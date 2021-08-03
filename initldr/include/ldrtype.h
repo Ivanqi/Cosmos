@@ -141,7 +141,7 @@ typedef struct s_IDTR
 {
     u16_t idtlen;
     u32_t idtbas;
-};
+} idtr_t;
 
 typedef struct s_RWHDPACK
 {
