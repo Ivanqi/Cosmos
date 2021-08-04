@@ -93,7 +93,7 @@ PUBLIC void init_acpi(machbstart_t *mbsp)
         kerror("Your computer is not support ACPI!");
     }
 
-    return ;
+    return;
 }
 
 void init_mem(machbstart_t *mbsp)
@@ -118,7 +118,7 @@ void init_mem(machbstart_t *mbsp)
     mbsp->mb_memsz = get_memsize(retemp, retemnr);
     init_acpi(mbsp);
 
-    return ;
+    return;
 }
 
 void init_chkcpu(machbstart_t *mbsp)
@@ -134,7 +134,7 @@ void init_chkcpu(machbstart_t *mbsp)
     }
 
     mbsp->mb_cpumode = 0x40;
-    return ;
+    return;
 }
 
 void init_krlinitstack(machbstart_t *mbsp)
@@ -146,7 +146,7 @@ void init_krlinitstack(machbstart_t *mbsp)
     mbsp->mb_krlinitstack = IKSTACK_PHYADR;
     mbsp->mb_krlitstacksz = IKSTACK_SIZE;
 
-    return ;
+    return;
 }
 
 void init_bstartpages(machbstart_t *mbsp)
@@ -181,7 +181,7 @@ void init_bstartpages(machbstart_t *mbsp)
     mbsp->mb_subpageslen = (u64_t)(0x1000 * 16 + 0x2000);
     mbsp->mb_kpmapphymemsz = (u64_t)(0x400000000);
 
-    return ;
+    return;
 }
 
 void init_meme820(machbstart_t *mbsp)
@@ -198,7 +198,7 @@ void init_meme820(machbstart_t *mbsp)
     mbsp->mb_e820padr = (u64_t)((u32_t)(demp));
     mbsp->mb_e820sz = senr * (sizeof(e820map_t));
     mbsp->mb_nextwtpadr = mbsp->mb_e820exnr + mbsp->mb_e820sz;
-    return ;
+    return;
 }
 
 void mmap(e820map_t **retemp, u32_t *retemnr)
@@ -207,4 +207,188 @@ void mmap(e820map_t **retemp, u32_t *retemnr)
     *retemnr = *((u32_t *)(E80MAP_NR));
     *retemp = (e820map_t *)(*((u32_t *)(E80MAP_ADRADR)));
     return ;
+}
+
+e820map_t *chk_memsize(e820map_t *e8p, u32_t enr, u64_t sadr, u64_t size)
+{
+    u64_t len = sadr + size;
+    if (enr == 0 || e8p == NULL) {
+        return NULL;
+    }
+
+    for (u32_t i = 0; i < enr; i++) {
+        if (e8p[i].type == RAM_USABLE) {
+            if ((sadr >= e8p[i].saddr) && (len < (e8p[i].saddr + e8p[i].lsize))) {
+                return &e8p[i];
+            }
+        }
+    }
+
+    return NULL;
+}
+
+u64_t get_memsize(e820map_t *e8p, u32_t enr)
+{
+    u64_t len = 0;
+    if (enr == 0 || e8p == NULL) {
+        return 0;
+    }
+
+    for (u32_t i = 0; i < enr; i++) {
+        if (e8p[i].type == RAM_USABLE) {
+            len += e8p[i].lsize;
+        }
+    }
+
+    return len;
+}
+
+int chk_cpuid()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "pushfl \n\t"
+        "popl %%eax \n\t"
+        "movl %%eax,%%ebx \n\t"
+        "xorl $0x0200000,%%eax \n\t"
+        "pushl %%eax \n\t"
+        "popfl \n\t"
+        "pushfl \n\t"
+        "popl %%eax \n\t"
+        "xorl %%ebx,%%eax \n\t"
+        "jz 1f \n\t"
+        "movl $1,%0 \n\t"
+        "jmp 2f \n\t"
+        "1: movl $0,%0 \n\t"
+        "2: \n\t"
+        : "=c"(rets)
+        :
+        :
+    );
+    return rets;
+}
+
+int chk_cpu_longmode()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x80000000,%%eax \n\t"
+        "cpuid \n\t"
+        "cmpl $0x80000001,%%eax \n\t"
+        "setnb %%al \n\t"
+        "jb 1f \n\t"
+        "movl $0x80000001,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $29,%%edx  \n\t" // long mode  support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        :
+        :
+    );
+    return rets;
+}
+
+void init_chkmm()
+{
+    e820map_t *map = (e820map_t *)EMAP_PTR;
+    u16_t *map_nr = (u16_t *)EMAP_NR_PTR;
+    u64_t mmsz = 0;
+
+    for (int j = 0; j < (*map_nr); j++) {
+        if (map->type == RAM_USABLE) {
+            mmsz += map->lsize;
+        }
+        map++;
+    }
+
+    if (mmsz < BASE_MEM_SZ) {
+        kprint("Your computer is low on memory, the memory cannot be less than 64MB!");
+        CLI_HALT();
+    }
+
+    if (!chk_cpuid()) {
+        kprint("Your CPU is not support CPUID sys is die!");
+        CLI_HALT();
+    }
+
+    if (!chk_cpu_longmode()) {
+        kprint("Your CPU is not support 64bits mode sys is die!");
+        CLI_HALT();
+    }
+
+    ldr_createpage_and_open();
+    return;
+}
+
+void out_char(char *c)
+{
+    char *str = c, *p = (char *)0xb8000;
+    while (*str) {
+        *p = *str;
+        p += 2;
+        str++;
+    }
+
+    return;
+}
+
+void init_bstartpagesold(machbstart_t *mbsp)
+{
+    if (1 > move_krlimg(mbsp, (u64_t)(PML4T_BADR), 0x3000)) {
+        kerror("ip_moveing err");
+    }
+
+    pt64_t *pml4p = (pt64_t *)PML4T_BADR, *pdptp = (pt64_t *) PDPTE_BADR, *pdep = (pt64_t *)PDE_BADR;
+    for (int pi = 0; pi < PG_SIZE; pi++) {
+        pml4p[pi] = 0;
+        pdptp[pi] = 0;
+
+        pdep[pi] = 0;
+    }
+
+    pml4p[0] = 0 | PDPTE_BADR | PDT_S_RW | PDT_S_PNT;
+    pdptp[0] = 0 | PDE_BADR | PDT_S_RW | PDT_S_PNT;
+    pml4p[256] = 0 | PDPTE_BADR | PDT_S_RW | PDT_S_PNT;
+
+    pt64_t tmpba = 0, tmpbd = 0 | PDT_S_SIZE | PDT_S_RW | PDT_S_PNT;
+
+    for (int di = 0; di < PG_SIZE; di++) {
+        pdep[di] = tmpbd;
+        tmpba += 0x200000;
+        tmpbd = tmpba | PDT_S_SIZE | PDT_S_RW | PDT_S_PNT;
+    }
+
+    mbsp->mb_pml4padr = (u64_t)((u32_t)pml4p);
+    mbsp->mb_subpageslen = 0x3000;
+    mbsp->mb_kpmapphymemsz = (0x200000 * 512);
+
+    return;
+}
+
+void ldr_createpage_and_open()
+{
+    pt64_t *pml4p = (pt64_t *)PML4T_BADR, *pdptp = (pt64_t *)PDPTE_BADR, *pdep = (pt64_t *)PDE_BADR;
+    
+    for (int pi = 0; pi < PG_SIZE; pi++) {
+        pml4p[pi] = 0;
+        pdptp[pi] = 0;
+        pdep[pi] = 0;
+    }
+
+    pml4p[0] = 0 | PDPTE_BADR | PDT_S_RW | PDT_S_PNT;
+    pdptp[0] = 0 | PDE_BADR | PDT_S_RW | PDT_S_PNT;
+
+    pml4p[256] = 0 | PDPTE_BADR | PDT_S_RW | PDT_S_PNT;
+
+    pt64_t tmpba = 0, tmpbd = 0 | PDT_S_SIZE | PDT_S_RW | PDT_S_PNT;
+
+    for (int di = 0; di < PG_SIZE; di++) {
+        pdep[di] = tmpbd;
+        tmpba += 0x200000;
+        tmpbd = tmpba | PDT_S_SIZE | PDT_S_RW | PDT_S_PNT;
+    }
+
+    return;
 }
