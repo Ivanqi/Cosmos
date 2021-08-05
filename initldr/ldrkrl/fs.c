@@ -119,3 +119,66 @@ u64_t get_filesz(char_t *filenm, machbstart_t *mbsp)
     }
     return fhdscstart->fhd_frealsz;
 }
+
+u64_t get_wt_imgfilesz(machbstart_t *mbsp)
+{
+    u64_t retsz = LDRFILEADR;
+    mlosrddsc_t *mrddadrs = MRDDSC_ADR;
+    if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_ENDGIC || mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
+        return 0;
+    }
+
+    if (mrddadrs->mdc_filbk_e < 0x4000) {
+        return 0;
+    }
+
+    retsz += mrddadrs->mdc_filbk_e;
+    retsz -= LDRFILEADR;
+    mbsp->mb_imgpadr = LDRFILEADR;
+    mbsp->mb_imgsz = retsz;
+    return retsz;
+}
+
+u64_t r_file_to_padr(machbstart_t *mbsp, u32_t f2adr, char_t *fnm)
+{
+    if (NULL == f2adr || NULL == fnm || NULL == mbsp) {
+        return 0;
+    }
+
+    u32_t fpadr = 0, sz = 0;
+    get_file_rpadrandsz(fnm, mbsp, &fpadr, &sz);
+
+    if (0 == fpadr || 0 == sz) {
+        return 0;
+    }
+
+    if (NULL == chk_memsize((e820map_t *)(u32_t)mbsp->mb_e820padr), (u32_t)(mbsp->mb_e820nr), f2adr, sz) {
+        return 0;
+    }
+
+    if (0 != chkadr_is_ok(mbsp, f2adr, sz)) {
+        return 0;
+    }
+
+    m2mcopy((void *)fpadr, (void *)f2adr, (sint_t)sz);
+    return sz;
+}
+
+u64_t ret_imgfilesz()
+{
+    u64_t retsz = LDRFILEADR;
+    mlosrddsc_t *mrddadrs = MRDDSC_ADR;
+
+    if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_RVGIC || mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
+        kerror("no mrddsc");
+    }
+
+    if (mrddadrs->mdc_filbk_e < 0x4000) {
+        kerror("imgfile error");
+    }
+
+    retsz += mrddadrs->mdc_filbk_e;
+    retsz += LDRFILEADR;
+
+    return retsz;
+}
