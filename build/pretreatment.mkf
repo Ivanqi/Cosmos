@@ -18,7 +18,7 @@ CCBUILDPATH	= $(KERNELCE_PATH)
 # 二进制文件
 LMKFBUID = ./lmkfbuild
 
-## GCC
+# GCC
 CC		= gcc
 CPPFLGSLDS	= $(HEADFILE_PATH) -E -P 
 
@@ -30,13 +30,13 @@ PREMENTMK_OBJS = krnlobjs.mk krnlbuidcmd.mk krnlbuidrule.mk hal.mk krl.mk drv.mk
 
 all: build_kernel
 
-build_kernel: everything
+build_kernel: everything everymk
 
 everything: $(PREMENTMKI_OBJS) 
 
 everymk: $(PREMENTMK_OBJS)
 
-# 通过后缀前的名字查找对应名称的文件
+# 通过后缀前的名字查找对应名称的文件，然后执行对应的命令
 %.lds : $(CCBUILDPATH)%.S
 	$(CC) $(CPPFLGSLDS) -o $@ $<
 	$(PRINTCSTR)
@@ -52,5 +52,3 @@ everymk: $(PREMENTMK_OBJS)
 %.mk : %.mki
 	$(LMKFBUID) -i $< -o $@
 	$(PRINTCSTRLMK)
-
-
