@@ -6,6 +6,8 @@ MAKEFLAGS = -s
 KERNELCE_PATH	= ../kernel/
 HEADFILE_PATH = -I ../include -I ../include/bastypeinc -I ../include/halinc -I ../include/knlinc -I ../include/libinc -I ../include/drvinc
 CCBUILDPATH	= $(KERNELCE_PATH)
+
+# 加载其他mk文件
 include krnlbuidcmd.mk
 include krnlobjs.mk
 

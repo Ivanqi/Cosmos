@@ -32,4 +32,5 @@ all: build_kernel
 build_kernel:everything
 
 everything :$(BUILD_MK_HALY_OBJS)
+# 加载mk文件, 构建规则
 include krnlbuidrule.mk
