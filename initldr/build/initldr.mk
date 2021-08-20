@@ -3,6 +3,7 @@ HEADFILE_PATH = ../include/
 KRNLBOOT_PATH = ../ldrkrl/
 
 CCBUILDPATH	= $(KRNLBOOT_PATH)
+# 加载其他mh文件
 include krnlbuidcmd.mh
 include ldrobjs.mh
 

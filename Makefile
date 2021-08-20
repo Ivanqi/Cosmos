@@ -66,6 +66,25 @@ CPLILDRSRC = $(INITLDR_BUILD_PATH)$(INITLDRSVE) $(INITLDR_BUILD_PATH)$(INITLDRKR
 LKIMG_INFILE = $(INITLDRSVE) $(INITLDRKRL) $(KRNLEXCIMG) $(FONTFILE) $(LOGOFILE)
 .PHONY: install x32 build print clean all krnlexc cpkrnl wrimg phymod exc vdi vdiexc cprelease release createimg
 
+# 移动文件. 把 ./initldr/build/ 的文件移动到 ./release/
+cplmildr:
+	$(CP) $(CPFLAGES) $(CPLILDRSRC) $(CPLILDR_PATH)
+
+# 进入./build目录，把 Cosmos.bin 文件移动到  ../exckrnl
+cpkrnl:
+	$(CD) $(BUILD_PATH) && $(CP) $(CPFLAGES) $(SRCFILE) $(DSTPATH)
+
+# 进入 ./exckrnl目录, 把 Cosmos.bin 文件 移动到 ../release
+cprelease:
+	$(CD) $(EXKNL_PATH) && $(CP) $(CPFLAGES) $(RSRCFILE) $(RELEDSTPATH)
+
+# 进入./release/，通过 lmoskrlimg 把 initldrimh.bin initldrsve.bin initldrkrl.bin Cosmos.bin font.fnt logo.bmp background.bmp 打包成 Cosmos.eki
+KIMG:
+	@echo '正在生成Cosmos内核映像文件，请稍后……'
+	$(CD) $(CPLILDR_PATH) && $(LKIMG) -lhf $(INITLDRIMH) -o Cosmos.eki -f $(LKIMG_INFILE)
+
+VBOXRUN:
+	$(MAKE) $(VVMRLMOSFLGS)
 
 all:
 	$(MAKE) $(X86BARD)
@@ -80,3 +99,8 @@ clean:
 print:
 	@echo $(LKIMG_INFILE)
 	@echo '*********正在开始编译构建系统*************'
+
+#cpkrnl cprelease
+release: clean all cplmildr cpkrnl cprelease KIMG 
+
+vboxtest: release VBOXRUN

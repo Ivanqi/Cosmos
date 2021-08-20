@@ -17,6 +17,7 @@ OJCYFLAGS = -S -O binary
 # -f 表示输入文件列表
 LDRIMG		= ./lmoskrlimg
 
+# ASM flag
 ASMBFLAGS	= -I $(HEADFILE_PATH) -f elf
 ASMKFLAGS	= -I $(HEADFILE_PATH) -f elf64  #-mregparm=0-finline-functions-mcmodel=medium -mcmodel=large 
 
@@ -28,6 +29,7 @@ CPPFLGSLDS	= $(HEADFILE_PATH) -E -P
 CSCFLAGS = -I $(HEADFILE_PATH) -c -fno-builtin -fno-common -fno-stack-protector -fno-ident -ffreestanding
 SCFLAGS	= -I $(HEADFILE_PATH) -S  -std=c99 -fno-ident -Wall -fno-builtin -fno-common -fno-stack-protector
 
+# ld flag
 LDFLAGS		= -s -static -T boot.lds -n  -Map boot.map 
 FDLDRLDFLG	= -s -Ttext 0 -n  -Map fdldr.map 
 LOADERLDFLAGS	= -s -T ldrld.lds -n  -Map hdldr.map

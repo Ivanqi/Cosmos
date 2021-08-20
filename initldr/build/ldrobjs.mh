@@ -2,6 +2,8 @@ INITLDRIMH_OBJS :=
 INITLDRIMH_LINK :=
 INITLDRIMH_OBJS += imginithead.o inithead.o vgastr.o
 INITLDRIMH_LINK += $(INITLDRIMH_OBJS)
+
+# elf
 INITLDRIMH_ELF = initldrimh.elf
 INITLDRIMH = initldrimh.bin
 
@@ -9,6 +11,8 @@ INITLDRKRL_OBJS :=
 INITLDRKRL_LINK :=
 INITLDRKRL_OBJS += ldrkrl32.o ldrkrlentry.o fs.o chkcpmm.o graph.o bstartparm.o
 INITLDRKRL_LINK += $(INITLDRKRL_OBJS) vgastr.o
+
+# elf
 INITLDRKRL_ELF = initldrkrl.elf
 INITLDRKRL = initldrkrl.bin
 
@@ -16,5 +20,7 @@ INITLDRSVE_OBJS :=
 INITLDRSVE_LINK :=
 INITLDRSVE_OBJS += realintsve.o
 INITLDRSVE_LINK += $(INITLDRSVE_OBJS)
+
+# elf
 INITLDRSVE_ELF = initldrsve.elf
 INITLDRSVE = initldrsve.bin
