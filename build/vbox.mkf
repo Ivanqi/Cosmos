@@ -6,19 +6,23 @@ all: moutraw tranvdi idectrnul crtidectr moutvmhd stratvm
 createvm:
 	VBoxManage createvm --name Cosmos -register
 
+# IDE的硬盘其控制器是PIIX4
 crtidectr:
 	VBoxManage storagectl Cosmos --name "IDE" --add ide --controller PIIX4
 
 idectrnul:
 	VBoxManage storagectl Cosmos --name "IDE" --remove 
 
+# 转换虚拟硬盘格式
 moutvmhd:
 	VBoxManage closemedium disk ../exckrnl/hd.vdi
 	VBoxManage storageattach Cosmos --storagectl "IDE" --port 0 --device 0 --type hdd --medium ../exckrnl/hd.vdi
-	
+
+# 启动虚拟机
 stratvm:
 	VBoxManage startvm Cosmos
 
+#删除虚拟硬盘UUID并重新分配
 tranvdi:
 	VBoxManage convertfromraw ../hd.img --format VDI ../exckrnl/hd.vdi
 

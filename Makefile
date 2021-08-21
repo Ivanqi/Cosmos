@@ -11,6 +11,11 @@ CD = cd
 DD = dd
 RM = rm
 
+# lmoskrlimg -m k -lhf GRUB头文件 -o 映像文件 -f 输入的文件列表
+# -m 表示模式 只能是k内核模式
+# -lhf 表示后面跟上GRUB头文件
+# -o 表示输出的映像文件名
+# -f 表示输入文件列表
 LKIMG = ./lmoskrlimg -m k
 
 # qemu-system-x86_64 使用 qemu-system-x86 来启动 x86 架构的虚拟机

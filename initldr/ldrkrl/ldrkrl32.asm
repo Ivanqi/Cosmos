@@ -54,9 +54,9 @@ realadr_call_entry:
 	ret
 
 save_eip_jmp:
-	pop esi                     ; 弹出call save_eip_jmp时保存的eip到esi寄存器中
-	mov [PM32_EIP_OFF],esi      ; 把eip保存到特定的内存空间中
-	mov [PM32_ESP_OFF],esp      ; 把esp保存到特定的内存空间中
+	pop esi                      ; 弹出call save_eip_jmp时保存的eip到esi寄存器中
+	mov [PM32_EIP_OFF], esi      ; 把eip保存到特定的内存空间中
+	mov [PM32_ESP_OFF], esp      ; 把esp保存到特定的内存空间中
 
     ; 这个指令是一个长跳转，表示把[cpmty_mode]处的数据装入 CS：EIP，也就是把 0x18：0x1000 装入到 CS：EIP 中
     ; 这个 0x18 就是段描述索引, 它正是指向 GDT 中的 16 位代码段描述符
