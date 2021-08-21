@@ -128,7 +128,7 @@ void vsprintfk(char_t *buf, const char_t *fmt, va_list_t args)
     while (*fmt) {
         if (*fmt != '%') {
             *p++ = *fmt++;
-            continue
+            continue;
         }
 
         fmt++;

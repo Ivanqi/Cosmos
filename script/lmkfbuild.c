@@ -7,7 +7,7 @@ char* retn_ifilenm(int gc, char* argv[]) {
 		return NULL;
 	}
 
-	for(int i = 0; i < gc; i++) {
+	for (int i = 0; i < gc; i++) {
 		if (strcmp("-i", argv[i]) == 0){
 			if (i < (gc - 1)) {
 				return argv[i + 1];
