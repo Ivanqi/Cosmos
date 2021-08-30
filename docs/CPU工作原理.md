@@ -22,7 +22,7 @@
 
 # CPU工作原理
 ## CPU工作原理图例
-![cce3fc24c06def5d81a65d4f13ff40f1.png](evernotecid://95103871-7E20-47B6-A8DD-62C60FAB24B1/appyinxiangcom/15513169/ENResource/p14325)@w=500
+![avatar](../images/cpu_principle.png)
 
 ## 概述
 控制单元要取下一条待运行的指令，该指令的地址在程序计数器PC。在x86CPU上，程序计数器就是cs:ip
