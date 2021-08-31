@@ -18,6 +18,7 @@ align 4
 ; DD作为汇编语言中的伪操作命令，它用来定义操作数占用的字节数(DoubleWord的缩写)，即4个字节（32位）
 ; DW定义字类型变量，一个字数据占2个字节单元，读完一个，偏移量加2
 
+; 用汇编定义的GRUB的多引导协议头，之所以有两个引导头，是为了兼容GRUB1和GRUB2
 ; GRUB所需要的头, 定义字节数据
 mbt_hdr:
 	dd MBT_HDR_MAGIC
@@ -54,6 +55,7 @@ mbhdr:
 	DD	8
 mhdrend:
 
+; 关掉中断(无打扰状态)，设定CPU的工作模式
 ; 关中断并加载 GDT
 ; 读端口用IN指令，写端口用OUT指令
 _entry:
@@ -63,10 +65,10 @@ _entry:
 
 	in al, 0x70
 	or al, 0x80	
-	out 0x70, al
+	out 0x70, al				; 关掉不可屏蔽中断
 
-	lgdt [GDT_PTR]	; 重新加载GDT
-	jmp dword 0x8 :_32bits_mode
+	lgdt [GDT_PTR]				; 加载GDT地址到GDTR寄存器
+	jmp dword 0x8:_32bits_mode	; 长跳转刷新CS影子寄存器
 
 ; 初始化段寄存器和通用寄存器、栈寄存器，这是为了给调用 inithead_entry 这个 C 函数做准备
 _32bits_mode:
@@ -91,7 +93,7 @@ _32bits_mode:
 	jmp 0x200000
 
 
-
+; 从GDT_START开始是CPU工作模式所需要的数据
 GDT_START:
 knull_dsc: dq 0
 kcode_dsc: dq 0x00cf9e000000ffff
@@ -100,5 +102,5 @@ k16cd_dsc: dq 0x00009e000000ffff
 k16da_dsc: dq 0x000092000000ffff
 GDT_END:
 GDT_PTR:
-GDTLEN	dw GDT_END-GDT_START-1	;GDT界限
+GDTLEN	dw GDT_END-GDT_START-1		; GDT界限
 GDTBASE	dd GDT_START

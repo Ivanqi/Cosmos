@@ -58,15 +58,15 @@ sudo grub-install --boot-directory=./hdisk/boot/ --force --allow-floppy /dev/loo
 在 /hdisk/boot/grub/ 目录下建立一个 grub.cfg 文本文件，然后写入如下内容
 ```
 menuentry 'HelloOS' {
-insmod part_msdos
-insmod ext2
-set root='hd0,msdos1' #我们的硬盘只有一个分区所以是'hd0,msdos1'
-multiboot2 /boot/HelloOS.eki #加载boot目录下的HelloOS.eki文件
-boot #引导启动
+insmod part_msdos             # GRUB加载分区模块识别分区
+insmod ext2                   # GRUB加载ext文件系统模块识别ext文件系统
+set root='hd0,msdos1'         # 我们的硬盘只有一个分区所以是'hd0,msdos1'
+multiboot2 /boot/HelloOS.eki  # 加载boot目录下的HelloOS.eki文件
+boot                          # 引导启动      
 }
 set timeout_style=menu
 if [ "${timeout}" = 0 ]; then
-  set timeout=10 #等待10秒钟自动启动
+  set timeout=10              # 等待10秒钟自动启动
 fi
 ```
 文件系统为 ext2
