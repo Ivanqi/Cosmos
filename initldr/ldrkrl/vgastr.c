@@ -39,7 +39,7 @@ void GxH_strwrite(char_t *str, cursor_t *cursptr)
         current_curs(cursptr, VGACHAR_DF_CFLG);
 
         *p_strdst = *str++;
-        p_strdst ++ 2;
+        p_strdst += 2;
     }
 
     if (tfindx == TRUE) {
