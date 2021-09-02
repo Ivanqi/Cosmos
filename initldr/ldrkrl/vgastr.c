@@ -71,6 +71,7 @@ char_t *numberk(char_t *str, uint_t n, sint_t base)
     return str;
 }
 
+// 设置光标
 void set_curs(u32_t x, u32_t y)
 {
     curs.x = x;
@@ -78,7 +79,9 @@ void set_curs(u32_t x, u32_t y)
     return ;
 }
 
-// 清空屏幕
+/**
+ * 清空屏幕
+ */
 void clear_screen(u16_t srrv)
 {
     curs.x = 0;
@@ -101,7 +104,11 @@ void put_one_char(char_t cr, uint_t x, uint_t y)
     return ;
 }
 
-// 关闭光标
+/**
+ * 关闭光标
+ *  1. 通过 out 往 0x3d4 写入一个换行符
+ *  2. 通过 out 往 0x3d5 写入一个空格符
+ */
 void close_curs()
 {
     out_u8(VGACTRL_REG_ADR, VGACURS_REG_INX);
@@ -109,6 +116,7 @@ void close_curs()
     return ;
 }
 
+// 字符拷贝
 char_t *strcopy(char_t *buf, char_t *str_s)
 {
     while (*str_s) {
