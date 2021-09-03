@@ -4,13 +4,19 @@ global realadr_call_entry
 global IDT_PTR
 global ldrkrl_entry
 [section .text]
+
+;;; 功能介绍
+;;;;  1. 保护C语言环境下的CPU上下文，即保护模式下的所有通用寄存器、段寄存器、程序指针寄存器、栈寄存器，把它们都保存在内存中
+;;;;  2. 切换回实模式，调用BIOS中断，把BIOS中断返回的相关结果，保存在内存中
+;;;;  3. 切换回保护模式，重新加载第1步中保存的寄存器。这样C语言代码才能重新恢复执行
+
 [bits 32]
 _start:
 _entry:
 	cli
 	lgdt [GDT_PTR]                  ; 加载GDT地址到GDTR寄存器
 	lidt [IDT_PTR]                  ; 加载IDT地址到IDTR寄存器
-	jmp dword 0x8 :_32bits_mode     ; 长跳转刷新CS影子寄存器
+	jmp dword 0x8:_32bits_mode      ; 长跳转刷新CS影子寄存器
 
 ; 初始化CPU相关寄存器
 _32bits_mode:
@@ -28,10 +34,10 @@ _32bits_mode:
 	xor esi, esi
 	xor ebp, ebp
 	xor esp, esp
-	mov esp, 0x90000
-	call ldrkrl_entry
+	mov esp, 0x90000				; 使得栈底指向了0x90000
+	call ldrkrl_entry				; 调用ldrkrl_entry函数
 	xor ebx, ebx
-	jmp 0x2000000
+	jmp 0x2000000					; 跳转到0x2000000的内存地址
 	jmp $
 
 ; PUSHAD, 本指令将EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI 这8个32位通用寄存器依次压入堆栈

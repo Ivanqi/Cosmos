@@ -2,8 +2,11 @@
 
 /**
  * 具体功能
- *  分别别调用 write_realintsvefile();、write_ldrkrlfile() 函数
- *  把映像文件中的 initldrsve.bin 文件和 initldrkrl.bin 文件写入到特定的内存地址空间中
+ *  1. 初始化光标
+ *  2. 关闭光标
+ *  3. 清屏
+ *  4. 调用 write_realintsvefile() 函数 读取 initldrsve.bin 文件到特定的内存地址空间中
+ *  5. 调用 write_ldrkrlfile(）函数 读取 initldrkrl.bin文件到特定的内存地址空间中
  */
 void inithead_entry()
 {
@@ -38,7 +41,7 @@ void write_realintsvefile()
  */
 fhdsc_t *find_file(char_t *fname)
 {
-    mlosrddsc_t *mrddadrs = MRDDSC_ADR;
+    mlosrddsc_t *mrddadrs = MRDDSC_ADR; // 0x4001000
     if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_RVGIC ||
         mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
         error("no mrddsc");
