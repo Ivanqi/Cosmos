@@ -3,9 +3,14 @@ global _start
 [section .text]
 [bits 16]
 
+;;; 功能介绍
+;;;;  1. 保护C语言环境下的CPU上下文，即保护模式下的所有通用寄存器、段寄存器、程序指针寄存器、栈寄存器，把它们都保存在内存中
+;;;;  2. 切换回实模式，调用BIOS中断，把BIOS中断返回的相关结果，保存在内存中
+;;;;  3. 切换回保护模式，重新加载第1步中保存的寄存器。这样C语言代码才能重新恢复执行
+
 _start:
 _16_mode:
-    mov bp, 0x20        ; ;0x20是指向GDT中的16位数据段描述符
+    mov bp, 0x20        ; 0x20是指向GDT中的16位数据段描述符
     mov ds, bp
     mov es, bp
     mov ss, bp
@@ -28,7 +33,7 @@ real_entry:
 	mov	ebp, cr0
 	or	ebp, 1
 	mov	cr0, ebp
-	jmp dword 0x8 :_32bits_mode
+	jmp dword 0x8:_32bits_mode
 
 [BITS 32]
 _32bits_mode:
