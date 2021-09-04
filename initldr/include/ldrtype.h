@@ -10,7 +10,7 @@
 #define BFH_RWONE_ER 2
 #define BFH_RWALL_OK 3
 
-#define FHDSC_NMAX 192
+#define FHDSC_NMAX 192      // 文件名长度
 #define FHDSC_SZMAX 256
 
 #define MDC_ENDGIC 0xaaffaaffaaffaaff // 12321755120571230975UL
@@ -23,7 +23,7 @@
 #define IKSTACK_PHYADR (0x90000-0x10) // 589824 - 16
 #define IKSTACK_SIZE 0x1000           // 4096
 
-#define IMGFILE_PHYADR 0x4000000      // 图片文件物理地址
+#define IMGFILE_PHYADR 0x4000000      // 映射文件物理地址
 #define IMGKRNL_PHYADR 0x2000000      // 33554432
 
 #define KINITPAGE_PHYADR 0x1000000    // 16777216
@@ -67,43 +67,45 @@
 #define KPDP_SHIFT 21
 #define PGENTY_SIZE 512
 
+// 文件头描述符
 typedef struct s_fhdsc
 {
-    u64_t fhd_type;
-    u64_t fhd_subtype;
-    u64_t fhd_stuts;
-    u64_t fhd_id;
-    u64_t fhd_intsfsoff;
-    u64_t fhd_intsfend;
-    u64_t fhd_frealsz;
-    u64_t fhd_fsum;
-    char fhd_name[FHDSC_NMAX];
+    u64_t fhd_type;             // 文件类型
+    u64_t fhd_subtype;          // 文件子类型
+    u64_t fhd_stuts;            // 文件状态
+    u64_t fhd_id;               // 文件id
+    u64_t fhd_intsfsoff;        // 文件在映像文件位置开始偏移
+    u64_t fhd_intsfend;         // 文件在映像文件的结束偏移
+    u64_t fhd_frealsz;          // 文件实际大小
+    u64_t fhd_fsum;             // 文件校验和
+    char fhd_name[FHDSC_NMAX];  // 文件名
 } fhdsc_t;
 
+// 映像文件头描述符
 typedef struct s_mlosrddsc
 {
-    u64_t mdc_mgic;
-    u64_t mdc_sfsum;
-    u64_t mdc_sfsoff;
-    u64_t mdc_sfeoff;
-    u64_t mdc_sfrlsz;
-    u64_t mdc_ldrbk_s;
-    u64_t mdc_ldrbk_e;
-    u64_t mdc_ldrbk_rsz;
-    u64_t mdc_ldrbk_sum;
-    u64_t mdc_fhdbk_s;
-    u64_t mdc_fhdbk_e;
-    u64_t mdc_fhdbk_rsz;
-    u64_t mdc_fhdbk_sum;
-    u64_t mdc_filbk_s;
-    u64_t mdc_filbk_e;
-    u64_t mdc_filbk_rsz;
-    u64_t mdc_filbk_sum;
-    u64_t mdc_ldrcodenr;
-    u64_t mdc_fhdnr;
-    u64_t mdc_filnr;
-    u64_t mdc_endgic;
-    u64_t mdc_rv
+    u64_t mdc_mgic;             // 映射文件标识
+    u64_t mdc_sfsum;            // 未使用
+    u64_t mdc_sfsoff;           // 未使用
+    u64_t mdc_sfeoff;           // 未使用
+    u64_t mdc_sfrlsz;           // 未使用
+    u64_t mdc_ldrbk_s;          // 映像文件中二级引导器的开始偏移
+    u64_t mdc_ldrbk_e;          // 映像文件中的二级引导器的结束偏移
+    u64_t mdc_ldrbk_rsz;        // 映像文件中的二级引导器的实际大小
+    u64_t mdc_ldrbk_sum;        // 映像文件中的二级引导器的校验和
+    u64_t mdc_fhdbk_s;          // 映像文件中文件头描述的开始偏移
+    u64_t mdc_fhdbk_e;          // 映像文件中文件头描述的结束偏移
+    u64_t mdc_fhdbk_rsz;        // 映像文件中文件头描述的实际大小
+    u64_t mdc_fhdbk_sum;        // 映像文件中文件头描述符的校验和
+    u64_t mdc_filbk_s;          // 映像文件中文件数据的开始偏移
+    u64_t mdc_filbk_e;          // 映像文件中文件数据的结束偏移
+    u64_t mdc_filbk_rsz;        // 映像文件中文件数据的实际大小
+    u64_t mdc_filbk_sum;        // 映像文件中文件数据的校验和
+    u64_t mdc_ldrcodenr;        // 映像文件中二级引导器的文件头描述符的索引号
+    u64_t mdc_fhdnr;            // 映像文件中文件头描述符有多少个
+    u64_t mdc_filnr;            // 映像文件中文件有多少个
+    u64_t mdc_endgic;           // 映像文件结束标识
+    u64_t mdc_rv                // 映像文件版本
 } mlosrddsc_t;
 
 #define RLINTNR(x) (x * 2)
