@@ -20,7 +20,7 @@ void inithead_entry()
     return;
 }
 
-// 写initldrsve.bin文件到特定的内存中
+// 写initldrsve.bin文件到特定的内存中(0x1000)
 void write_realintsvefile()
 {
 
@@ -67,7 +67,7 @@ ok_l:
     return &fhdscstart[rethn];
 }
 
-// 写initldrkrl.bin文件到特定的内存中
+// 写initldrkrl.bin文件到特定的内存中(0x2097152)
 void write_ldrkrlfile()
 {
     fhdsc_t *fhdscstart = find_file("initldrkrl.bin");
@@ -75,6 +75,7 @@ void write_ldrkrlfile()
         error("not file initldrkrl.bin");
     }
 
+    // 负责把映像文件复制到具体空间
     m2mcopy((void *)((u32_t)(fhdscstart->fhd_intsfsoff) + LDRFILEADR), (void *)ILDRKRL_PHYADR, (sint_t)fhdscstart->fhd_frealsz);
     
     return ;

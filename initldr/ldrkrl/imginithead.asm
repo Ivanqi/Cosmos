@@ -98,9 +98,9 @@ _32bits_mode:
 
 ; 从GDT_START开始是CPU工作模式所需要的数据
 GDT_START:
-knull_dsc: dq 0
-kcode_dsc: dq 0x00cf9e000000ffff
-kdata_dsc: dq 0x00cf92000000ffff
+knull_dsc: dq 0						; 第一个段描述符CPU硬件规定必须为0
+kcode_dsc: dq 0x00cf9e000000ffff	; 段基地址=0，段长度=0xfffff. G=1,D/B=1,L=0,AVL=0、P=1,DPL=0,S=1、T=1,C=1,R=1,A=0
+kdata_dsc: dq 0x00cf92000000ffff	; 段基地址=0，段长度=0xfffff. G=1,D/B=1,L=0,AVL=0、P=1,DPL=0,S=1、T=0,C=0,R=1,A=0
 k16cd_dsc: dq 0x00009e000000ffff
 k16da_dsc: dq 0x000092000000ffff
 GDT_END:

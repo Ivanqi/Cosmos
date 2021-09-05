@@ -16,8 +16,8 @@
 #define MDC_ENDGIC 0xaaffaaffaaffaaff // 12321755120571230975UL
 #define MDC_RVGIC 0xffaaffaaffaaffaa  // 18422818335611355050UL
 
-#define REALDRV_PHYADR 0x1000         // 4096
-#define ILDRKRL_PHYADR 0x2097152      // 2097152
+#define REALDRV_PHYADR 0x1000         // initldrkrl映射文件具体拷贝内存地址
+#define ILDRKRL_PHYADR 0x2097152      // initldrkrl映射文件具体拷贝内存地址
 #define IMGSHEL_PHYADR 0x30000        // 196608
 
 #define IKSTACK_PHYADR (0x90000-0x10) // 589824 - 16
