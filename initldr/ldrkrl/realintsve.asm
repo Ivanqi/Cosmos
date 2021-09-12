@@ -15,7 +15,7 @@ _16_mode:
     mov es, bp
     mov ss, bp
     mov ebp, cr0
-    and ebp, 0xfffffffe ; 0xfffffffe = 4294967294
+    and ebp, 0xfffffffe ; ebp为 1, 0xfffffffe = 1111 1111 1111 1111 | 1111 1111 1111 1110
     mov	cr0, ebp        ; CR0.P=0 关闭保护模式
     jmp	0:real_entry    ; 刷新CS影子寄存器，真正进入实模式
 
