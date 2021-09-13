@@ -71,7 +71,7 @@ _entry:
 	out 0x70, al				; 关掉不可屏蔽中断
 
 	lgdt [GDT_PTR]				; 加载GDT地址到GDTR寄存器
-	jmp dword 0x8:_32bits_mode	; 长跳转刷新CS影子寄存器
+	jmp dword 0x8:_32bits_mode	; 长跳转刷新CS影子寄存器，0x8为选择子
 
 ; 初始化段寄存器和通用寄存器、栈寄存器，这是为了给调用 inithead_entry 这个 C 函数做准备
 _32bits_mode:
