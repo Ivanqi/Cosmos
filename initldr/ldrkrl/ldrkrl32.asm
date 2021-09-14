@@ -80,3 +80,7 @@ GDT_END:
 GDT_PTR:
 GDTLEN	dw GDT_END-GDT_START - 1	; GDT界限
 GDTBASE	dd GDT_START
+
+IDT_PTR:
+IDTLEN	dw 0x3ff
+IDTBAS	dd 0						; 这是BIOS中断表的地址和长度

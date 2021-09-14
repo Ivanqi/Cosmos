@@ -10,7 +10,7 @@ global _start
 
 _start:
 _16_mode:
-    mov bp, 0x20        ; 0x20是指向GDT中的16位	
+    mov bp, 0x20        ; 0x20是指向GDT中的16位数据段描述符
     mov ds, bp
     mov es, bp
     mov ss, bp
@@ -110,8 +110,8 @@ _read:
 	mov ah, 0x42				; 66
 	mov dl, 0x80				; 128
 	mov si, RWHDPACK_ADR
-	int 0x13
-	jc .err
+	int 0x13					; 硬盘中断
+	jc .err						; jc 进位则跳转，关联CF位
 	pop ss
 	pop es
 	pop ds
