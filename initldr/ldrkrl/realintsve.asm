@@ -33,7 +33,7 @@ real_entry:
 	mov	ebp, cr0
 	or	ebp, 1
 	mov	cr0, ebp					; CRO.P=1 开始保护模式
-	jmp dword 0x8:_32bits_mode
+	jmp dword 0x8:_32bits_mode		; dword(double word， 双字，4个字节)
 
 [BITS 32]
 _32bits_mode:
@@ -64,12 +64,13 @@ cleardisp:
 	int 10h						; 调用的BOIS的10号
 	ret
 
+; 获取内存布局试图的函数
 _getmmap:
 	push ds
 	push es
 	push ss
 	mov esi, 0
-	mov dword[E80MAP_NR], esi
+	mov dword[E80MAP_NR], esi				; 把esi的机器码赋予给内存地址 E80MAP_NR
 	mov dword[E80MAP_ADRADR], E80MAP_ADR
 
 	xor ebx, ebx
@@ -102,6 +103,7 @@ loop:
 	pop es
 	pop ds
 
+; 获取硬盘的函数
 _read:
 	push ds
 	push es
@@ -117,6 +119,7 @@ _read:
 	pop ds
 	ret
 
+; 错误信息
 .err:
 	mov ax, int131errmsg
 	call DispStr
@@ -126,16 +129,17 @@ _read:
 	pop ds
 	ret
 
+; 获取显卡VBE模式
 _getvbemode:
 	push es
 	push ax
 	push di
 	mov di, VBEINFO_ADR
 	mov ax, 0
-	mov ax, 0x4f00
+	mov ax, 0x4f00				; VBE标准
 	int 0x10
-	cmp ax, 0x004f
-	jz .ok
+	cmp ax, 0x004f				; 若有VBE，AX应该为0x004f
+	jz .ok						; 为0则跳转
 	mov ax, getvbmodeerrmsg
 	call DispStr
 	jmp $
@@ -187,6 +191,7 @@ _setvbemode:
 	pop ax
 	ret
 
+; NMI中断
 disable_nmi:
 	push ax
 	in al, 0x70		; port 0x70NMI_EN_PORT
