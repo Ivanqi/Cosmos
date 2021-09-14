@@ -430,7 +430,7 @@ typedef struct s_MACHBSTART
     graph_t mb_ghparm;          // 图形信息
 }__attribute__((packed)) machbstart_t;
 
-#define MBSPADR ((machbstart_t*)(0x100000)) // 1048576
+#define MBSPADR ((machbstart_t*)(0x100000)) // 1048576，1M
 
 #define VBE_DISPI_IOPORT_INDEX (0x01CE) // 462
 #define VBE_DISPI_IOPORT_DATA (0x01CF)  // 462

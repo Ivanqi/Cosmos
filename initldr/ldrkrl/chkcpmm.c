@@ -121,6 +121,7 @@ void init_mem(machbstart_t *mbsp)
     return;
 }
 
+// 检查CPU
 void init_chkcpu(machbstart_t *mbsp)
 {
     if (!chk_cpuid()) {
@@ -243,11 +244,12 @@ u64_t get_memsize(e820map_t *e8p, u32_t enr)
     return len;
 }
 
+// 通过改写Eflags寄存器的第21位，观察其位的变化判断是否支持CPUID
 int chk_cpuid()
 {
     int rets = 0;
     __asm__ __volatile__(
-        "pushfl \n\t"
+        "pushfl \n\t"                   // pushf 的功能是将标志寄存器的值压栈
         "popl %%eax \n\t"
         "movl %%eax,%%ebx \n\t"
         "xorl $0x0200000,%%eax \n\t"

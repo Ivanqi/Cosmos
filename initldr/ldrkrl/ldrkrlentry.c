@@ -2,6 +2,11 @@
 
 extern idtr_t IDT_PTR;
 
+/**
+ * 1. 初始化光标
+ * 2. 关闭光标
+ * 3. 清屏
+ */
 void ldrkrl_entry()
 {
     init_curs();
