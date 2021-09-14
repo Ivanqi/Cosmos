@@ -71,10 +71,10 @@ save_eip_jmp:
 
 GDT_START:
 knull_dsc: dq 0
-kcode_dsc: dq 0x00cf9a000000ffff    ; a-e, 58434644969848830
-kdata_dsc: dq 0x00cf92000000ffff    ; 58425848876826620
-k16cd_dsc: dq 0x00009a000000ffff    ; a-e, 169324790743039, 16位代码段描述符
-k16da_dsc: dq 0x000092000000ffff    ; 160528697720831, 16位数据段描述符
+kcode_dsc: dq 0x00cf9a000000ffff    ; a-e
+kdata_dsc: dq 0x00cf92000000ffff
+k16cd_dsc: dq 0x00009a000000ffff    ; a-e, 16位代码段描述符
+k16da_dsc: dq 0x000092000000ffff    ; 6位数据段描述符
 GDT_END:
 
 GDT_PTR:
