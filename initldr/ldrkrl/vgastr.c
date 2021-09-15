@@ -20,13 +20,18 @@ void init_curs()
     curs.y = 0;
 }
 
+/**
+ * 往屏幕写入字符
+ */
 void GxH_strwrite(char_t *str, cursor_t *cursptr)
 {
     uint_t straddr = cursptr->x + cursptr->y * 80 * 2;
-    char_t *p_strdst = (char_t *)(cursptr->vmem_s + straddr);
+    char_t *p_strdst = (char_t *)(cursptr->vmem_s + straddr);   // 写入的显卡内存首地址
     u32_t tfindx = FALSE;
 
+    // 把str的内存复制到p_strdst中去
     while (*str) {
+        // 判断是否为10
         if (*str == 10) {
             tfindx = TRUE;
             str++;
@@ -36,7 +41,7 @@ void GxH_strwrite(char_t *str, cursor_t *cursptr)
             }
         }
 
-        current_curs(cursptr, VGACHAR_DF_CFLG);
+        current_curs(cursptr, VGACHAR_DF_CFLG);                // 增加空格
 
         *p_strdst = *str++;
         p_strdst += 2;
@@ -49,6 +54,9 @@ void GxH_strwrite(char_t *str, cursor_t *cursptr)
     return ;
 }
 
+/**
+ * 按base(进制)字符串转数字
+ */
 char_t *numberk(char_t *str, uint_t n, sint_t base) 
 {
     register char_t *p;
@@ -132,6 +140,12 @@ char_t *strcopy(char_t *buf, char_t *str_s)
     return buf;
 }
 
+/**
+ * 对占位符号进行替换
+ *  x: 替换成16进制数字
+ *  d: 替换成16进制数字
+ *  s: 替换成字符串
+ */
 void vsprintfk(char_t *buf, const char_t *fmt, va_list_t args)
 {
     char_t *p = buf;
@@ -173,11 +187,14 @@ void vsprintfk(char_t *buf, const char_t *fmt, va_list_t args)
     return ;
 }
 
+/**
+ * 打印函数
+ */
 void kprint(const char_t *fmt, ...)
 {
     char_t buf[512];
 
-    va_list_t arg = (va_list_t)((char_t *)(&fmt) + sizeof(long));
+    va_list_t arg = (va_list_t)((char_t *)(&fmt) + sizeof(long));   // 其他参数
 
     vsprintfk(buf, fmt, arg);
     GxH_strwrite(buf, &curs);

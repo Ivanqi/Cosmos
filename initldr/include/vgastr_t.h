@@ -22,7 +22,7 @@
 
 #define VGACURS_CLOSE 0x20          // 0x0720黑底白字的低字节，空格
 
-#define VGACHAR_LR_CFLG 10
+#define VGACHAR_LR_CFLG 10          // 换行
 #define VGACHAR_DF_CFLG 0           // 空字符
 
 #define VGASADH_REG_INX 0x0c        // 换页

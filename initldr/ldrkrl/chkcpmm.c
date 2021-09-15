@@ -252,14 +252,16 @@ int chk_cpuid()
         "pushfl \n\t"                   // pushf 的功能是将标志寄存器的值压栈
         "popl %%eax \n\t"
         "movl %%eax,%%ebx \n\t"
-        "xorl $0x0200000,%%eax \n\t"
-        "pushl %%eax \n\t"
-        "popfl \n\t"
+        "xorl $0x0200000,%%eax \n\t"    // xorl: 按位异或, 将把a和b中一个为1另一个为0的位设为 1 . 0x0200000: 0010 0000 | 0000 0000 0000 0000
+        "pushl %%eax \n\t"              // 暂存eax，同时存储eflags的信息
+
+        "popfl \n\t"                    // popf 是从栈中探出标志寄存器
         "pushfl \n\t"
+
         "popl %%eax \n\t"
-        "xorl %%ebx,%%eax \n\t"
-        "jz 1f \n\t"
-        "movl $1,%0 \n\t"
+        "xorl %%ebx,%%eax \n\t"         // 两个值xor
+        "jz 1f \n\t"                    // jz为0则跳转
+        "movl $1,%0 \n\t"               // 成功返回1
         "jmp 2f \n\t"
         "1: movl $0,%0 \n\t"
         "2: \n\t"

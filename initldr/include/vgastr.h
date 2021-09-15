@@ -23,8 +23,14 @@ void vsprintfk(char_t *buf, const char_t *fmt, va_list_t args);
 
 void kprint(const char_t *fmt, ...);
 
+/**
+ * 1. 换行
+ * 2. 增加空格
+ * 3. 显示的大小限制(x:80 y:25), 超过大小清屏
+ */
 KLINE void current_curs(cursor_t *cp, u32_t c_flg)
 {
+    // 换行，y增加，x归0
     if (c_flg == VGACHAR_LR_CFLG) {
         cp->y++;
         cp->x = 0;
@@ -37,6 +43,7 @@ KLINE void current_curs(cursor_t *cp, u32_t c_flg)
         return ;
     }
 
+    // 增加空格 x+2
     if (c_flg == VGACHAR_DF_CFLG) {
         cp->x += 2;
         if (cp->x > 159) {
