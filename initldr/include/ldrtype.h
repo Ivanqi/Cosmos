@@ -20,13 +20,13 @@
 #define ILDRKRL_PHYADR 0x2097152      // initldrkrl映射文件具体拷贝内存地址
 #define IMGSHEL_PHYADR 0x30000        // 196608
 
-#define IKSTACK_PHYADR (0x90000-0x10) // 589824 - 16
-#define IKSTACK_SIZE 0x1000           // 4096
+#define IKSTACK_PHYADR (0x90000-0x10) // 栈顶地址
+#define IKSTACK_SIZE 0x1000           // 栈大小是4KB
 
 #define IMGFILE_PHYADR 0x4000000      // 映射文件物理地址
 #define IMGKRNL_PHYADR 0x2000000      // 33554432
 
-#define KINITPAGE_PHYADR 0x1000000    // 16777216
+#define KINITPAGE_PHYADR 0x1000000    // 顶级页目录
 #define KINITFRVM_PHYADR 0x800000     // 8388608
 #define KINITFRVM_SZ 4194304
 
@@ -246,15 +246,16 @@ typedef struct s_VBEOMINFO
 
 typedef struct s_PIXCL
 {
-    u8_t cl_b;
-    u8_t cl_g;
-    u8_t cl_r;
-    u8_t cl_a;
+    u8_t cl_b;  // 蓝
+    u8_t cl_g;  // 绿
+    u8_t cl_r;  // 红
+    u8_t cl_a;  // 透明
 } __attribute__((packed)) pixcl_t;
 
 #define BGRA(r, g, b) ((0 | (r << 16) | (g << 8) | b))
-
+// 通常情况下用pilx_t 和 BGRA宏
 typedef u32_t pixl_t;
+
 #define VBEMODE 1
 #define GPUMODE 2
 #define BGAMODE 3

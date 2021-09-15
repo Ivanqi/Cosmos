@@ -6,7 +6,7 @@
 
 #include "bdvideo_t.h"
 
-#ifndef CFG_X86_PLATFORM
+#ifdef CFG_X86_PLATFORM
 #define CPUCORE_MAX 1
 #define SDRAM_MAPVECTPHY_ADDR 0x30000000
 
@@ -126,10 +126,10 @@ typedef struct s_MACHBSTART {
 #define RAM_AREACON 5
 
 typedef struct s_e820 {
-    u64_t saddr;            /* start of memory segment8 */
-    u64_t lsize;            /* size of memory segment8 */
-    u32_t type;             /* type of memory segment 4*/
-} __attribute__((packed)) e820map_;
+    u64_t saddr;            /* start of memory segment8，内存开始地址 */
+    u64_t lsize;            /* size of memory segment8，内存大小 */
+    u32_t type;             /* type of memory segment 4， 内存类型*/
+} __attribute__((packed)) e820map_t;
 
 typedef struct s_fhdsc {
     u64_t fhd_type;

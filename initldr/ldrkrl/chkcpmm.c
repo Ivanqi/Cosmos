@@ -112,16 +112,20 @@ void init_mem(machbstart_t *mbsp)
         kerror("Your computer is low on memory, the memory cannot be less than 128MB!");
     }
 
-    mbsp->mb_e820expadr = (u64_t)((u32_t)(retemp));
-    mbsp->mb_e820nr = (u64_t)retemnr;
-    mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));
-    mbsp->mb_memsz = get_memsize(retemp, retemnr);
+    mbsp->mb_e820expadr = (u64_t)((u32_t)(retemp));     // 把e820map_t结构数组的首地址传给mbsp->mb_e820padr
+    mbsp->mb_e820nr = (u64_t)retemnr;                   // 把e820map_t数据数组元素个数传给mbsp->mb_e820nr
+    mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));    // 把e820map_t结构数据大小传给mbsp->mb_e820sz
+    mbsp->mb_memsz = get_memsize(retemp, retemnr);      // 根据e820map_t结构数据计算内存大小
     init_acpi(mbsp);
 
     return;
 }
 
-// 检查CPU
+/**
+ * 检查CPU
+ *  1. 通过eflags寄存器观察是否支持CPUID
+ *  2. 检查CPU是否支持长模式
+ */
 void init_chkcpu(machbstart_t *mbsp)
 {
     if (!chk_cpuid()) {
@@ -134,50 +138,60 @@ void init_chkcpu(machbstart_t *mbsp)
         CLI_HALT();
     }
 
+    // 如果成功则设置机器信息结构CPU模式为64位
     mbsp->mb_cpumode = 0x40;
     return;
 }
 
+// 初始化内核栈
 void init_krlinitstack(machbstart_t *mbsp)
 {
     if (1 > move_krlimg(mbsp, (u64_t)(0x8f000), 0x1001)) {
         kerror("iks_moveimg err");
     }
 
-    mbsp->mb_krlinitstack = IKSTACK_PHYADR;
-    mbsp->mb_krlitstacksz = IKSTACK_SIZE;
+    mbsp->mb_krlinitstack = IKSTACK_PHYADR; // 栈顶地址
+    mbsp->mb_krlitstacksz = IKSTACK_SIZE;   // 栈大小是4kb
 
     return;
 }
 
 void init_bstartpages(machbstart_t *mbsp)
 {
+    // 顶级页目录
     u64_t *p = (u64_t *)(KINITPAGE_PHYADR);
+    // 页目录指针
     u64_t *pdpte = (u64_t *)(KINITPAGE_PHYADR + 0x1000);
+    // 页目录
     u64_t *pde = (u64_t *)(KINITPAGE_PHYADR + 0x2000);
-
+    // 物理地址从0开始
     u64_t adr = 0;
 
     if (1 > move_krlimg(mbsp, (u64_t)(KINITFRVM_PHYADR), (0x1000 * 16 + 0x2000))) {
         kerror("move_krlimg err");
     }
 
+    // 将顶级页目录，页目录指针的空间清0
     for (uint_t mi = 0; mi < PGENTY_SIZE; mi++) {
         p[mi] = 0;
         pdpte[mi] = 0;
     }
 
+    // 映射
     for (uint_t pdei = 0; pdei < 16; pdei++) {
         pdpte[pdei] = (u64_t)((u32_t)pde | KPDPTE_RW | KPDPTE_P);
         for (uint_t pdeii = 0; pdeii < PGENTY_SIZE; pdeii++) {
+            // 大页KPDE_PS 2MB， 可读写KPDE_RW， 存在KPDE_P
             pde[pdeii] = 0 | adr | KPDE_PS | KPDE_RW | KPDE_P;
             adr += 0x200000;
         }
         pde = (u64_t *)((u32_t)pde + 0x1000);
     }
 
+    // 让顶级页目录中第0项和第((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff项，指向同一个页目录指针页
     p[((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff] = (u64_t)((u32_t)pdpte | KPML4_RW | KPML4_P);
     p[0] = (u64_t)((u32_t)pdpte | KPML4_RW | KPML4_P);
+    // 把页表首地址保存在机器信息结构中
     mbsp->mb_pml4padr = (u64_t)(KINITPAGE_PHYADR);
     mbsp->mb_subpageslen = (u64_t)(0x1000 * 16 + 0x2000);
     mbsp->mb_kpmapphymemsz = (u64_t)(0x400000000);
@@ -272,18 +286,19 @@ int chk_cpuid()
     return rets;
 }
 
+// 检查CPU是否支持长模式
 int chk_cpu_longmode()
 {
     int rets = 0;
     __asm__ __volatile__(
         "movl $0x80000000,%%eax \n\t"
-        "cpuid \n\t"
-        "cmpl $0x80000001,%%eax \n\t"
-        "setnb %%al \n\t"
-        "jb 1f \n\t"
+        "cpuid \n\t"                        // 把eax中放入0x80000000调用CPUID指令
+        "cmpl $0x80000001,%%eax \n\t"       // 看eax中返回结果
+        "setnb %%al \n\t"                   // 不为0x80000001，则不支持0x80000001号功能
+        "jb 1f \n\t"                        // JB表示无符号小于则跳转，CF=1 且ZF=0 即A<B转移
         "movl $0x80000001,%%eax \n\t"
-        "cpuid \n\t"
-        "bt $29,%%edx  \n\t" // long mode  support 位
+        "cpuid \n\t"                        // 把eax中放入0x80000001调用CPUID指令，检查edx中的返回数据
+        "bt $29,%%edx  \n\t"                // 长模式 支持位 是否为1
         "setcb %%al \n\t"
         "1: \n\t"
         "movzx %%al,%%eax \n\t"

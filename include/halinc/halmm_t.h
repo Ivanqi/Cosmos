@@ -76,11 +76,11 @@
 #define VGAADRS 0xa0000ULL
 #define VGAADRD 0xc0000ULL
 
-#define RAM_USABLE 1
-#define RAM_RESERV 2
-#define RAM_ACPIREC 3
-#define RAM_ACPINVS 4
-#define RAM_AREACON 5
+#define RAM_USABLE 1            // 可以内存
+#define RAM_RESERV 2            // 保留内存不可使用
+#define RAM_ACPIREC 3           // ACPI表相关
+#define RAM_ACPINVS 4           // ACPI NVS空间
+#define RAM_AREACON 5           // 包含坏内存
 
 
 #define PMR_T_OSAPUSERRAM 1

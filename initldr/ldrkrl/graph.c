@@ -68,12 +68,16 @@ void logo(machbstart_t *mbsp)
 
 void init_graph(machbstart_t *mbsp)
 {
+    // 初始化图形数据结构
     graph_t_init(&mbsp->mb_ghparm);
     init_bgadevice(mbsp);
 
     if (mbsp->mb_ghparm.gh_mode != BGAMODE) {
+        // 获取VBE模式，通过BIOS中断
         get_vbemode(mbsp);
+        // 获取一个具体VBE模式信息，通过BIOS中断
         get_vbemodeinfo(mbsp);
+        // 设置VBE模式，通过BIOS
         set_vbemodeinfo();
     }
 
