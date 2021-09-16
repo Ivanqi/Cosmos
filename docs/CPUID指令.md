@@ -7,6 +7,20 @@ CPUID这条指令，除了用于识别CPU(CPU型号、家族、类型等)，还�
 
 CPUID 指令有两组功能，一组返回的是基本信息，另一组返回的是扩展信息
 
+# 例子
+```
+  uint32_t  eax, ebx, ecx, edx;
+
+    __asm__ (
+
+        "cpuid"
+
+    : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx) : "a" (i) );
+```
+通过汇编指令cpuid，输入参数只有一个，就是cpuid指令支持的功能号，放在eax寄存器中
+
+输出参数有四个，分别放在eax、ebx、ecx、edx中
+
 # CPUID指令的执行方法
 把功能代码放在EAX寄存器中，执行CPUID指令即可。例如
 ```
@@ -120,3 +134,6 @@ mov eax, 80000008h
 cpuid
 ```
 执行CPUID指令后，物理地址的大小在EAX的bit[7:0]返回，虚拟地址的大小在EAX的bit[15:8]返回，返回的内容为虚拟（物理）地址的位数
+
+# 参考资料
+- [CPUID — CPU Identification](https://www.felixcloutier.com/x86/cpuid)
