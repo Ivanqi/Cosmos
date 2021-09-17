@@ -7,7 +7,7 @@
 unsigned int acpi_get_bios_ebda()
 {
     unsigned int address = *(unsigned short *)0x40E;
-    address <<= 4;
+    address <<= 4; // 0x40E0
     return address;
 }
 
@@ -96,18 +96,28 @@ PUBLIC void init_acpi(machbstart_t *mbsp)
     return;
 }
 
+/**
+ * 获取内存布局信息
+ *  1. 获取e820map_t结构体
+ *  2. 检查内存大小
+ */
 void init_mem(machbstart_t *mbsp)
 {
     e820map_t *retemp;
     u32_t retemnr = 0;
 
     mbsp->mb_ebdaphyadr = acpi_get_bios_ebda();
+    /**
+     * retemnr e820map_t内存数组个数 
+     * retemp 内存首地址
+     */
     mmap(&retemp, &retemnr);
 
     if (retemnr == 0) {
         kerror("no e820map\n");
     }
 
+    // 根据e820map_t结构数据检查内存大小
     if (chk_memsize(retemp, retemnr, 0x100000, 0x8000000) == NULL) {
         kerror("Your computer is low on memory, the memory cannot be less than 128MB!");
     }
@@ -216,6 +226,9 @@ void init_meme820(machbstart_t *mbsp)
     return;
 }
 
+/**
+ * 通过调用realadr_call_entry函数，来调用实模式下的_getmmap函数，并且在_getmmap函数中调用BIOS中断
+ */
 void mmap(e820map_t **retemp, u32_t *retemnr)
 {
     realadr_call_entry(RLINTNR(0), 0, 0);
@@ -224,6 +237,7 @@ void mmap(e820map_t **retemp, u32_t *retemnr)
     return ;
 }
 
+// 检查内存大小
 e820map_t *chk_memsize(e820map_t *e8p, u32_t enr, u64_t sadr, u64_t size)
 {
     u64_t len = sadr + size;
@@ -294,12 +308,12 @@ int chk_cpu_longmode()
         "movl $0x80000000,%%eax \n\t"
         "cpuid \n\t"                        // 把eax中放入0x80000000调用CPUID指令
         "cmpl $0x80000001,%%eax \n\t"       // 看eax中返回结果
-        "setnb %%al \n\t"                   // 不为0x80000001，则不支持0x80000001号功能
+        "setnb %%al \n\t"                   // 不为0x80000001，则不支持0x80000001号功能。setnb: ~CF
         "jb 1f \n\t"                        // JB表示无符号小于则跳转，CF=1 且ZF=0 即A<B转移
         "movl $0x80000001,%%eax \n\t"
         "cpuid \n\t"                        // 把eax中放入0x80000001调用CPUID指令，检查edx中的返回数据
         "bt $29,%%edx  \n\t"                // bt 表示 Bit Test，测试并用原值设置进位值.长模式 支持位 是否为1
-        "setcb %%al \n\t"
+        "setcb %%al \n\t"                   // CF=1
         "1: \n\t"
         "movzx %%al,%%eax \n\t"
         : "=a"(rets)

@@ -29,9 +29,11 @@ RM16_EIP_OFF EQU (ETYBAK_ADR + 8)       ; 16位EIP暂存空间
 RM16_ESP_OFF EQU (ETYBAK_ADR + 12)      ; 16位ESP暂存空间
 
 RWHDPACK_ADR EQU (ETYBAK_ADR + 32)
+
+; e820内存地址
 E80MAP_NR EQU (ETYBAK_ADR + 64)
 E80MAP_ADRADR EQU (ETYBAK_ADR + 68)
-E80MAP_ADR EQU (0x5000)                ; 20480
+E80MAP_ADR EQU (0x5000)                ; edi设为存放输出结果的1MB内的物理内存地
 
 VBEINFO_ADR EQU (0x6000)               ; VBE信息地址
 VBEMINFO_ADR EQU (0x6400)              ; 25600

@@ -165,17 +165,16 @@ typedef struct s_RWHDPACK
     u32_t rwhpk_lh; 
 } __attribute__((packed)) rwhdpach_t;
 
-#define RAM_USABLE 1
-#define RAM_RESERV 2
-#define RAM_ACPIREC 3
-#define RAM_ACPINVS 4
-#define RAM_AREACON 5
+#define RAM_USABLE 1        // 可用内存
+#define RAM_RESERV 2        // 保留内存不可使用
+#define RAM_ACPIREC 3       // ACPI表相关
+#define RAM_ACPINVS 4       // ACPI NVS空间
+#define RAM_AREACON 5       // 包含坏内存
 
-typedef struct s_e820
-{
-    u64_t saddr;    // start of memory segment8
-    u64_t lsize;    // size of memory segment8
-    u32_t type;     // type of memory segment 4
+typedef struct s_e820 {
+    u64_t saddr;            /* start of memory segment8，内存开始地址 */
+    u64_t lsize;            /* size of memory segment8，内存大小 */
+    u32_t type;             /* type of memory segment 4， 内存类型*/
 } __attribute__((packed)) e820map_t;
 
 typedef struct s_VBEINFO
@@ -412,9 +411,9 @@ typedef struct s_MACHBSTART
     u64_t   mb_e820padr;        // 机器e820数组地址
     u64_t   mb_e820nr;          // 机器e820数组元素个数
     u64_t   mb_e820sz;          // 机器e820数组大小
-    u64_t   mb_e820expadr;
-    u64_t   mb_e820exnr;
-    u64_t   mb_e820exsz;
+    u64_t   mb_e820expadr;      // e820map_t结构数组的首地址
+    u64_t   mb_e820exnr;        // e820map_t数据数组元素个数
+    u64_t   mb_e820exsz;        // e820map_t结构数据大小
     u64_t   mb_memznpadr;
     u64_t   mb_memznnr;
     u64_t   mb_memznsz;

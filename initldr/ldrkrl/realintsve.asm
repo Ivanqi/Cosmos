@@ -65,6 +65,8 @@ cleardisp:
 	ret
 
 ; 获取内存布局试图的函数
+; _getmmap和loop在迭代执行中断，每次中中断都要输出一个20字节大小数据项
+; 最后会形成一个s_e820的的结构体
 _getmmap:
 	push ds
 	push es
@@ -73,24 +75,24 @@ _getmmap:
 	mov dword[E80MAP_NR], esi				; 把esi的机器码赋予给内存地址 E80MAP_NR
 	mov dword[E80MAP_ADRADR], E80MAP_ADR
 
-	xor ebx, ebx
+	xor ebx, ebx							; ebx设为0
 	mov edi, E80MAP_ADR
 
 loop:
-	mov eax, 0e820h
-	mov ecx, 20
-	mov edx, 0534d4150h
-	int 15h
-	jc .1
+	mov eax, 0e820h							; eax必须为0e820h
+	mov ecx, 20								; 输出结果数据项的大小为20字节：8字节内存基地址，8字节内存长度，4字节内存类型
+	mov edx, 0534d4150h						; edx必须为0534d4150h
+	int 15h									; 执行中断
+	jc .1									; 如果flags寄存器的C位置1，则表示出错
 
-	add edi, 20
+	add edi, 20								; 更新下一次输出结果的地址
 	cmp edi, E80MAP_ADR + 0x1000
 	jg .1
 
 	inc esi
 
-	cmp ebx, 0
-	jne loop
+	cmp ebx, 0								; 如ebx为0，则表示循环迭代结束
+	jne loop								; 还有结果项，继续迭代
 
 	jmp .2
 
