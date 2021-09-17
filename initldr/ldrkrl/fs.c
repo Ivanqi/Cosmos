@@ -15,9 +15,10 @@ int strcmpl(const char *a, const char *b)
     return *b - *a;
 }
 
+// 按文件名称在文件数组获取相关文件
 fhdsc_t *get_fileinfo(char_t *fname, machbstart_t *mbsp)
 {
-    mlosrddsc_t *mrddadrs = (mlosrddsc_t *)((u32_t)(mbsp->mb_imgpadr + MLOSDSC_OFF));
+    mlosrddsc_t *mrddadrs = (mlosrddsc_t *)((u32_t)(mbsp->mb_imgpadr + MLOSDSC_OFF));   // 映像文件实际地址
     if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_RVGIC  || mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
         kerror("no mrddsc");
     }
@@ -105,15 +106,17 @@ void init_defutfont(machbstart_t *mbsp)
     return;
 }
 
-
+// 获取对应映像文件，并返回映像文件的地址和实际大小
 void get_file_rpadrandsz(char_t *fname, machbstart_t *mbsp, u32_t *retadr, u32_t *retsz)
 {
     u64_t padr = 0, fsz = 0;
+    // 映像文件名称为空或者 mbsp(二级信息引导)为空
     if (NULL == fname || NULL == mbsp) {
         *retadr = 0;
         return;
     }
 
+    // 获取对映的映像文件
     fhdsc_t *fhdsc = get_fileinfo(fname, mbsp);
     if (fhdsc == NULL) {
         *retadr = 0;
@@ -121,12 +124,14 @@ void get_file_rpadrandsz(char_t *fname, machbstart_t *mbsp, u32_t *retadr, u32_t
     }
 
     padr = fhdsc->fhd_intsfsoff + mbsp->mb_imgpadr;
+    // 检查文件偏移位置
     if (padr > 0xffffffff) {
         *retadr = 0;
         return;
     }
 
     fsz = (u32_t)fhdsc->fhd_frealsz;
+    // 检查文件实际大小
     if (fsz > 0xffffffff) {
         *retadr = 0;
         return;
@@ -172,6 +177,7 @@ u64_t get_wt_imgfilesz(machbstart_t *mbsp)
     return retsz;
 }
 
+// 在映像查找相应的文件，并复制到对应的地址，并返回文件大小，按fnm查找对应的文件
 u64_t r_file_to_padr(machbstart_t *mbsp, u32_t f2adr, char_t *fnm)
 {
     if (NULL == f2adr || NULL == fnm || NULL == mbsp) {
@@ -181,10 +187,12 @@ u64_t r_file_to_padr(machbstart_t *mbsp, u32_t f2adr, char_t *fnm)
     u32_t fpadr = 0, sz = 0;
     get_file_rpadrandsz(fnm, mbsp, &fpadr, &sz);
 
+    // 检查映像文件的地址和实际大小
     if (0 == fpadr || 0 == sz) {
         return 0;
     }
 
+    // 检测内存是否可用
     if (NULL == chk_memsize((e820map_t *)(u32_t)mbsp->mb_e820padr, (u32_t)(mbsp->mb_e820nr), f2adr, sz)) {
         return 0;
     }
@@ -193,6 +201,7 @@ u64_t r_file_to_padr(machbstart_t *mbsp, u32_t f2adr, char_t *fnm)
         return 0;
     }
 
+    // 把映像文件复制到内核文件地址中
     m2mcopy((void *)fpadr, (void *)f2adr, (sint_t)sz);
     return sz;
 }

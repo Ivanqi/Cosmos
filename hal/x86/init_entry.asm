@@ -5,7 +5,7 @@
 %define MBSP_ADR 0x100000
 %define IA32_EFER 0C0000080H
 %define PML4T_BADR 0x1000000
-%define KRLVIRADR 0xffff800000000000
+%define KRLVIRADR 0xffff800000000000	; 内核虚拟空间
 %define KINITSTACK_OFF 16
 
 global _start

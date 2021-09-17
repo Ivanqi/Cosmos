@@ -24,7 +24,7 @@
 #define IKSTACK_SIZE 0x1000           // 栈大小是4KB
 
 #define IMGFILE_PHYADR 0x4000000      // 映射文件物理地址
-#define IMGKRNL_PHYADR 0x2000000      // 33554432
+#define IMGKRNL_PHYADR 0x2000000      // 内核文件物理地址
 
 #define KINITPAGE_PHYADR 0x1000000    // 顶级页目录
 #define KINITFRVM_PHYADR 0x800000     // 8388608
@@ -392,7 +392,7 @@ typedef struct s_MACHBSTART
     u64_t   mb_krlitstacksz;    // 24, 内核栈大小
     u64_t   mb_imgpadr;         // 操作系统映像
     u64_t   mb_imgsz;           // 操作系统映像大小
-    u64_t   mb_krlimgpadr;
+    u64_t   mb_krlimgpadr;      // 内核文件地址
     u64_t   mb_krlsz;
     u64_t   mb_krlvec;
     u64_t   mb_krlrunmode;
@@ -401,7 +401,7 @@ typedef struct s_MACHBSTART
     u64_t   mb_ksepadre;
     u64_t   mb_kservadrs;
     u64_t   mb_kservadre;
-    u64_t   mb_nextwtpadr;
+    u64_t   mb_nextwtpadr;      // 下一段空闲内存的首地址
     u64_t   mb_bfontpadr;       // 操作系统字体地址
     u64_t   mb_bfontsz;         // 操作系统字体大小
     u64_t   mb_fvrmphyadr;      // 机器显存地址

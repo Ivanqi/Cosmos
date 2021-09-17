@@ -169,10 +169,14 @@ void init_krlinitstack(machbstart_t *mbsp)
     return;
 }
 
+/**
+ * 内核虚拟空间从0xffff800000000000开始，所以这个虚拟地址映射从物理地址0开始，大小都是0x400000000即16GB
+ * 也就说是要虚拟地址空间：0xffff800000000000 ～ 0xffff800400000000 映射到物理地址空间 0 ~ 0x400000000
+ */
 void init_bstartpages(machbstart_t *mbsp)
 {
     // 顶级页目录
-    u64_t *p = (u64_t *)(KINITPAGE_PHYADR);
+    u64_t *p = (u64_t *)(KINITPAGE_PHYADR);     // 16MB地址处
     // 页目录指针
     u64_t *pdpte = (u64_t *)(KINITPAGE_PHYADR + 0x1000);
     // 页目录
@@ -240,7 +244,7 @@ void mmap(e820map_t **retemp, u32_t *retemnr)
     return ;
 }
 
-// 检查内存大小
+// 检查可用内存大小
 e820map_t *chk_memsize(e820map_t *e8p, u32_t enr, u64_t sadr, u64_t size)
 {
     u64_t len = sadr + size;

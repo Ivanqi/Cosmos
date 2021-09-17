@@ -83,12 +83,12 @@ typedef struct s_MEMDIVMER {
 #define MA_KRNL_LSTART 0x2000000
 #define MA_KRNL_LSZ (0x400000000-0x2000000)
 #define MA_KRNL_LEND (MA_KRNL_LSTART+MA_KRNL_LSZ-1)
-#define MA_PROC_LSTART 0x400000000
+#define MA_PROC_LSTART 0x400000000	// 物理内存大小16GB
 #define MA_PROC_LSZ (0xffffffffffffffff-0x400000000)
 #define MA_PROC_LEND (MA_PROC_LSTART+MA_PROC_LSZ)
 
 /**
- * 0x400000000  0x40000000
+ * 0x400000000  16GB
  * 这个结构至少占用一个页面，当然也可以是多个连续的的页面，但是该结构从第一个页面的首地址开始存放，
  * 后面的空间用于存放实现分配算法的数据结构，这样每个区可方便的实现不同的分配策略，或者有天你觉得我的分配算法是渣渣，
  * 完全可以替换mafuncobjs_t结构中的指针，指向你的函数
