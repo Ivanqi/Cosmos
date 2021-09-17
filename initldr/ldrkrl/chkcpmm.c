@@ -4,6 +4,7 @@
 
 #include "cmctl.h"
 
+// acpi内存
 unsigned int acpi_get_bios_ebda()
 {
     unsigned int address = *(unsigned short *)0x40E;
@@ -78,6 +79,7 @@ PUBLIC mrsdp_t *find_acpi_rsdp()
     return NULL;
 }
 
+// 初始化 acpi
 PUBLIC void init_acpi(machbstart_t *mbsp)
 {
     mrsdp_t *rdp = NULL;
@@ -256,6 +258,9 @@ e820map_t *chk_memsize(e820map_t *e8p, u32_t enr, u64_t sadr, u64_t size)
     return NULL;
 }
 
+/**
+ * 计算可用内存大小
+ */
 u64_t get_memsize(e820map_t *e8p, u32_t enr)
 {
     u64_t len = 0;
