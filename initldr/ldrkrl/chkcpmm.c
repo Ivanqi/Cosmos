@@ -298,7 +298,7 @@ int chk_cpu_longmode()
         "jb 1f \n\t"                        // JB表示无符号小于则跳转，CF=1 且ZF=0 即A<B转移
         "movl $0x80000001,%%eax \n\t"
         "cpuid \n\t"                        // 把eax中放入0x80000001调用CPUID指令，检查edx中的返回数据
-        "bt $29,%%edx  \n\t"                // 长模式 支持位 是否为1
+        "bt $29,%%edx  \n\t"                // bt 表示 Bit Test，测试并用原值设置进位值.长模式 支持位 是否为1
         "setcb %%al \n\t"
         "1: \n\t"
         "movzx %%al,%%eax \n\t"
