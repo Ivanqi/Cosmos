@@ -158,6 +158,7 @@ void init_chkcpu(machbstart_t *mbsp)
 // 初始化内核栈
 void init_krlinitstack(machbstart_t *mbsp)
 {
+    // 检测0x8f000～（0x8f000+0x1001）与其他内存是否有冲突
     if (1 > move_krlimg(mbsp, (u64_t)(0x8f000), 0x1001)) {
         kerror("iks_moveimg err");
     }

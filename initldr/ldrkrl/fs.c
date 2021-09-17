@@ -41,6 +41,7 @@ ok_l:
     return &fhdscstart[rethn];
 }
 
+// 判断一个地址空间是否和内存中存放的内容有冲突
 int move_krlimg(machbstart_t *mbsp, u64_t cpyadr, u64_t cpysz)
 {
     if (0xffffffff <= (cpyadr + cpysz) || 1 > cpysz) {
@@ -55,6 +56,7 @@ int move_krlimg(machbstart_t *mbsp, u64_t cpyadr, u64_t cpysz)
             return -1;
         }
         
+        // 把映像文件地址复制到toadr
         m2mcopy((void *)((u32_t)mbsp->mb_imgpadr), toadr, tosz);
         mbsp->mb_imgpadr = (u64_t)((u32_t)toadr);
         return 1;
@@ -148,14 +150,17 @@ u64_t get_filesz(char_t *filenm, machbstart_t *mbsp)
     return fhdscstart->fhd_frealsz;
 }
 
+// 获取映像文件地址
 u64_t get_wt_imgfilesz(machbstart_t *mbsp)
 {
-    u64_t retsz = LDRFILEADR;
-    mlosrddsc_t *mrddadrs = MRDDSC_ADR;
+    u64_t retsz = LDRFILEADR;               
+    mlosrddsc_t *mrddadrs = MRDDSC_ADR;     // 映射文件地址
+    // 判断映射文件是否已经到结束的位置
     if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_ENDGIC || mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
         return 0;
     }
 
+    // mdc_filbk_e 映像文件中文件数据的结束偏移
     if (mrddadrs->mdc_filbk_e < 0x4000) {
         return 0;
     }
@@ -180,7 +185,7 @@ u64_t r_file_to_padr(machbstart_t *mbsp, u32_t f2adr, char_t *fnm)
         return 0;
     }
 
-    if (NULL == chk_memsize((e820map_t *)(u32_t)mbsp->mb_e820padr), (u32_t)(mbsp->mb_e820nr), f2adr, sz) {
+    if (NULL == chk_memsize((e820map_t *)(u32_t)mbsp->mb_e820padr, (u32_t)(mbsp->mb_e820nr), f2adr, sz)) {
         return 0;
     }
 

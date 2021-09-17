@@ -88,8 +88,11 @@ void machbstart_t_init(machbstart_t *initp)
     return ;
 }
 
+/**
+ * sadr 和 kadr 内存检测
+ */
 int adrzone_is_ok(u64_t sadr, u64_t slen, u64_t kadr, u64_t klen)
-{
+{ 
     if (kadr >= sadr && kadr <= (sadr + slen)) {
         return -1;
     }
