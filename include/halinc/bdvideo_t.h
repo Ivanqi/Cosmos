@@ -168,49 +168,55 @@ typedef struct s_FNTDATA {
 } __attribute__((packed)) fntdata_t;
 
 typedef struct s_DFTGHOPS {
+    // 读写显存数据
     size_t (*dgo_read)(void* ghpdev,void* outp,size_t rdsz);
     size_t (*dgo_write)(void* ghpdev,void* inp,size_t wesz);
     sint_t (*dgo_ioctrl)(void* ghpdev,void* outp,uint_t iocode);
+    // 刷新
     void   (*dgo_flush)(void* ghpdev);
     sint_t (*dgo_set_bank)(void* ghpdev, sint_t bnr);
+    // 读写像素
     pixl_t (*dgo_readpix)(void* ghpdev,uint_t x,uint_t y);
     void   (*dgo_writepix)(void* ghpdev,pixl_t pix,uint_t x,uint_t y);
+    // 直接读写像素
     pixl_t (*dgo_dxreadpix)(void* ghpdev,uint_t x,uint_t y);
     void   (*dgo_dxwritepix)(void* ghpdev,pixl_t pix,uint_t x,uint_t y);
+    // 设置x,y坐标和偏移
     sint_t (*dgo_set_xy)(void* ghpdev,uint_t x,uint_t y);
     sint_t (*dgo_set_vwh)(void* ghpdev,uint_t vwt,uint_t vhi);
     sint_t (*dgo_set_xyoffset)(void* ghpdev,uint_t xoff,uint_t yoff);
+    // 获取x,y坐标和偏移
     sint_t (*dgo_get_xy)(void* ghpdev,uint_t* rx,uint_t* ry);
     sint_t (*dgo_get_vwh)(void* ghpdev,uint_t* rvwt,uint_t* rvhi);
     sint_t (*dgo_get_xyoffset)(void* ghpdev,uint_t* rxoff,uint_t* ryoff);
 } dftghops_t;
 
 typedef struct s_DFTGRAPH {
-    u64_t gh_mode;
-    u64_t gh_x;
-    u64_t gh_y;
-    u64_t gh_framphyadr;
-    u64_t gh_fvrmphyadr;
-    u64_t gh_fvrmsz;
-    u64_t gh_onepixbits;
+    u64_t gh_mode;              // 图形模式
+    u64_t gh_x;                 // 水平像素点
+    u64_t gh_y;                 // 垂直像素点
+    u64_t gh_framphyadr;        // 显存物理地址
+    u64_t gh_fvrmphyadr;        // 显存虚拟地址
+    u64_t gh_fvrmsz;            // 显存大小
+    u64_t gh_onepixbits;        // 一个像素字占用的数据位数
     u64_t gh_onepixbyte;
-    u64_t gh_vbemodenr;
-    u64_t gh_bank;
-    u64_t gh_curdipbnk;
-    u64_t gh_nextbnk;
-    u64_t gh_banksz;
-    u64_t gh_fontadr;
-    u64_t gh_fontsz;
-    u64_t gh_fnthight;
-    u64_t gh_nxtcharsx;
-    u64_t gh_nxtcharsy;
-    u64_t gh_linesz;
-    pixl_t gh_deffontpx;
+    u64_t gh_vbemodenr;         // vbe模式号
+    u64_t gh_bank;              // 显存的bank数
+    u64_t gh_curdipbnk;         // 当前bank
+    u64_t gh_nextbnk;           // 下一个bank
+    u64_t gh_banksz;            // bank大小
+    u64_t gh_fontadr;           // 字库地址
+    u64_t gh_fontsz;            // 字库大小
+    u64_t gh_fnthight;          // 字体高度
+    u64_t gh_nxtcharsx;         // 下一字符显示的x坐标
+    u64_t gh_nxtcharsy;         // 下一字符显示的y坐标
+    u64_t gh_linesz;            // 字符行高
+    pixl_t gh_deffontpx;        // 默认字体大小
     u64_t gh_chardxw;
     u64_t gh_flush;
     u64_t gh_framnr;
-    u64_t gh_fshdata;
-    dftghops_t gh_opfun;
+    u64_t gh_fshdata;           // 刷新相关的
+    dftghops_t gh_opfun;        // 图形驱动操作函数指针结构体
 } dftgraph_t;
 
 #define VBE_DISPI_IOPORT_INDEX (0x01CE)

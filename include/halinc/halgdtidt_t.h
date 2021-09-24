@@ -107,15 +107,15 @@ typedef struct s_descriptor {           // 共 8 个字节
 
 // 门描述符
 typedef struct s_GATE {
-    u16_t   offset_low;                  // Offset Low
-    u16_t   selector;                    // Selector
+    u16_t   offset_low;                  // Offset Low,偏移
+    u16_t   selector;                    // Selector, 选择子
     /**
      * 该字段只在调用门描述符中有效。如果在利用调用门调用子程序时引起特权级的转换和堆栈的改变，需要将外层堆栈中的参数复制到内层堆栈
      * 该双字计数字段就是用于说明这种情况发生时，要复制的双字参数的数量
      */
     u8_t    dcount;
     u8_t	attr;		                // P(1) DPL(2) DT(1) TYPE(4)
-    u16_t	offset_high;	            // Offset High
+    u16_t	offset_high;	            // Offset High，偏移的高位段
     u32_t   offset_high_h;
 	u32_t	offset_resv;
 } __attribute__((packed)) gate_t;

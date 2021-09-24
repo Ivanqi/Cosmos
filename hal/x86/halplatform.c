@@ -27,6 +27,7 @@ adr_t phyadr_to_viradr(adr_t kphyadr)
 
 void machbstart_t_init(machbstart_t *initp)
 {
+    // 清零
     memset(initp, 0, sizeof(machbstart_t));
     return;
 }
@@ -34,17 +35,25 @@ void machbstart_t_init(machbstart_t *initp)
 void init_machbstart()
 {
     machbstart_t *kmbsp = &kmachbsp;
-    machbstart_t *smbsp = MBSPADR;
+    machbstart_t *smbsp = MBSPADR;      // 物理地址1MB处
 
     machbstart_t_init(kmbsp);
-
+    // 复制，要把地址转换成虚拟地址
     memcopy((void *)phyadr_to_viradr((adr_t)smbsp), (void *)kmbsp, sizeof(machbstart_t));
     return;
 }
 
+/**
+ * 这个函数负责两个任务
+ *  1. 把二级引导器建立的机器信息结构复制到hal层中的一个全局变量中，方便内核中的其他代码使用里面的信息，之后二级引导器的数据所占用的内存都会被释放
+ *  2. 初始化图形显示驱动，内核在在运行过程要在屏幕上输出信息
+ */
+
 void init_halplaltform()
 {
+    // 复制机器信息结构
     init_machbstart();
+    // 初始化图形显示驱动
     init_bdvideo();
     return;
 }

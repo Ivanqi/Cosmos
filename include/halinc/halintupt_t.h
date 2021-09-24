@@ -36,13 +36,13 @@ typedef struct s_INTFLTDSC {
 };
 
 typedef struct s_INTSERDSC {
-    list_h_t    s_list;
-    list_h_t    s_indevlst;
+    list_h_t    s_list;         // 在中断异常描述符中的链表
+    list_h_t    s_indevlst;     // 在设备描述描述符中的链表
     u32_t       s_flg;
-    intfltdsc_t* s_intfltp;
-    void*       s_device;
+    intfltdsc_t* s_intfltp;     // 指向中断异常描述符
+    void*       s_device;       // 指向设备描述符
     uint_t      s_indx;
-    intflthandle_t s_handle;
+    intflthandle_t s_handle;    // 中断处理的回调函数指针
 } intserdsc_t;
 
 typedef struct s_KITHREAD {

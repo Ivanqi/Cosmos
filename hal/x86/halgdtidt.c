@@ -5,6 +5,14 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+/**
+ * 参数
+ *  vector 向量也是中断号
+ *  dest_type 中断门类型，中断门，陷阱门
+ *  handler 中断处理程序的入口地址
+ *  privilege 中断门的权限级别
+ * 
+ */
 void set_idt_desc(u8_t vector, u8_t desc_type, inthandler_t handler, u8_t privilege)
 {
     gate_t *p_gate = &x64_idt[vector];
@@ -133,7 +141,8 @@ PUBLIC LKINIT void init_descriptor()
 }
 
 PUBLIC LKINIT void init_idt_descriptor()
-{
+{   
+    // 一开始把所有中断的处理程序设置为保留的通用处理程序
     for (u16_t intindx = 0; intindx <= 255; intindx++) {
         set_idt_desc((u8_t)intindx, DA_386IGate, hxi_exc_general_intpfault, PRIVILEGE_KRNL);
     }

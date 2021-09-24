@@ -197,11 +197,16 @@ void hal_logo()
 PUBLIC LKINIT void init_bdvideo()
 {
     dftgraph_t *kghp = &kdftgh;
-
+    
+    // 初始化图形数据结构，里面放有图形模式，分辨率、图形驱动函数指针
     init_dftgraph();
+    // 初始化bag图形显卡的函数指针
     init_bga();
+    // 初始化vbe图形显卡的函数指针
     init_vbe();
+    // 清空屏幕，为黑色
     fill_graph(kghp, BGRA(0, 0, 0));
+    /// 显示背景图片
     set_charsdxwflush(0, 0);
     hal_background();
     
@@ -287,6 +292,7 @@ void drxw_pixcolor(dftgraph_t *kghp, u32_t x, u32_t y, pixl_t pix)
     return;
 }
 
+// 刷新显存
 void flush_videoram(dftgraph_t *kghp)
 {
     kghp->gh_opfun.dgo_flush(kghp);

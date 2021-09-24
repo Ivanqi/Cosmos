@@ -73,7 +73,7 @@ global  asm_ret_from_user_mode
 %define _KERNEL_DS 0x10
 %define _NOERRO_CODE 0xffffffffffffffff
 
-
+; 保存中断的寄存器
 %macro	SAVEALL	0
 
 	push rax
@@ -111,7 +111,7 @@ global  asm_ret_from_user_mode
 	
 %endmacro
 
-
+; 恢复中断后寄存器
 %macro	RESTOREALL	0
    	;pop	gs
 	;pop	fs
@@ -147,6 +147,7 @@ global  asm_ret_from_user_mode
 	iretq
 %endmacro
 
+; 保存异常下的寄存器
 %macro	SAVEALLFAULT 0
 	push rax
 	push rbx
@@ -181,6 +182,7 @@ global  asm_ret_from_user_mode
 	
 %endmacro
 
+; 恢复异常下寄存器
 %macro	RESTOREALLFAULT	0
    	;pop	gs
 	;pop	fs
@@ -217,6 +219,7 @@ global  asm_ret_from_user_mode
 	iretq
 %endmacro
 
+; 没有错误码CPU异常
 %macro	SRFTFAULT 1
 	push	  _NOERRO_CODE
 	SAVEALLFAULT
@@ -232,6 +235,7 @@ global  asm_ret_from_user_mode
 	RESTOREALLFAULT
 %endmacro
 
+; CPU异常
 %macro	SRFTFAULT_ECODE 1
 	SAVEALLFAULT
 	mov r14w,0x10
@@ -246,7 +250,7 @@ global  asm_ret_from_user_mode
 	RESTOREALLFAULT
 %endmacro
 
-
+; 硬件中断
 %macro	HARWINT	1
 	SAVEALL
 	
