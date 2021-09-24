@@ -82,7 +82,7 @@ entry64:
 	xor r15, r15
     mov rbx, MBSP_ADR
     mov rax, KRLVIRADR
-    mov rcx, [rbx+KINITSTACK_OFF]
+    mov rcx, [rbx + KINITSTACK_OFF]
     add rax, rcx
     xor rcx, rcx
 	xor rbx, rbx
