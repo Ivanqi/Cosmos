@@ -24,7 +24,7 @@
 #define IKSTACK_SIZE 0x1000           // 栈大小是4KB
 
 #define IMGFILE_PHYADR 0x4000000      // 映射文件物理地址
-#define IMGKRNL_PHYADR 0x2000000      // 内核文件物理地址
+#define IMGKRNL_PHYADR 0x2000000      // 内核文件物理地址，Cosmos.eki的位置
 
 #define KINITPAGE_PHYADR 0x1000000    // 顶级页目录
 #define KINITFRVM_PHYADR 0x800000     // 8388608
@@ -255,24 +255,27 @@ typedef struct s_PIXCL
 // 通常情况下用pilx_t 和 BGRA宏
 typedef u32_t pixl_t;
 
-#define VBEMODE 1
+#define VBEMODE 1   // VBE模式
 #define GPUMODE 2
 #define BGAMODE 3
 
+/**
+ * 图形模式结构体
+ */
 typedef struct s_GRAPH
 {
-    u32_t gh_mode;
-    u32_t gh_x;
-    u32_t gh_y;
-    u32_t gh_framphyadr;
-    u32_t gh_onepixbits;
-    u32_t gh_vbemodenr;
-    u32_t gh_vifphyadr;
-    u32_t gh_vmifphyadr;
-    u32_t gh_bank;
+    u32_t gh_mode;              // 模式
+    u32_t gh_x;                 // 分辨率的x
+    u32_t gh_y;                 // 分辨率的y
+    u32_t gh_framphyadr;        // 显存地址
+    u32_t gh_onepixbits;        // 单个像素点占用显存的数据
+    u32_t gh_vbemodenr;         // vbe模式
+    u32_t gh_vifphyadr;         // vbe信息地址
+    u32_t gh_vmifphyadr;        // 具体vbe信息地址
+    u32_t gh_bank;              // 4字节
     u32_t gh_curdipbnk;
     u32_t gh_nextbnk;
-    u32_t gh_banksz;
+    u32_t gh_banksz;            // 分辨率
     u32_t gh_logophyadrs;
     u32_t gh_logophyadre;
     u32_t gh_fontadr;

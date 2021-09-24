@@ -52,6 +52,12 @@ void bmp_print(void *bmfile, machbstart_t *mbsp)
     return;
 }
 
+/**
+ * os logo. logo文件是个24位的位图文件
+ *  调用get_file_rpadrandsz定位到位图文件
+ *  调用bmp_print，读入像素点，BGRA转换
+ *  最后调用write_pixcolor，写入到mbsp->mb_ghparm正确的位置，图像就显示出来了
+ */
 void logo(machbstart_t *mbsp)
 {
     u32_t retadr = 0, sz = 0;
@@ -66,12 +72,26 @@ void logo(machbstart_t *mbsp)
     return;
 }
 
+/**
+ * 选择VBE的118h模式，该模式下屏幕分辨率为1024 * 768,显存大小是16.8MB。显存开始地址一般为0xe00000000
+ * 
+ * 屏幕分辨率为1024 * 768，即把屏幕分成768行，每行1024个像素点，但每个像素点占用显存32位数据(4字节，红、绿、蓝、透明各占8位)
+ * 
+ * 只要往对应的显存地址写入相应的像素数据，屏幕对应的位置就能显示了
+ */
 void init_graph(machbstart_t *mbsp)
 {
     // 初始化图形数据结构
     graph_t_init(&mbsp->mb_ghparm);
     init_bgadevice(mbsp);
 
+    /**
+     * 如果不是图形模式，要通过BIOS中断进行切换，设置显示参数，并将参数保存到mbsp结构中：
+     *  获取VBE模式，通过BIOS中断
+     *  获取一个具体VBE模式的信息，通过BIOS中断
+     *  设置VBE模式，通过BIOS中断
+     *  这三个方法同样用到了realadr_call_entry
+     */
     if (mbsp->mb_ghparm.gh_mode != BGAMODE) {
         // 获取VBE模式，通过BIOS中断
         get_vbemode(mbsp);
@@ -110,6 +130,9 @@ u32_t vfartolineadr(u32_t vfar)
     return (sec + off);
 }
 
+/**
+ * 从BIOS获取数据
+ */
 void get_vbemode(machbstart_t *mbsp)
 {
     realadr_call_entry(RLINTNR(2), 0, 0);
@@ -218,6 +241,16 @@ u32_t chk_bgamaxver()
     return 0;
 }
 
+/**
+ * 初始化graph_t 结构体
+ *  首先获取GBA设备ID
+ *  检查设备最大分辨率
+ *  设置显示参数，并将参数保存到mbsp结构中
+ * 
+ * 选择VBE的118h模式，该模式下屏幕分辨率为1024 * 768,显存大小是16.8MB。显存开始地址一般为0xe00000000
+ * 
+ * 屏幕分辨率为1024 * 768，即把屏幕分成768行，每行1024个像素点，但每个像素点占用显存32位数据(4字节，红、绿、蓝、透明各占8位)
+ */
 void init_bgadevice(machbstart_t* mbsp)
 {
     u32_t retdevid = get_bgadevice();
@@ -230,6 +263,7 @@ void init_bgadevice(machbstart_t* mbsp)
         return;
     }
 
+    // 往vbe相关端口写入数据
     bga_write_reg(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_DISABLED);
     bga_write_reg(VBE_DISPI_INDEX_XRES, 1024);
     bga_write_reg(VBE_DISPI_INDEX_YRES, 768);

@@ -36,6 +36,6 @@ E80MAP_ADRADR EQU (ETYBAK_ADR + 68)
 E80MAP_ADR EQU (0x5000)                ; edi设为存放输出结果的1MB内的物理内存地
 
 VBEINFO_ADR EQU (0x6000)               ; VBE信息地址
-VBEMINFO_ADR EQU (0x6400)              ; 25600
+VBEMINFO_ADR EQU (0x6400)              ; 具体VBE模式信息地址
 
 READHD_BUFADR EQU 0x3000               ; 12288

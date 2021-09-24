@@ -37,7 +37,7 @@ _32bits_mode:
 	mov esp, 0x90000				; 使得栈底指向了0x90000
 	call ldrkrl_entry				; 调用ldrkrl_entry函数
 	xor ebx, ebx
-	jmp 0x2000000					; 跳转到0x2000000的内存地址
+	jmp 0x2000000					; 跳转到0x2000000的内存地址， 0x2000000为Cosmos.bin
 	jmp $
 
 ; PUSHAD, 本指令将EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI 这8个32位通用寄存器依次压入堆栈

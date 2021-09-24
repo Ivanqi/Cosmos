@@ -15,8 +15,8 @@
 #define E80MAP_ADRADR (ETYBAK_ADR + 68)
 #define E80MAP_ADR (0x5000)     // edi设为存放输出结果的1MB内的物理内存地
 
-#define VBEINFO_ADR (0x6000)    // 24576
-#define VBEMINFO_ADR (0x6400)   // 24576
+#define VBEINFO_ADR (0x6000)    // VBE信息地址
+#define VBEMINFO_ADR (0x6400)   // 具体VBE模式信息地址
 
 #define READHD_BUFADR 0x3000    // 12288
 

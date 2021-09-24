@@ -172,13 +172,15 @@ void init_krlinitstack(machbstart_t *mbsp)
 /**
  * 内核虚拟空间从0xffff800000000000开始，所以这个虚拟地址映射从物理地址0开始，大小都是0x400000000即16GB
  * 也就说是要虚拟地址空间：0xffff800000000000 ～ 0xffff800400000000 映射到物理地址空间 0 ~ 0x400000000
+ * 
+ * 长模式下的2MB分页方式
  */
 void init_bstartpages(machbstart_t *mbsp)
 {
     // 顶级页目录
-    u64_t *p = (u64_t *)(KINITPAGE_PHYADR);     // 16MB地址处
+    u64_t *p = (u64_t *)(KINITPAGE_PHYADR);                 // 16MB地址处
     // 页目录指针
-    u64_t *pdpte = (u64_t *)(KINITPAGE_PHYADR + 0x1000);
+    u64_t *pdpte = (u64_t *)(KINITPAGE_PHYADR + 0x1000);    // 4KB大小，其中各有512个条目，每个条目8字节64位大小
     // 页目录
     u64_t *pde = (u64_t *)(KINITPAGE_PHYADR + 0x2000);
     // 物理地址从0开始
@@ -194,7 +196,12 @@ void init_bstartpages(machbstart_t *mbsp)
         pdpte[mi] = 0;
     }
 
-    // 映射
+    /**
+     * 映射
+     *  映射的核心逻辑由两重循环控制，外层循环控制页目录指针顶，只有16项，其中每一项都指向一个页目录，每个页目录中有512个物理页地址
+     * 
+     *  物理地址每次增加2MB，由内层循环控制，每次执行一次外层循环就要执行512次内层循环
+     */
     for (uint_t pdei = 0; pdei < 16; pdei++) {
         pdpte[pdei] = (u64_t)((u32_t)pde | KPDPTE_RW | KPDPTE_P);
         for (uint_t pdeii = 0; pdeii < PGENTY_SIZE; pdeii++) {
@@ -205,9 +212,14 @@ void init_bstartpages(machbstart_t *mbsp)
         pde = (u64_t *)((u32_t)pde + 0x1000);
     }
 
-    // 让顶级页目录中第0项和第((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff项，指向同一个页目录指针页
+    /**
+     * 让顶级页目录中第0项和第((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff项，指向同一个页目录指针页
+     * 这样的话就能让虚拟地址：0xffff800000000000 ~ 0xffff800400000000 和虚拟地址0 ～ 0x400000000，访问都同一个物理地址空间 0 ～ 0x400000000
+     * 这样做是由目的，内核在启动初期，虚拟地址和物理地址要保持相同
+     */
     p[((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff] = (u64_t)((u32_t)pdpte | KPML4_RW | KPML4_P);
     p[0] = (u64_t)((u32_t)pdpte | KPML4_RW | KPML4_P);
+
     // 把页表首地址保存在机器信息结构中
     mbsp->mb_pml4padr = (u64_t)(KINITPAGE_PHYADR);
     mbsp->mb_subpageslen = (u64_t)(0x1000 * 16 + 0x2000);
