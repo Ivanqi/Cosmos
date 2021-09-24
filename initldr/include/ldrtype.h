@@ -105,7 +105,7 @@ typedef struct s_mlosrddsc
     u64_t mdc_fhdnr;            // 映像文件中文件头描述符有多少个
     u64_t mdc_filnr;            // 映像文件中文件有多少个
     u64_t mdc_endgic;           // 映像文件结束标识
-    u64_t mdc_rv                // 映像文件版本
+    u64_t mdc_rv;               // 映像文件版本
 } mlosrddsc_t;
 
 #define RLINTNR(x) (x * 2)
@@ -187,7 +187,6 @@ typedef struct s_VBEINFO
     u16_t totalmemory;
     u16_t oemsoftwarerev;
     u32_t oemvendornameptr;
-    u32_t oemproductnameptr;
     u32_t oemproductnameptr;
     u32_t oemproductrevptr;
     u8_t reserved[222];

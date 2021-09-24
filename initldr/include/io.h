@@ -22,6 +22,8 @@ KLINE u8_t in_u8(const u16_t port)
         : "=a"(tmp)
         : "dN"(port)
     );
+
+    return tmp;
 }
 
 // outw 向I/O端口写入一个字(16位)（WORD，即两个字节）
