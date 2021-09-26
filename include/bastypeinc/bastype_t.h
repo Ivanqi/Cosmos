@@ -40,7 +40,7 @@ typedef void (*inthandler_t)();
 typedef drv_t (*i_handle_t)(uint_t int_nr);
 typedef drv_t (*f_handle_t)(uint_t int_nr,void *sframe);
 typedef drvstus_t(*intflthandle_t)(uint_t ift_nr, void *device, void *sframe);
-typedef u64_t mmstus_t
+typedef u64_t mmstus_t;
 
 #define KLINE static inline
 #define PUBLIC

@@ -16,6 +16,6 @@ typedef struct s_MCHKSTUC {
 	msadsc_t* mc_msa; 
 	u64_t* mc_chksadr;
 	u64_t* mc_chkeadr; 
-};
+} mchkstuc_t;
 
 #endif

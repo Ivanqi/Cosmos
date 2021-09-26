@@ -18,7 +18,7 @@ typedef struct s_KWLST {
     spinlock_t wl_lock;
     uint_t   wl_tdnr;
     list_h_t wl_list;
-};
+} kwlst_t;
 
 typedef struct s_SEM {
     spinlock_t sem_lock;

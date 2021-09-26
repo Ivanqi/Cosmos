@@ -33,13 +33,13 @@ typedef struct s_INTFLTDSC {
     void*       i_msgmpool;     // 可能的中断消息池
     void*       i_privp;
     void*       i_extp;
-};
+} intfltdsc_t;
 
 typedef struct s_INTSERDSC {
     list_h_t    s_list;         // 在中断异常描述符中的链表
     list_h_t    s_indevlst;     // 在设备描述描述符中的链表
     u32_t       s_flg;
-    intfltdsc_t* s_intfltp;     // 指向中断异常描述符
+    intfltdsc_t *s_intfltp;     // 指向中断异常描述符
     void*       s_device;       // 指向设备描述符
     uint_t      s_indx;
     intflthandle_t s_handle;    // 中断处理的回调函数指针

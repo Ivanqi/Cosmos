@@ -88,6 +88,7 @@ KLINE void out_u8(const u16_t port, const u8_t val) {
                         : "dN"(port), "a"(val));
 }
 
+
 KLINE void out_u8_p(const u16_t port, const u8_t val) {
      __asm__ __volatile__("outb  %1, %0\n\t"
                         "nop \n\t"
@@ -116,6 +117,7 @@ KLINE u16_t in_u16(const u16_t port) {
     __asm__ __volatile__("inw %1, %0\n"
                         : "=a"(tmp)
                         : "dN"(port));
+    return tmp;
 }
 
 KLINE void out_u32(const u16_t port, const u32_t val) {

@@ -69,6 +69,7 @@ typedef struct s_VBEOMINFO {
 } __attribute__((packed)) vbeominfo_t;
 
 #define BGRA(r, g, b) ((0 | (r << 6) | (g << 8) | b))
+typedef u32_t pixl_t;
 
 #define VBEMODE 1
 #define GPUMODE 2

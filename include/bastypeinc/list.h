@@ -5,7 +5,7 @@
 #ifndef _LIST_H
 #define _LIST_H
 
-KLINE void list_init(lish_h_t *list) {
+KLINE void list_init(list_h_t *list) {
     list->prev = list;
     list->next = list;
     return;

@@ -118,6 +118,6 @@ typedef struct s_MEMAREA {
 	mafuncobjs_t ma_funcobj;
 	memdivmer_t ma_mdmdata;
 	void* ma_privp;
-} ;
+} memarea_t;
 
 #endif

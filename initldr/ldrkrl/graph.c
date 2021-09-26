@@ -194,7 +194,7 @@ u16_t bga_read_reg(u16_t index)
 
 u32_t get_bgadevice()
 {
-    u32_t bgaid = bga_read_reg(VBE_DISPI_INDEX_ID);
+    u16_t bgaid = bga_read_reg(VBE_DISPI_INDEX_ID);
     if (BGA_DEV_ID0 <= bgaid && BGA_DEV_ID5 >= bgaid) {
         bga_write_reg(VBE_DISPI_INDEX_ID, bgaid);
         if (bga_read_reg(VBE_DISPI_INDEX_ID) != bgaid) {

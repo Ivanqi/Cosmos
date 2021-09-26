@@ -2,7 +2,7 @@
 global _start
 global realadr_call_entry
 global IDT_PTR
-global ldrkrl_entry
+extern ldrkrl_entry
 [section .text]
 
 ;;; 功能介绍
@@ -68,6 +68,11 @@ save_eip_jmp:
     ; 这个 0x18 就是段描述索引, 它正是指向 GDT 中的 16 位代码段描述符
     ; 0x1000 代表段内的偏移地址，所以在这个地址上，我们必须放一段代码指令，不然 CPU 跳转到这里将没指令可以执行，那样就会发生错误
 	jmp dword far [cpmty_mode]  ; 长跳转这里表示把cpmty_mode处的第一个4字节装入eip，把其后的2字节装入cs
+
+cpmty_mode:
+	dd 0x1000
+	dw 0x18
+	jmp $
 
 GDT_START:
 knull_dsc: dq 0

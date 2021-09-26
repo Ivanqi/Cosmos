@@ -21,6 +21,6 @@
 
 #include "halglobal_t.h"
 #include "halinit_t.h"
-#include "halprint_t.h
+#include "halprint_t.h"
 
 #endif

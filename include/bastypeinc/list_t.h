@@ -1,12 +1,12 @@
 /**********************************************************
-		链表头文件list.h
+	链表头文件list.h
 ***********************************************************/
 #ifndef _LIST_T_H
 #define _LIST_T_H
 
 // 链表头文件
 typedef struct s_LIST_H {
-    typedef s_LIST_H *prev, *next;
+    struct s_LIST_H *prev, *next;
 } list_h_t;
 
 // 多叉树

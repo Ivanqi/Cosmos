@@ -26,7 +26,7 @@ void hal_write_cpuflg(cpuflg_t cpuflg)
 uint_t hal_read_ipsr();
 void hal_swhmodset_sp_rscurmod(uint_t cpumod,reg_t sp);
 cpuflg_t hal_read_scpuflg();
-void hal_write_scpuflg(cpuflg_t scpuflg)
+void hal_write_scpuflg(cpuflg_t scpuflg);
 
 void hal_cpumode_switch(uint_t mode);
 uint_t hal_cpumodeswitch_retoldmode(uint_t mode);
