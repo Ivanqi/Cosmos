@@ -104,6 +104,7 @@ loop:
 	pop ss
 	pop es
 	pop ds
+	ret
 
 ; 获取硬盘的函数
 _read:
@@ -138,6 +139,7 @@ _getvbemode:
 	push di
 	mov di, VBEINFO_ADR
 	mov ax, 0
+	mov es, ax
 	mov ax, 0x4f00				; VBE标准
 	int 0x10
 	cmp ax, 0x004f				; 若有VBE，AX应该为0x004f
@@ -146,7 +148,7 @@ _getvbemode:
 	call DispStr
 	jmp $
 
-.ok
+.ok:
 	pop di
 	pop ax
 	pop es
@@ -172,7 +174,7 @@ _getvbeonemodeinfo:
 .ok:
 	pop cx
 	pop di
-	pop dx
+	pop ax
 	pop es
 	ret
 
@@ -188,7 +190,7 @@ _setvbemode:
 	call DispStr
 	jmp $
 
-.ok 
+.ok:
 	pop bx
 	pop ax
 	ret
