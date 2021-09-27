@@ -53,7 +53,7 @@ int move_krlimg(machbstart_t *mbsp, u64_t cpyadr, u64_t cpysz)
     sint_t tosz = (sint_t)mbsp->mb_imgsz;
 
     if (0 != adrzone_is_ok(mbsp->mb_imgpadr, mbsp->mb_imgsz, cpyadr, cpysz)) {
-        if (NULL == chk_memsize((e820map_t *)((u32_t)(mbsp->mb_e820exnr)), (u32_t)mbsp->mb_e820nr, (u64_t)((u32_t)toadr), (u64_t)tosz)) {
+        if (NULL == chk_memsize((e820map_t *)((u32_t)(mbsp->mb_e820padr)), (u32_t)mbsp->mb_e820nr, (u64_t)((u32_t)toadr), (u64_t)tosz)) {
             return -1;
         }
         
@@ -80,7 +80,7 @@ void init_krlfile(machbstart_t *mbsp)
 
     // mbsp->mb_nextwtpadr始终要保持指向下一段空闲内存的首地址
     mbsp->mb_nextwtpadr = P4K_ALIGN(mbsp->mb_krlimgpadr + mbsp->mb_krlsz);
-    mbsp->mb_kalldendpadr = mbsp->mb_bfontpadr + mbsp->mb_bfontsz;
+    mbsp->mb_kalldendpadr = mbsp->mb_krlimgpadr + mbsp->mb_krlsz;
     return;
 }
 
@@ -161,7 +161,7 @@ u64_t get_wt_imgfilesz(machbstart_t *mbsp)
     u64_t retsz = LDRFILEADR;               
     mlosrddsc_t *mrddadrs = MRDDSC_ADR;     // 映射文件地址
     // 判断映射文件是否已经到结束的位置
-    if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_ENDGIC || mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
+    if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_RVGIC || mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
         return 0;
     }
 
@@ -193,7 +193,7 @@ u64_t r_file_to_padr(machbstart_t *mbsp, u32_t f2adr, char_t *fnm)
     }
 
     // 检测内存是否可用
-    if (NULL == chk_memsize((e820map_t *)(u32_t)mbsp->mb_e820padr, (u32_t)(mbsp->mb_e820nr), f2adr, sz)) {
+    if (NULL == chk_memsize((e820map_t *)((u32_t)mbsp->mb_e820padr), (u32_t)(mbsp->mb_e820nr), f2adr, sz)) {
         return 0;
     }
 
@@ -220,7 +220,7 @@ u64_t ret_imgfilesz()
     }
 
     retsz += mrddadrs->mdc_filbk_e;
-    retsz += LDRFILEADR;
+    retsz -= LDRFILEADR;
 
     return retsz;
 }

@@ -124,7 +124,7 @@ void init_mem(machbstart_t *mbsp)
         kerror("Your computer is low on memory, the memory cannot be less than 128MB!");
     }
 
-    mbsp->mb_e820expadr = (u64_t)((u32_t)(retemp));     // 把e820map_t结构数组的首地址传给mbsp->mb_e820padr
+    mbsp->mb_e820padr = (u64_t)((u32_t)(retemp));     // 把e820map_t结构数组的首地址传给mbsp->mb_e820padr
     mbsp->mb_e820nr = (u64_t)retemnr;                   // 把e820map_t数据数组元素个数传给mbsp->mb_e820nr
     mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));    // 把e820map_t结构数据大小传给mbsp->mb_e820sz
     mbsp->mb_memsz = get_memsize(retemp, retemnr);      // 根据e820map_t结构数据计算内存大小
@@ -186,7 +186,7 @@ void init_bstartpages(machbstart_t *mbsp)
     // 物理地址从0开始
     u64_t adr = 0;
 
-    if (1 > move_krlimg(mbsp, (u64_t)(KINITFRVM_PHYADR), (0x1000 * 16 + 0x2000))) {
+    if (1 > move_krlimg(mbsp, (u64_t)(KINITPAGE_PHYADR), (0x1000 * 16 + 0x2000))) {
         kerror("move_krlimg err");
     }
 
@@ -241,7 +241,8 @@ void init_meme820(machbstart_t *mbsp)
     m2mcopy(semp, demp, (sint_t)(senr * (sizeof(e820map_t))));
     mbsp->mb_e820padr = (u64_t)((u32_t)(demp));
     mbsp->mb_e820sz = senr * (sizeof(e820map_t));
-    mbsp->mb_nextwtpadr = mbsp->mb_e820exnr + mbsp->mb_e820sz;
+    mbsp->mb_nextwtpadr = P4K_ALIGN((u32_t)(demp) + (u32_t)(senr * (sizeof(e820map_t))));
+    mbsp->mb_nextwtpadr = mbsp->mb_e820padr + mbsp->mb_e820sz;
     return;
 }
 
@@ -392,7 +393,7 @@ void out_char(char *c)
 void init_bstartpagesold(machbstart_t *mbsp)
 {
     if (1 > move_krlimg(mbsp, (u64_t)(PML4T_BADR), 0x3000)) {
-        kerror("ip_moveing err");
+        kerror("ip_moveimg err");
     }
 
     pt64_t *pml4p = (pt64_t *)PML4T_BADR, *pdptp = (pt64_t *) PDPTE_BADR, *pdep = (pt64_t *)PDE_BADR;

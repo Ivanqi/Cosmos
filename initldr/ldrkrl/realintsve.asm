@@ -41,7 +41,7 @@ _32bits_mode:
 	mov ds, bp
 	mov ss, bp					; 重新设置保护摸下的段寄存器0x10是32为数据段描述符的索引
 	mov esi, [PM32_EIP_OFF]		; 加载先前保存的EIP
-	mov esp, [PM32_EIP_OFF]		; 加载先前保存的ESP
+	mov esp, [PM32_ESP_OFF]		; 加载先前保存的ESP
 	jmp esi						; eip=esi 回到了realadr_call_entry函数中
 
 [BITS 16]

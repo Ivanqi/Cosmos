@@ -6,6 +6,6 @@
 #include "cosmosmctrl.h"
 
 void hal_start() {
-    // for (;;);
-    // return;
+    for (;;);
+    return;
 }

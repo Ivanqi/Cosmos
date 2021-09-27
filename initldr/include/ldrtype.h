@@ -17,7 +17,7 @@
 #define MDC_RVGIC 0xffaaffaaffaaffaa  // 18422818335611355050UL
 
 #define REALDRV_PHYADR 0x1000         // initldrkrl映射文件具体拷贝内存地址
-#define ILDRKRL_PHYADR 0x2097152      // initldrkrl映射文件具体拷贝内存地址
+#define ILDRKRL_PHYADR 0x200000       // initldrkrl映射文件具体拷贝内存地址
 #define IMGSHEL_PHYADR 0x30000        // 196608
 
 #define IKSTACK_PHYADR (0x90000-0x10) // 栈顶地址
@@ -28,7 +28,7 @@
 
 #define KINITPAGE_PHYADR 0x1000000    // 顶级页目录
 #define KINITFRVM_PHYADR 0x800000     // 8388608
-#define KINITFRVM_SZ 4194304
+#define KINITFRVM_SZ 0x400000
 
 #define LDRFILEADR IMGFILE_PHYADR
 
@@ -128,7 +128,7 @@ typedef struct s_DPT
 typedef struct s_MBR
 {
     char_t mb_byte[446];
-    dpt_t mb_start[4];
+    dpt_t mb_part[4];
     u16_t mb_endmgic;
 } __attribute__((packed)) mbr_t;
 

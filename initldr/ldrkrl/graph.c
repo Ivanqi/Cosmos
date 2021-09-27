@@ -40,7 +40,7 @@ void bmp_print(void *bmfile, machbstart_t *mbsp)
 
     for (int y = 639; y >= 129; y--, l++) {
         k = 0;
-        for (int x = 322; x < 622; x++) {
+        for (int x = 322; x < 662; x++) {
             pix = BGRA(bpixp[k].bmd_r, bpixp[k].bmd_g, bpixp[k].bmd_b);
             write_pixcolor(mbsp, x, y, pix);
             k++;
@@ -64,7 +64,7 @@ void logo(machbstart_t *mbsp)
     get_file_rpadrandsz("logo.bmp", mbsp, &retadr, &sz);
 
     if (0 == retadr) {
-        kerror("log getfilerpadrsz err");
+        kerror("logo getfilerpadrsz err");
     }
 
     bmp_print((void*)retadr, mbsp);
@@ -144,7 +144,7 @@ void get_vbemode(machbstart_t *mbsp)
         kerror("vbe is not VESA");
     }
 
-    kprint("vbe vbevet: %x\n", vbeinfoptr->vbeversion);
+    kprint("vbe vbever: %x\n", vbeinfoptr->vbeversion);
 
     if (vbeinfoptr->vbeversion < 0x0200) {
         kerror("vbe version not vbe3");
@@ -184,6 +184,7 @@ void bga_write_reg(u16_t index, u16_t data)
 {
     out_u16(VBE_DISPI_IOPORT_INDEX, index);
     out_u16(VBE_DISPI_IOPORT_DATA, data);
+    return;
 }
 
 u16_t bga_read_reg(u16_t index)

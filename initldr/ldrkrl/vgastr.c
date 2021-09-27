@@ -18,6 +18,7 @@ void init_curs()
     curs.cvmemadr = 0;
     curs.x = 0;
     curs.y = 0;
+    return;
 }
 
 /**
