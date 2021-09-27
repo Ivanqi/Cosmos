@@ -21,7 +21,7 @@ void hal_enableirqfiq_restcpuflg(cpuflg_t* cpuflg);
 u32_t hal_read_currmodesp();
 
 cpuflg_t hal_read_cpuflg();
-void hal_write_cpuflg(cpuflg_t cpuflg)
+void hal_write_cpuflg(cpuflg_t cpuflg);
 
 uint_t hal_read_ipsr();
 void hal_swhmodset_sp_rscurmod(uint_t cpumod,reg_t sp);

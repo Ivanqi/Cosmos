@@ -13,6 +13,8 @@
 #include "halintupt.h"
 #include "halmm.h"
 #include "halmach.h"
+
+// x86
 #ifdef CFG_X86_PLATFORM
 #include "io.h"
 #include "halgdtidt.h"
@@ -20,6 +22,7 @@
 #include "bdvideo.h"
 #include "memmgrmctrl.h"
 #endif
+
 #include "halglobal.h"
 #include "halinit.h"
 #include "halprint.h"

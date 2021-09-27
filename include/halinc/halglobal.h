@@ -63,7 +63,7 @@ void hxi_apic_lint0();
 void hxi_apic_lint1();
 void hxi_apic_error();
 void exi_sys_call();
-voidasm_ret_from_user_mode();
+void asm_ret_from_user_mode();
 
 // 全局变量
 HAL_DEFGLOB_VARIABLE(descriptor_t, x64_gdt)[CPUCORE_MAX][GDTMAX];
