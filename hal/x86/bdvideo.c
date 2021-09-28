@@ -10,31 +10,35 @@ const char *cosmos_version = "Cosmos\n内核版本:00.01\n彭东 @ 构建于 "__
                            " "__TIME__
                            "\n";
 
+// 初始化图形数据结构，里面放有图形模式，分辨率，图形驱动函数指针
 PUBLIC LKINIT void init_dftgraph()
 {
     dftgraph_t *kghp = &kdftgh;
     machbstart_t *kmbsp = &kmachbsp;
     memset(kghp, 0, sizeof(dftgraph_t));
 
-    kghp->gh_mode = kmbsp->mb_ghparm.gh_mode;
-    kghp->gh_x = kmbsp->mb_ghparm.gh_x;
-    kghp->gh_y = kmbsp->mb_ghparm.gh_y;
-    kghp->gh_framphyadr = phyadr_to_viradr((adr_t)kmbsp->mb_ghparm.gh_framphyadr);
-    kghp->gh_fvrmphyadr = phyadr_to_viradr((adr_t)kmbsp->mb_fvrmphyadr);
-    kghp->gh_fvrmsz = kmbsp->mb_fvrmsz;
-    kghp->gh_onepixbits = kmbsp->mb_ghparm.gh_onepixbits;
-    kghp->gh_onepixbyte = kmbsp->mb_ghparm.gh_onepixbits / 8;
-    kghp->gh_vbemodenr = kmbsp->mb_ghparm.gh_vbemodenr;
-    kghp->gh_bank = kmbsp->mb_ghparm.gh_bank;
-    kghp->gh_curdipbnk = kmbsp->mb_ghparm.gh_curdipbnk;
-    kghp->gh_nextbnk = kmbsp->mb_ghparm.gh_nextbnk;
-    kghp->gh_banksz = kmbsp->mb_ghparm.gh_banksz;
+    kghp->gh_mode = kmbsp->mb_ghparm.gh_mode;   // 图形模式
+    kghp->gh_x = kmbsp->mb_ghparm.gh_x;         // 水平像素点
+    kghp->gh_y = kmbsp->mb_ghparm.gh_y;         // 垂直像素点
 
-    kghp->gh_fontadr = phyadr_to_viradr((adr_t)kmbsp->mb_bfontpadr);
-    kghp->gh_fontsz = kmbsp->mb_bfontsz;
-    kghp->gh_fnthight = 16;
-    kghp->gh_linesz = 16 + 4;
-    kghp->gh_deffontpx = BGRA(0xff, 0xff, 0xff);
+    kghp->gh_framphyadr = phyadr_to_viradr((adr_t)kmbsp->mb_ghparm.gh_framphyadr);  // 显存物理地址
+    kghp->gh_fvrmphyadr = phyadr_to_viradr((adr_t)kmbsp->mb_fvrmphyadr);            // 显存虚拟地址
+    kghp->gh_fvrmsz = kmbsp->mb_fvrmsz;                                             // 显存大小
+
+    kghp->gh_onepixbits = kmbsp->mb_ghparm.gh_onepixbits;       // 一个像素字占用的数据位数
+    kghp->gh_onepixbyte = kmbsp->mb_ghparm.gh_onepixbits / 8;
+    
+    kghp->gh_vbemodenr = kmbsp->mb_ghparm.gh_vbemodenr; // vbe模式号
+    kghp->gh_bank = kmbsp->mb_ghparm.gh_bank;           // 显存的bank数
+    kghp->gh_curdipbnk = kmbsp->mb_ghparm.gh_curdipbnk; // 当前bank
+    kghp->gh_nextbnk = kmbsp->mb_ghparm.gh_nextbnk;     // 下一个bank
+    kghp->gh_banksz = kmbsp->mb_ghparm.gh_banksz;       // bank大小
+
+    kghp->gh_fontadr = phyadr_to_viradr((adr_t)kmbsp->mb_bfontpadr);    // 字库地址
+    kghp->gh_fontsz = kmbsp->mb_bfontsz;                                // 字库大小
+    kghp->gh_fnthight = 16;                                             // 字体高度
+    kghp->gh_linesz = 16 + 4;                                           // 字符行高
+    kghp->gh_deffontpx = BGRA(0xff, 0xff, 0xff);                        // 默认字体大小
 
     return;
 }

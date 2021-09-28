@@ -5,6 +5,7 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+// 虚拟地址转物理地址
 adr_t virtadr_to_phyadr(adr_t kviradr)
 {
     if (kviradr < KRNL_MAP_VIRTADDRESS_START || kviradr > KRNL_MAP_VIRTADDRESS_END) {
@@ -15,6 +16,7 @@ adr_t virtadr_to_phyadr(adr_t kviradr)
     return kviradr - KRNL_MAP_VIRTADDRESS_START;
 }
 
+// 物理地址转虚拟地址
 adr_t phyadr_to_viradr(adr_t kphyadr)
 {
     if (kphyadr >= KRNL_MAP_PHYADDRESS_END) {
@@ -25,6 +27,7 @@ adr_t phyadr_to_viradr(adr_t kphyadr)
     return kphyadr + KRNL_MAP_VIRTADDRESS_START;
 }
 
+// 初始化machbstart_t结构体
 void machbstart_t_init(machbstart_t *initp)
 {
     // 清零
@@ -32,6 +35,7 @@ void machbstart_t_init(machbstart_t *initp)
     return;
 }
 
+// 把二级引导器建立的机器信息结构复制到hal层中的一个全局变量中
 void init_machbstart()
 {
     machbstart_t *kmbsp = &kmachbsp;
@@ -139,17 +143,23 @@ e820map_t *get_maxmappadr_e820map(machbstart_t *mbsp, u64_t mappadr)
     return retemp;
 }
 
+/**
+ * e820内存数组校验
+ */
 e820map_t *ret_kmaxmpadrcmpsz_e820map(machbstart_t *mbsp, u64_t mappadr, u64_t cpsz)
 {
     if (NULL == mbsp) {
         return NULL;
     }
 
-    u64_t enr = mbsp->mb_e820nr;
-    e820map_t *emp = (e820map_t *)phyadr_to_viradr((adr_t)mbsp->mb_e820padr);
-    e820map_t *retemp = NULL;
+    u64_t enr = mbsp->mb_e820nr;                                                // e820 数组个数
+    e820map_t *emp = (e820map_t *)phyadr_to_viradr((adr_t)mbsp->mb_e820padr);   // e820 地址
+
     u64_t maxadr = emp[0].saddr;
 
+    e820map_t *retemp = NULL;
+
+    // 遍历e820内存数组
     for (u64_t i = 0; i < enr; i++) {
         if (emp[i].type == RAM_USABLE) {
             if (emp[i].saddr >= maxadr && (mappadr > (emp[i].saddr + emp[i].lsize)) && (emp[i].lsize >= cpsz)) {
@@ -168,7 +178,8 @@ e820map_t *ret_kmaxmpadrcmpsz_e820map(machbstart_t *mbsp, u64_t mappadr, u64_t c
 
 void move_img2maxpadr(machbstart_t *mbsp)
 {
-    u64_t kmapadrend = mbsp->mb_kpmapphymemsz;
+    u64_t kmapadrend = mbsp->mb_kpmapphymemsz;  // 操作系统映射空间大小
+    // 检查映射文件内存
     e820map_t *emp = ret_kmaxmpadrcmpsz_e820map(mbsp, kmapadrend, mbsp->mb_imgsz);
     if (NULL == emp) {
         system_error("move_img2maxpadr1 emp not ok");

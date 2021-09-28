@@ -21,7 +21,7 @@ extern hal_start
 ; 4. 读取EFER，将第8位设置为1，写回EFER，设置为长模式
 ; 5. 开启保护模式[CR0第0位设置为1]，开始分页[CR0第31位设置位1]，开始CACHE[CR0第30位设置为0]，开始WriteThrough[CR0第29位设置为0]
 ; 6. 初始化寄存器们
-; 7. 将之前复制到Cosmos.bin之后到mbsp地址，放入rsp
+; 7. 将之前复制到Cosmos.bin之后的mbsp地址，放入rsp
 ; 8. 0入栈，0x8入栈, hal_start入栈
 ; 9. 调用机器指令 "oxcb48"，做一个"返回"操作，同时从栈中弹出两个数据[0x8:hal_start 函数地址]到[CR:RIP],长模式下,指令寄存器为RIP，
 ;	也就是下一个指令为hal_start地址.CS中为0x8，对应到ekml_c64_dsc，对应到内核代码段，可以执行。CPU继续缓冲RIP地址执行

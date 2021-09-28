@@ -152,6 +152,7 @@ KLINE void write_msr(const u32_t reg, const u64_t val) {
         : "a"((u32_t)val), "d"((u32_t)(val >> 32)), "c"(reg));
 }
 
+// 逐一指针复制
 KLINE void memcopy(void *src, void *dest, uint_t count) {
     u8_t *ss = src, *sd = dest;
     for (uint_t i = 0; i < count; i++) {

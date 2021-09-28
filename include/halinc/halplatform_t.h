@@ -32,13 +32,16 @@
 #define INTSRC_MAX 32
 
 #define KRNL_MAP_VIRTADDRESS_SIZE 0x400000000
-#define KRNL_VIRTUAL_ADDRESS_START 0xffff800000000000
+
+#define KRNL_VIRTUAL_ADDRESS_START 0xffff800000000000   // 内核虚拟空间从0xffff800000000000开始
 #define KRNL_VIRTUAL_ADDRESS_END 0xffffffffffffffff
 #define USER_VIRTUAL_ADDRESS_START 0
 #define USER_VIRTUAL_ADDRESS_END 0x00007fffffffffff
+
 #define KRNL_MAP_PHYADDRESS_START 0
 #define KRNL_MAP_PHYADDRESS_END 0x400000000
 #define KRNL_MAP_PHYADDRESS_SIZE 0x400000000
+
 #define KRNL_MAP_VIRTADDRESS_START KRNL_VIRTUAL_ADDRESS_START
 #define KRNL_MAP_VIRTADDRESS_END (KRNL_MAP_VIRTADDRESS_START+KRNL_MAP_VIRTADDRESS_SIZE)
 #define KRNL_ADDR_ERROR 0xf800000000000
@@ -57,14 +60,16 @@ typedef struct s_MRSDP {
     u8_t rp_resv[3];
 } __attribute__((packed)) mrsdp_t;
 
-typedef struct s_MACHBSTART {
+// 二级引导器收集的信息
+typedef struct s_MACHBSTART
+{
     u64_t   mb_migc;            // LMOSMBSP//0
     u64_t   mb_chksum;          // 8
-    u64_t   mb_krlinitstack;    // 16
-    u64_t   mb_krlitstacksz;    // 24
-    u64_t   mb_imgpadr;
-    u64_t   mb_imgsz;
-    u64_t   mb_krlimgpadr;
+    u64_t   mb_krlinitstack;    // 16, 内核栈地址
+    u64_t   mb_krlitstacksz;    // 24, 内核栈大小
+    u64_t   mb_imgpadr;         // 操作系统映像
+    u64_t   mb_imgsz;           // 操作系统映像大小
+    u64_t   mb_krlimgpadr;      // 内核文件地址
     u64_t   mb_krlsz;
     u64_t   mb_krlvec;
     u64_t   mb_krlrunmode;
@@ -73,19 +78,19 @@ typedef struct s_MACHBSTART {
     u64_t   mb_ksepadre;
     u64_t   mb_kservadrs;
     u64_t   mb_kservadre;
-    u64_t   mb_nextwtpadr;
-    u64_t   mb_bfontpadr;
-    u64_t   mb_bfontsz;
-    u64_t   mb_fvrmphyadr;
-    u64_t   mb_fvrmsz;
-    u64_t   mb_cpumode;
-    u64_t   mb_memsz;
-    u64_t   mb_e820padr;
-    u64_t   mb_e820nr;
-    u64_t   mb_e820sz;
-    u64_t   mb_e820expadr;
-    u64_t   mb_e820exnr;
-    u64_t   mb_e820exsz;
+    u64_t   mb_nextwtpadr;      // 下一段空闲内存的首地址
+    u64_t   mb_bfontpadr;       // 操作系统字体地址
+    u64_t   mb_bfontsz;         // 操作系统字体大小
+    u64_t   mb_fvrmphyadr;      // 机器显存地址
+    u64_t   mb_fvrmsz;          // 机器显存大小
+    u64_t   mb_cpumode;         // 机器CPU工作模式
+    u64_t   mb_memsz;           // 机器内存大小
+    u64_t   mb_e820padr;        // 机器e820数组地址
+    u64_t   mb_e820nr;          // 机器e820数组元素个数
+    u64_t   mb_e820sz;          // 机器e820数组大小
+    u64_t   mb_e820expadr;      // e820map_t结构数组的首地址
+    u64_t   mb_e820exnr;        // e820map_t数据数组元素个数
+    u64_t   mb_e820exsz;        // e820map_t结构数据大小
     u64_t   mb_memznpadr;
     u64_t   mb_memznnr;
     u64_t   mb_memznsz;
@@ -94,13 +99,13 @@ typedef struct s_MACHBSTART {
     u64_t   mb_memmapnr;
     u64_t   mb_memmapsz;
     u64_t   mb_memmapchksum;
-    u64_t   mb_pml4padr;
-    u64_t   mb_subpageslen;
-    u64_t   mb_kpmapphymemsz;
+    u64_t   mb_pml4padr;        // 机器页表数据地址
+    u64_t   mb_subpageslen;     // 机器页表个数
+    u64_t   mb_kpmapphymemsz;   // 操作系统映射空间大小
     u64_t   mb_ebdaphyadr;
     mrsdp_t mb_mrsdp;
-    graph_t mb_ghparm;
-} __attribute__((packed)) machbstart_t;
+    graph_t mb_ghparm;          // 图形信息
+}__attribute__((packed)) machbstart_t;
 
 #define MBSPADR ((machbstart_t*)(0x100000))
 

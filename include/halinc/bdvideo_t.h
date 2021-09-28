@@ -75,31 +75,61 @@ typedef u32_t pixl_t;
 #define GPUMODE 2
 #define BGAMODE 3
 
-typedef struct s_GRAPH {
-    u32_t gh_mode;
-    u32_t gh_x;
-    u32_t gh_y;
-    u32_t gh_framphyadr;
-    u32_t gh_onepixbits;
-    u32_t gh_vbemodenr;
-    u32_t gh_vifphyadr;
-    u32_t gh_vmifphyadr;
-    u32_t gh_bank;
-    u32_t gh_curdipbnk;
-    u32_t gh_nextbnk;
-    u32_t gh_banksz;
+// typedef struct s_GRAPH {
+//     u32_t gh_mode;
+//     u32_t gh_x;
+//     u32_t gh_y;
+//     u32_t gh_framphyadr;
+//     u32_t gh_onepixbits;
+//     u32_t gh_vbemodenr;
+//     u32_t gh_vifphyadr;
+//     u32_t gh_vmifphyadr;
+//     u32_t gh_bank;
+//     u32_t gh_curdipbnk;
+//     u32_t gh_nextbnk;
+//     u32_t gh_banksz;
+//     u32_t gh_logophyadrs;
+//     u32_t gh_logophyadre;
+//     u32_t gh_fontadr;
+//     u32_t gh_ftsectadr;
+//     u32_t gh_ftsectnr;
+//     u32_t gh_fnthight;
+//     u32_t gh_nxtcharsx;
+//     u32_t gh_nxtcharsy;
+//     u32_t gh_linesz;
+//     vbeinfo_t gh_vbeinfo;
+//     vbeominfo_t gh_vminfo;
+// } __attribute__((packed)) graph_t;
+
+/**
+ * 图形模式结构体
+ */
+typedef struct s_GRAPH
+{
+    u32_t gh_mode;              // 图形模式
+    u32_t gh_x;                 // 水平像素点
+    u32_t gh_y;                 // 垂直像素点
+    u32_t gh_framphyadr;        // 显存物理地址
+    u32_t gh_onepixbits;        // 一个像素字占用的数据位数
+    u32_t gh_vbemodenr;         // vbe模式号
+    u32_t gh_vifphyadr;         // vbe信息地址
+    u32_t gh_vmifphyadr;        // 具体vbe信息地址
+    u32_t gh_bank;              // 显存的bank数
+    u32_t gh_curdipbnk;         // 当前bank
+    u32_t gh_nextbnk;           // 下一个bank
+    u32_t gh_banksz;            // bank大小
     u32_t gh_logophyadrs;
     u32_t gh_logophyadre;
-    u32_t gh_fontadr;
+    u32_t gh_fontadr;           // 字库地址
     u32_t gh_ftsectadr;
     u32_t gh_ftsectnr;
     u32_t gh_fnthight;
-    u32_t gh_nxtcharsx;
-    u32_t gh_nxtcharsy;
-    u32_t gh_linesz;
+    u32_t gh_nxtcharsx;         // 下一字符显示的x坐标
+    u32_t gh_nxtcharsy;         // 下一字符显示的y坐标
+    u32_t gh_linesz;            // 字符行高
     vbeinfo_t gh_vbeinfo;
     vbeominfo_t gh_vminfo;
-} __attribute__((packed)) graph_t;
+}__attribute__((packed)) graph_t;
 
 typedef struct s_BMFHEAD {
     u16_t bf_tag;   // 0x4d42
