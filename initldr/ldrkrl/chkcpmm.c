@@ -242,7 +242,7 @@ void init_meme820(machbstart_t *mbsp)
     mbsp->mb_e820padr = (u64_t)((u32_t)(demp));
     mbsp->mb_e820sz = senr * (sizeof(e820map_t));
     mbsp->mb_nextwtpadr = P4K_ALIGN((u32_t)(demp) + (u32_t)(senr * (sizeof(e820map_t))));
-    mbsp->mb_nextwtpadr = mbsp->mb_e820padr + mbsp->mb_e820sz;
+    mbsp->mb_kalldendpadr = mbsp->mb_e820padr + mbsp->mb_e820sz;
     return;
 }
 

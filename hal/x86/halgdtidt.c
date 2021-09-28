@@ -29,7 +29,6 @@ void set_idt_desc(u8_t vector, u8_t desc_type, inthandler_t handler, u8_t privil
 
 void set_igdtr(descriptor_t *gdtptr)
 {
-
     return;
 }
 

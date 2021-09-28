@@ -165,6 +165,7 @@ typedef struct s_RWHDPACK
     u32_t rwhpk_lh; 
 } __attribute__((packed)) rwhdpach_t;
 
+// 内存类型
 #define RAM_USABLE 1        // 可用内存
 #define RAM_RESERV 2        // 保留内存不可使用
 #define RAM_ACPIREC 3       // ACPI表相关

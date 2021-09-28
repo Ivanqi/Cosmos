@@ -28,6 +28,9 @@ void phymmarge_t_init(phymmarge_t *initp)
     return;
 }
 
+/**
+ * 从machbstart_t机器信息中得到一块空闲内存作为phymmarge_t的内存
+ */
 void ret_phymmarge_adrandsz(machbstart_t *mbsp, phymmarge_t **retpmrvadr, u64_t *retpmrsz)
 {
     if (NULL == mbsp || 0 == mbsp->mb_e820sz || NULL == mbsp->mb_e820padr || 0 == mbsp->mb_e820nr) {
@@ -38,6 +41,7 @@ void ret_phymmarge_adrandsz(machbstart_t *mbsp, phymmarge_t **retpmrvadr, u64_t 
 
     u64_t tmpsz = mbsp->mb_e820nr * sizeof(phymmarge_t);
     u64_t tmpphyadr = mbsp->mb_nextwtpadr;
+    // 内存检查
     if (0 != initchkadr_is_ok(mbsp, tmpphyadr, tmpsz)) {
         *retpmrsz = 0;
         *retpmrvadr = NULL;
@@ -50,6 +54,7 @@ void ret_phymmarge_adrandsz(machbstart_t *mbsp, phymmarge_t **retpmrvadr, u64_t 
     return;
 }
 
+// 把e820map_t的信息复制到phymmarge_t
 bool_t init_one_pmrge(e820map_t *e8p, phymmarge_t *pmargep)
 {
     u32_t ptype = 0, pstype = 0;
@@ -112,6 +117,7 @@ void phymmarge_swap(phymmarge_t *s, phymmarge_t *d)
     return;
 }
 
+// 按内存地址从小大排序
 void phymmarge_sort(phymmarge_t *argp, u64_t nr)
 {
     u64_t i, j, k = nr - 1;
@@ -126,6 +132,7 @@ void phymmarge_sort(phymmarge_t *argp, u64_t nr)
     return;
 }
 
+// 把e8sp数组的信息拷贝到pmargesp数组中
 u64_t initpmrge_core(e820map_t *e8sp, u64_t e8nr, phymmarge_t *pmargesp)
 {
     u64_t retnr = 0;
