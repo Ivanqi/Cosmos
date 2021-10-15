@@ -67,8 +67,11 @@ void asm_ret_from_user_mode();
 
 // 全局变量
 HAL_DEFGLOB_VARIABLE(descriptor_t, x64_gdt)[CPUCORE_MAX][GDTMAX];
+
 // 定义中断表，中断表其实是gate_t结构的数组，由CPU的IDTR寄存器指向,IDTMAX为256
+// 在 x86 CPU 上，最多支持 256 个中断
 HAL_DEFGLOB_VARIABLE(gate_t, x64_idt)[IDTMAX];
+
 HAL_DEFGLOB_VARIABLE(x64tss_t, x64tss)[CPUCORE_MAX]; 
 HAL_DEFGLOB_VARIABLE(igdtr_t, x64_igdt_reg)[CPUCORE_MAX];
 HAL_DEFGLOB_VARIABLE(iidtr_t, x64_iidt_reg);
