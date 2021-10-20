@@ -96,13 +96,14 @@
 
 #define INT_VECTOR_SYSCALL		0xFF
 
-typedef struct s_descriptor {           // 共 8 个字节
-    u16_t   limit_low;		            // Limit
-	u16_t	base_low;		            // Base
-	u8_t	base_mid;		            // Base
+// 段描述符结构体(8 个字节, 64位)
+typedef struct s_descriptor {
+    u16_t   limit_low;		            // Limit，段界限0～15
+	u16_t	base_low;		            // Base， 段基址31 ~ 16(段基址15～0)
+	u8_t	base_mid;		            // Base, 段基址0~7(段基址23~16)
 	u8_t	attr1;			            // P(1) DPL(2) DT(1) TYPE(4)
-	u8_t	limit_high_attr2;	        // G(1) D(1) 0(1) AVL(1) LimitHigh(4)
-	u8_t	base_high;		            // Base
+	u8_t	limit_high_attr2;	        // G(1) D(1) 0(1) AVL(1) LimitHigh(4)/段界限19~16
+	u8_t	base_high;		            // Base, 段基地31~24
 } __attribute__((packed)) descriptor_t;
 
 // 门描述符

@@ -40,6 +40,7 @@ void set_iidtr(gate_t *idtptr)
     return;
 }
 
+// 段描述符
 void set_descriptor(descriptor_t *p_desc, u32_t base, u32_t limit, u16_t attribute)
 {
     p_desc->limit_low = limit & 0x0FFFF;                                                   // 段界限 1(2 字节)
@@ -51,6 +52,7 @@ void set_descriptor(descriptor_t *p_desc, u32_t base, u32_t limit, u16_t attribu
     return;
 }
 
+// 任务状态段
 void set_x64tss_descriptor(descriptor_t *p_desc, u64_t base, u32_t limit, u16_t attribute)
 {
     u32_t *x64tssb_h = (u32_t *)(p_desc + 1);
@@ -119,13 +121,26 @@ PUBLIC LKINIT void load_x64_tr(u16_t trindx)
 PUBLIC LKINIT void init_descriptor()
 {
 
+    /**
+     * 通过全局描述符(gdt)0~4索引，寻找对应的段描述符。然后设置段描述符的信息
+     */
     for (u32_t gdtindx = 0; gdtindx < CPUCORE_MAX; gdtindx++) {
 
-        set_descriptor(&x64_gdt[gdtindx][0], 0, 0, 0);
+        // GDT中的第0个段描述符是不可用的
+        set_descriptor(&x64_gdt[gdtindx][0], 0, 0, 0); 
+
+        // 第一个描述符的数据段(向下扩展的数据段)只读可执行
         set_descriptor(&x64_gdt[gdtindx][1], 0, 0, DA_CR | DA_64 | 0);
-        set_descriptor(&x64_gdt[gdtindx][2], 0, 0, DA_DRW | DA_64 | 0);
+
+        // 第二个描述符的数据段(向下扩展的数据段)只读
+        set_descriptor(&x64_gdt[gdtindx][2], 0, 0, DA_DRW | DA_64 | 0); 
+
+        // 第三个描述符的数据段(向下扩展的数据段)只读可执行, 权限级别为3
         set_descriptor(&x64_gdt[gdtindx][3], 0, 0, DA_CR | DA_64 | DA_DPL3 | 0); 
+
+        // 第三个描述符的数据段(向下扩展的数据段)只读, 权限级别为3
         set_descriptor(&x64_gdt[gdtindx][4], 0, 0, DA_DRW | DA_64 | DA_DPL3 | 0);
+
         set_x64tss_descriptor(&x64_gdt[gdtindx][6], (u64_t)&x64tss[gdtindx], sizeof(x64tss[gdtindx]) - 1, DA_386TSS);
 
         x64_igdt_reg[gdtindx].gdtbass = (u64_t)x64_gdt[gdtindx];
@@ -139,6 +154,7 @@ PUBLIC LKINIT void init_descriptor()
     return;
 }
 
+// 设置中断门描述符
 PUBLIC LKINIT void init_idt_descriptor()
 {   
     // 一开始把所有中断的处理程序设置为保留的通用处理程序
