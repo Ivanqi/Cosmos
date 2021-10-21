@@ -15,12 +15,17 @@
  */
 void set_idt_desc(u8_t vector, u8_t desc_type, inthandler_t handler, u8_t privilege)
 {
-    gate_t *p_gate = &x64_idt[vector];
+    gate_t *p_gate = &x64_idt[vector];  // 从idt中取出中断描述符(中断门)
     u64_t base = (u64_t)handler;
+
+    // 中断处理程序所在段的段选择子和段内偏移地址
     p_gate->offset_low = base & 0xFFFF;
     p_gate->selector = SELECTOR_KERNEL_CS;
+
     p_gate->dcount = 0;
+    // 属性
     p_gate->attr = (u8_t)(desc_type | (privilege << 5));
+
     p_gate->offset_high = (u16_t)((base >> 16) & 0xFFFF);
     p_gate->offset_high_h = (u32_t)((base >> 32) & 0xffffffff);
     p_gate->offset_resv = 0;
@@ -69,6 +74,7 @@ void set_x64tss_descriptor(descriptor_t *p_desc, u64_t base, u32_t limit, u16_t 
     *(x64tssb_h + 1) = 0;
 }
 
+// 载入gdt
 PUBLIC LKINIT void load_x64_gdt(igdtr_t *igdtrp)
 {
 
@@ -118,11 +124,14 @@ PUBLIC LKINIT void load_x64_tr(u16_t trindx)
     );
 }
 
+// 初始化段描述符和TSS描述符
 PUBLIC LKINIT void init_descriptor()
 {
 
     /**
      * 通过全局描述符(gdt)0~4索引，寻找对应的段描述符。然后设置段描述符的信息
+     * 
+     * 因为TSS也是存储在gdt中，所以索引下标为6的描述符，作为TSS
      */
     for (u32_t gdtindx = 0; gdtindx < CPUCORE_MAX; gdtindx++) {
 
@@ -141,20 +150,27 @@ PUBLIC LKINIT void init_descriptor()
         // 第三个描述符的数据段(向下扩展的数据段)只读, 权限级别为3
         set_descriptor(&x64_gdt[gdtindx][4], 0, 0, DA_DRW | DA_64 | DA_DPL3 | 0);
 
+        // 当任务被创建时，此时尚未上CPU执行，因此，此时的B位为0，TYPE的值为1001
         set_x64tss_descriptor(&x64_gdt[gdtindx][6], (u64_t)&x64tss[gdtindx], sizeof(x64tss[gdtindx]) - 1, DA_386TSS);
 
+        // 用一层 x64_igdt_reg 把gdt包裹起来
         x64_igdt_reg[gdtindx].gdtbass = (u64_t)x64_gdt[gdtindx];
         x64_igdt_reg[gdtindx].gdtLen = sizeof(x64_gdt[gdtindx]) - 1;
-
     }
 
+    // 载入gdt
     load_x64_gdt(&x64_igdt_reg[0]);
+    // 载入TR寄存器，用于TSS
     load_x64_tr(0x30);
 
     return;
 }
 
-// 设置中断门描述符
+/**
+ * 设置中断门描述符
+ *  中断向量号是中断描述符的索引，当处理器收到一个外部中断向量后，它用此向量号在中断描述符表中查询对应的中断描述符，然后再去执行该中断中的中断处理程序
+ *  由于中断描述符是8个字节(64位)，所以处理器用中断向量号乘以8后，再与IDTR中的中断描述符表地址相加，所求的地址之和便是该中断向量号对应的中断描述符
+ */
 PUBLIC LKINIT void init_idt_descriptor()
 {   
     // 一开始把所有中断的处理程序设置为保留的通用处理程序
@@ -162,14 +178,18 @@ PUBLIC LKINIT void init_idt_descriptor()
         set_idt_desc((u8_t)intindx, DA_386IGate, hxi_exc_general_intpfault, PRIVILEGE_KRNL);
     }
 
+    // 除法错误异常 比如除0
     set_idt_desc(INT_VECTOR_DIVIDE, DA_386IGate, exc_divide_error, PRIVILEGE_KRNL);
 
+    // 单步执行异常
     set_idt_desc(INT_VECTOR_DEBUG, DA_386IGate, exc_single_step_exception, PRIVILEGE_KRNL);
 
     set_idt_desc(INT_VECTOR_NMI, DA_386IGate, exc_nmi, PRIVILEGE_KRNL);
 
+    // 调试断点异常
     set_idt_desc(INT_VECTOR_BREAKPOINT, DA_386IGate, exc_breakpoint_exception, PRIVILEGE_USER);
 
+    // 溢出异常
     set_idt_desc(INT_VECTOR_OVERFLOW, DA_386IGate, exc_overflow, PRIVILEGE_USER);
 
     set_idt_desc(INT_VECTOR_BOUNDS, DA_386IGate, exc_bounds_check, PRIVILEGE_KRNL);
@@ -184,12 +204,16 @@ PUBLIC LKINIT void init_idt_descriptor()
 
     set_idt_desc(INT_VECTOR_INVAL_TSS, DA_386IGate, exc_inval_tss, PRIVILEGE_KRNL);
 
+    // 段不存在异常
     set_idt_desc(INT_VECTOR_SEG_NOT, DA_386IGate, exc_segment_not_present, PRIVILEGE_KRNL);
 
+    // 栈异常
     set_idt_desc(INT_VECTOR_STACK_FAULT, DA_386IGate, exc_stack_exception, PRIVILEGE_KRNL);
 
+    // 通用异常
     set_idt_desc(INT_VECTOR_PROTECTION, DA_386IGate, exc_general_protection, PRIVILEGE_KRNL);
 
+    // 缺页异常
     set_idt_desc(INT_VECTOR_PAGE_FAULT, DA_386IGate, exc_page_fault, PRIVILEGE_KRNL);
 
     //set_idt_desc(15,DA_386IGate,hxi_exc_general_intpfault,PRIVILEGE_KRNL);

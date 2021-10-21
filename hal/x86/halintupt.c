@@ -32,6 +32,7 @@ void intfltdsc_t_init(intfltdsc_t *initp, u32_t flg, u32_t sts, uint_t prity, ui
     return;
 }
 
+// 初始化中断异常描述符
 void init_intfltdsc()
 {
     for (uint_t i = 0; i < IDTMAX; i++) {
@@ -41,6 +42,7 @@ void init_intfltdsc()
     return;
 }
 
+// 中断初始化
 PUBLIC void init_halintupt()
 {
     init_descriptor();

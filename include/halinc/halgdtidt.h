@@ -4,11 +4,16 @@
 #ifndef _HALGDTIDT_H
 #define _HALGDTIDT_H
 
+// 除法错误异常 比如除0
 void exc_divide_error();
+// 单步执行异常
 void exc_single_step_exception();
 void exc_nmi();
+// 调试断点异常
 void exc_breakpoint_exception();
+// 溢出异常
 void exc_overflow();
+// 段不存在异常
 void exc_bounds_check();
 void exc_inval_opcode();
 void exc_copr_not_available();
@@ -16,8 +21,11 @@ void exc_double_fault();
 void exc_copr_seg_overrun();
 void exc_inval_tss();
 void exc_segment_not_present();
+// 栈异常
 void exc_stack_exception();
+// 通用异常
 void exc_general_protection();
+// 缺页异常
 void exc_page_fault();
 void exc_copr_error();
 void exc_alignment_check();

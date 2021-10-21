@@ -14,6 +14,7 @@ typedef struct s_ILNEDSC {
     u32_t ild_clxsubinr;
 } ilnedsc_t;
 
+// 中断异常描述符
 typedef struct s_INTFLTDSC {
     spinlock_t  i_lock;
     u32_t       i_flg;

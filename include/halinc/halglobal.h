@@ -10,11 +10,16 @@
 #endif
 
 #ifdef CFG_X86_PLATFORM
+// 除法错误异常 比如除0
 void exc_divide_error();
+// 单步执行异常
 void exc_single_step_exception();
 void exc_nmi();
+// 调试断点异常
 void exc_breakpoint_exception();
+// 溢出异常
 void exc_overflow();
+// 段不存在异常
 void exc_bounds_check();
 void exc_inval_opcode();
 void exc_copr_not_available();
@@ -22,8 +27,11 @@ void exc_double_fault();
 void exc_copr_seg_overrun();
 void exc_inval_tss();
 void exc_segment_not_present();
+// 栈异常
 void exc_stack_exception();
+// 通用异常
 void exc_general_protection();
+// 缺页异常
 void exc_page_fault();
 void exc_copr_error();
 void exc_alignment_check();
@@ -72,14 +80,18 @@ HAL_DEFGLOB_VARIABLE(descriptor_t, x64_gdt)[CPUCORE_MAX][GDTMAX];
 // 在 x86 CPU 上，最多支持 256 个中断
 HAL_DEFGLOB_VARIABLE(gate_t, x64_idt)[IDTMAX];
 
+// 任务状态段
 HAL_DEFGLOB_VARIABLE(x64tss_t, x64tss)[CPUCORE_MAX]; 
+
 HAL_DEFGLOB_VARIABLE(igdtr_t, x64_igdt_reg)[CPUCORE_MAX];
 HAL_DEFGLOB_VARIABLE(iidtr_t, x64_iidt_reg);
 HAL_DEFGLOB_VARIABLE(machbstart_t, kmachbsp);
 HAL_DEFGLOB_VARIABLE(dftgraph_t, kdftgh);
 HAL_DEFGLOB_VARIABLE(memmgrob_t, memmgrob);
+
 // 定义intfltdsc_t结构数组大小为256
 HAL_DEFGLOB_VARIABLE(intfltdsc_t, machintflt)[IDTMAX];
+
 #endif
 void die(u32_t dt);
 
