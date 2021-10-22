@@ -75,7 +75,7 @@ ALIGN	16
 hxi_exc_general_intpfault:
 	SRFTFAULT 256
 	
-; 硬件1～7号中断
+; 硬件1～7号中断. 定义了各种硬件中断编号，比如hxi_hwint00，作为中断处理入口
 ALIGN	16
 hxi_hwint00:
 	HARWINT	(INT_VECTOR_IRQ0+0)

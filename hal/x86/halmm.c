@@ -153,7 +153,7 @@ u64_t initpmrge_core(e820map_t *e8sp, u64_t e8nr, phymmarge_t *pmargesp)
 
 /**
  * 根据e820map_t结构数组，建立一个phymmarge_t结构数组
- * init_one_pmrge 函数正是把e820map_t结构中的信息复制到phymmarge_t结构中
+ * init_one_pmrge 函数正是把e820map_t结构中的信息复制到phymmarge_t结构中，按内存开始地址进行排序
  */
 void init_phymmarge()
 {

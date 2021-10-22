@@ -35,7 +35,11 @@ void machbstart_t_init(machbstart_t *initp)
     return;
 }
 
-// 把二级引导器建立的机器信息结构复制到hal层中的一个全局变量中
+/**
+ * 把二级引导器建立的机器信息结构复制到hal层中的一个全局变量中
+ *  主要是把二级引导器建立的机器信息结构，复制到了hal层一份给内核使用，同时也为释放二级引导器占用的内存做好准备
+ *  其做法就是拷贝一份mbsp到kmbsp，其中用到了虚拟地址转换hyadr_to_viradr
+ */
 void init_machbstart()
 {
     machbstart_t *kmbsp = &kmachbsp;
@@ -176,6 +180,7 @@ e820map_t *ret_kmaxmpadrcmpsz_e820map(machbstart_t *mbsp, u64_t mappadr, u64_t c
     return NULL;
 }
 
+// 将移动initldrsve.bin到最大地址
 void move_img2maxpadr(machbstart_t *mbsp)
 {
     u64_t kmapadrend = mbsp->mb_kpmapphymemsz;  // 操作系统映射空间大小

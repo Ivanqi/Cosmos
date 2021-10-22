@@ -5,15 +5,23 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+/**
+ * 初始化8529芯片中断
+ * 	ICW1和OCW2、OCW3是用偶地址端口0x20(主片)或0xA0(从片)写入
+ * 	ICW2～ICW4和OCW1是用奇地址端口0x21(主片)或0xA1(从片)写入
+ */
 void init_i8259()
 {
 	// 初始化主从8259a
 	out_u8_p(ZIOPT, ICW1);
 	out_u8_p(SIOPT, ICW1);
+
 	out_u8_p(ZIOPT1, ZICW2);
 	out_u8_p(SIOPT1, SICW2);
+
 	out_u8_p(ZIOPT1, ZICW3);
 	out_u8_p(SIOPT1, SICW3);
+	
 	out_u8_p(ZIOPT1, ICW4);
 	out_u8_p(SIOPT1, ICW4);
 
@@ -31,6 +39,7 @@ void i8259_send_eoi()
 	return;
 }
 
+// 好像是取消mask，开启中断请求
 void i8259_enabled_line(u32_t line)
 {
 	cpuflg_t flags;

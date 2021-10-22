@@ -250,7 +250,7 @@ global  asm_ret_from_user_mode
 	RESTOREALLFAULT
 %endmacro
 
-; 硬件中断
+; 硬件中断,硬件分发器函数 hal_hwint_allocator
 %macro	HARWINT	1
 	SAVEALL
 	

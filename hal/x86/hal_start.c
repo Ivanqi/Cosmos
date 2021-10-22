@@ -6,7 +6,9 @@
 #include "cosmosmctrl.h"
 
 void hal_start() {
+    // 初始化Cosmos的hal层
     init_hal();
-    // init_krl();
+    // 初始化Cosmos的内核层
+    init_krl();
     return;
 }

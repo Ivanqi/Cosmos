@@ -69,6 +69,10 @@ void set_charsdxwflush(u64_t chardxw, u64_t flush)
     return;
 }
 
+/**
+ * 输出版本号等信息【vsprintfk】
+ * 其中，用ret_charsinfo根据字体文件获取字符像素信息
+ */
 void hal_dspversion()
 {
     pixl_t bkpx = set_deffontpx(BGRA(0xff, 0, 0));
@@ -136,6 +140,9 @@ void slou_sreen(uint_t hy)
     return;
 }
 
+/**
+ * 找到 background.bmp 并显示背景图
+ */
 void hal_background()
 {
     dftgraph_t *kghp = &kdftgh;

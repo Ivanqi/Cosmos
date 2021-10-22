@@ -32,7 +32,7 @@ void intfltdsc_t_init(intfltdsc_t *initp, u32_t flg, u32_t sts, uint_t prity, ui
     return;
 }
 
-// 初始化中断异常描述符
+// 初始化中断异常表machintflt，拷贝了中断相关信息
 void init_intfltdsc()
 {
     for (uint_t i = 0; i < IDTMAX; i++) {
@@ -47,7 +47,9 @@ PUBLIC void init_halintupt()
 {
     init_descriptor();
     init_idt_descriptor();
+    
     init_intfltdsc();
+
     init_i8259();
     i8259_enabled_line(0);
     return;
@@ -122,7 +124,11 @@ drvstus_t hal_intflt_default(uint_t ift_nr, void *sframe)
     return DFCOKSTUS;
 }
 
-// 负责调用中断处理的回调函数
+/**
+ * 负责调用中断处理的回调函数
+ *  先获取中断异常表machintflt
+ *  然后调用i_serlist 链表上所有挂载intserdsc_t 结构中的中断处理的回调函数，是否处理由函数自己判断
+ */
 void hal_run_intflthandle(uint_t ifdnr, void *sframe)
 {
     intserdsc_t *isdscp;
@@ -146,7 +152,12 @@ void hal_run_intflthandle(uint_t ifdnr, void *sframe)
     return;
 }
 
-// 中断处理函数
+/**
+ * 中断处理函数
+ *  加锁
+ *  调用中断回调函数hal_run_intflthandle
+ *  释放锁
+ */
 void hal_do_hwint(uint_t intnumb, void *krnlsframp)
 {
     intfltdsc_t *ifdscp = NULL;
@@ -194,6 +205,13 @@ sysstus_t hal_syscl_allocator(uint_t sys_nr,void* msgp)
 	return 0; 
 }
 
+
+/**
+ * 有硬件中断时，会先到达中断处理入口，然后调用到硬件中断分发器函数hal_hwint_allocator
+ *  第一个参数为中断编号，在rdi
+ *  第二个参数为中断发生时的栈指针，在rsi
+ *  然后调用异常处理函数hal_do_hwint
+ */
 void hal_hwint_allocator(uint_t intnumb, void *krnlsframp)
 {
     i8259_send_eoi();
