@@ -56,6 +56,7 @@ typedef u64_t mmstus_t;
 #define DFCERRSTUS (-1)
 #define DFCOKSTUS (0)
 #define NO_HAND (-1)
+// 对齐
 #define ALIGN(x, a)     (((x) + (a) - 1) & ~((a) - 1))
 
 #define LKHEAD_T __attribute__((section(".head.text")))
