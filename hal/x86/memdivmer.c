@@ -128,7 +128,9 @@ msadsc_t *mm_divpages_opmsadsc(msadsc_t *msastat, uint_t mnr)
 		system_error("mm_divpages_opmsadsc err4");
 	}
 
+	// 单个msadsc_t结构的情况
 	if (mend == msastat) {
+		// 增加msadsc_t结构中分配计数，分配标志位设置为1
 		msastat->md_indxflgs.mf_uindx++;
 		msastat->md_phyadrs.paf_alloc = PAF_ALLOC;
 		msastat->md_indxflgs.mf_olkty = MF_OLKTY_ODER;
@@ -138,6 +140,8 @@ msadsc_t *mm_divpages_opmsadsc(msadsc_t *msastat, uint_t mnr)
 
 	msastat->md_indxflgs.mf_uindx++;
 	msastat->md_phyadrs.paf_alloc = PAF_ALLOC;
+
+	// 多个msadsc_t结构的情况下，末端msadsc_t结构也设置已分配状态
 	mend->md_indxflgs.mf_uindx++;
 	mend->md_phyadrs.paf_alloc = PAF_ALLOC;
 	msastat->md_indxflgs.mf_olkty = MF_OLKTY_ODER;
@@ -176,42 +180,59 @@ sint_t mm_merpages_opmsadsc(bafhlst_t *bafh, msadsc_t *freemsa, uint_t freepgs)
 		system_error("mm_merpages_opmsadsc err6\n");
 	}
 
+	// 处理只有一个单页的情况
 	if (freemsa == fmend) {
+		// 页面的分配计数减1
 		freemsa->md_indxflgs.mf_uindx--;
 		if (0 < freemsa->md_indxflgs.mf_uindx) {
+			// 如果依然大于0说明它是共享页面 直接返回1指示不需要进行下一步操作
 			return 1;
 		}
 
+		// 设置页未分配的标志
 		freemsa->md_phyadrs.paf_alloc = PAF_NO_ALLOC;
 		freemsa->md_indxflgs.mf_olkty = MF_OLKTY_BAFH;
 		freemsa->md_odlink = bafh;
+		// 返回2指示需要进行下一步操作
 		return 2;
 	}
 
+	// 多个页面的超始页面和结束页面都要减一
 	freemsa->md_indxflgs.mf_uindx--;
 	fmend->md_indxflgs.mf_uindx--;
 
+	// 如果依然大于0说明它是共享页面 直接返回1指示不需要进行下一步操作
 	if (0 < freemsa->md_indxflgs.mf_uindx) {
 		return 1;
 	}
 
+	// 设置起始、结束页页未分配的标志
 	freemsa->md_phyadrs.paf_alloc = PAF_NO_ALLOC;
 	fmend->md_phyadrs.paf_alloc = PAF_NO_ALLOC;
 	freemsa->md_indxflgs.mf_olkty = MF_OLKTY_ODER;
+	
+	// 起始页面指向结束页面
 	freemsa->md_odlink = fmend;
 	fmend->md_indxflgs.mf_olkty = MF_OLKTY_BAFH;
+
+	// 结束页面指向所属的bafhlst_t结构
 	fmend->md_odlink = bafh;
+	// 返回2指示需要进行下一步操作
 	return 2;
 }
 
+// 内存分配的核心函数
 bool_t onmpgs_retn_bafhlst(memarea_t *malckp, uint_t pages, bafhlst_t **retrelbafh, bafhlst_t **retdivbafh)
 {
 	if (NULL == malckp || 1 > pages || NULL == retrelbafh || NULL == retdivbafh) {
 		return FALSE;
 	}
 
+	// 获取bafhlst_t结构数组的开始地址
 	bafhlst_t *bafhstat = malckp->ma_mdmdata.dm_mdmlielst;
+	// 根据分配页面数计算出分配页面在dm_mdmlielst数组中下标
 	sint_t dividx = retn_divoder(pages);
+
 	if (0 > dividx || MDIVMER_ARR_LMAX <= dividx) {
 		*retrelbafh = NULL;
 		*retdivbafh = NULL;
@@ -224,9 +245,13 @@ bool_t onmpgs_retn_bafhlst(memarea_t *malckp, uint_t pages, bafhlst_t **retrelba
 		return FALSE;
 	}
 
+	// 从第dividx个数组元素开始搜索
 	for (sint_t idx = dividx; idx < MDIVMER_ARR_LMAX; idx++) {
+		// 如果第idx个数组元素对应的一次可分配连续的页面数大于等于请求的页面数，且其中的可分配对象大于0则返回
 		if (bafhstat[idx].af_oderpnr >= pages && 0 < bafhstat[idx].af_fobjnr) {
+			// 返回请求分配的bafhlst_t结构指针
 			*retrelbafh = &bafhstat[dividx];
+			// 返回实际分配的bafhlst_t结构指针
 			*retdivbafh = &bafhstat[idx];
 			return TRUE;
 		}
@@ -243,7 +268,9 @@ bool_t onfpgs_retn_bafhlst(memarea_t *malckp, uint_t freepgs, bafhlst_t **retrel
 		return FALSE;
 	}
 
+	// 获取bafhlst_t结构数组的开始地址
 	bafhlst_t *bafhstat = malckp->ma_mdmdata.dm_mdmlielst;
+	// 根据分配页面数计算出分配页面在dm_mdmlielst数组中下标
 	sint_t dividx = retn_divoder(freepgs);
 
 	if (0 > dividx || MDIVMER_ARR_LMAX <= dividx) {
@@ -266,7 +293,9 @@ bool_t onfpgs_retn_bafhlst(memarea_t *malckp, uint_t freepgs, bafhlst_t **retrel
 		return FALSE;
 	}
 
+	// 返回请求释放的bafhlst_t结构指针
 	*retrelbf = &bafhstat[dividx];
+	// 返回最大释放的bafhlst_t结构指针
 	*retmerbf = &bafhstat[MDIVMER_ARR_LMAX - 1];
 	return TRUE;
 }
@@ -313,14 +342,21 @@ bool_t mm_retnmsaob_onbafhlst(bafhlst_t *bafhp, msadsc_t **retmstat, msadsc_t **
 		return FALSE;
 	}
 
+	// 取出一个msadsc_t结构
 	msadsc_t *tmp = list_entry(bafhp->af_frelst.next, msadsc_t, md_list);
+	// 从链表中删除
 	list_del(&tmp->md_list);
+
+	// 减少bafhlst_t结构中的msadsc_t计数
 	bafhp->af_mobjnr--;
 	bafhp->af_fobjnr--;
+	// 增加分配计数
 	bafhp->af_freindx++;
 	*retmstat = tmp;
+	// 返回当前msadsc_t结构连续的那个结尾的msadsc_t结构
 	*retmend = (msadsc_t *)tmp->md_odlink;
 
+	// 如果只单个msadsc_t结构，那就是它本身
 	if (MF_OLKTY_BAFH == tmp->md_indxflgs.mf_olkty) {
 		*retmend = tmp;
 	}
@@ -451,6 +487,7 @@ bool_t mrdmb_add_msa_bafh(bafhlst_t *bafhp, msadsc_t *msastat, msadsc_t *msaend)
 		return FALSE;
 	}
 
+	// 把一段连续的msadsc_t结构加入到它所对应的bafhlst_t结构中
 	msastat->md_indxflgs.mf_olkty = MF_OLKTY_ODER;
 	msastat->md_odlink = msaend;
 
@@ -476,7 +513,9 @@ msadsc_t *mm_reldpgsdivmsa_bafhl(memarea_t *malckp, uint_t pages, uint_t *retrel
 		return NULL;
 	}
 
+	// 处理相等的情况
 	if (relbfl == divbfl) {
+		// 从bafhlst_t结构中获取msadsc_t结构的开始与结束地址
 		rets = mm_retnmsaob_onbafhlst(relbfl, &retmstat, &retmend);
 		if (FALSE == rets || NULL == retmstat || NULL == retmend) {
 			*retrelpnr = 0;
@@ -488,16 +527,20 @@ msadsc_t *mm_reldpgsdivmsa_bafhl(memarea_t *malckp, uint_t pages, uint_t *retrel
 			return NULL;
 		}
 
+		// 设置msadsc_t结构的相关信息表示已经删除
 		retmsa = mm_divpages_opmsadsc(retmstat, relbfl->af_oderpnr);
 		if (NULL == retmsa) {
 			*retrelpnr = 0;
 			return NULL;
 		}
 
+		// 返回实际的分配页数
 		*retrelpnr = relbfl->af_oderpnr;
 		return retmsa;
 	}
 
+	// 处理不等的情况
+	// 从bafhlst_t结构中获取msadsc_t结构的开始与结束地址
 	rets = mm_retnmsaob_onbafhlst(divbfl, &retmstat, &retmend);
 	if (FALSE == rets || NULL == retmstat || NULL == retmend) {
 		*retrelpnr = 0;
@@ -510,7 +553,9 @@ msadsc_t *mm_reldpgsdivmsa_bafhl(memarea_t *malckp, uint_t pages, uint_t *retrel
 	}
 
 	uint_t divnr = divbfl->af_oderpnr;
+	// 从高bafhlst_t数组元素中向下遍历
 	for (bafhlst_t *tmpbfl = divbfl - 1; tmpbfl >= relbfl; tmpbfl--) {
+		// 开始分割连续的msadsc_t结构，把剩下的一段连续的msadsc_t结构加入到对应该bafhlst_t结构中
 		if (mrdmb_add_msa_bafh(tmpbfl, &retmstat[tmpbfl->af_oderpnr], (msadsc_t *)retmstat->md_odlink) == FALSE) {
 			system_error("mrdmb_add_msa_bafh fail\n");
 		}
@@ -541,6 +586,8 @@ msadsc_t *mm_reldivpages_onmarea(memarea_t *malckp, uint_t pages, uint_t *retrel
 	}
     
 	bafhlst_t *retrelbhl = NULL, *retdivbhl = NULL;
+
+	//根据页面数在内存区的m_mdmlielst数组中找出其中请求分配页面的bafhlst_t结构（retrelbhl）和实际要在其中分配页面的bafhlst_t结构(retdivbhl)
 	bool_t rets = onmpgs_retn_bafhlst(malckp, pages, &retrelbhl, &retdivbhl);
 	if (FALSE == rets) {
 		*retrelpnr = 0;
@@ -548,6 +595,7 @@ msadsc_t *mm_reldivpages_onmarea(memarea_t *malckp, uint_t pages, uint_t *retrel
 	}
 
 	uint_t retpnr = 0;
+	// 实际在bafhlst_t结构中分配页面
 	msadsc_t *retmsa = mm_reldpgsdivmsa_bafhl(malckp, pages, &retpnr, retrelbhl, retdivbhl);
 	if (NULL == retmsa) {
 		*retrelpnr = 0;
@@ -613,9 +661,11 @@ msadsc_t *mm_divpages_core(memarea_t *mareap, uint_t pages, uint_t *retrealpnr, 
 		return NULL;
 	}
 
+	// 内存区加锁
 	knl_spinlock_cli(&mareap->ma_lock, &cpuflg);
 
 	if (DMF_MAXDIV == flgs) {
+		// 分配内存
 		retmsa = mm_maxdivpages_onmarea(mareap, &retpnr);
 		goto ret_step;
 	}
@@ -633,14 +683,16 @@ ret_step:
 		mm_update_memmgrob(retpnr, 0);
 	}
 
+	// 内存区解锁
 	knl_spinunlock_sti(&mareap->ma_lock, &cpuflg);
 	*retrealpnr = retpnr;
 	return retmsa;
 }
 
+// 内存分配页面框架函数
 msadsc_t *mm_divpages_fmwk(memmgrob_t *mmobjp, uint_t pages, uint_t *retrelpnr, uint_t mrtype, uint_t flgs)
 {
-
+	// 返回mrtype对应的内存区结构的指针
 	memarea_t *marea = onmrtype_retn_marea(mmobjp, mrtype);
 	if (NULL == marea) {
 		*retrelpnr = 0;
@@ -648,6 +700,7 @@ msadsc_t *mm_divpages_fmwk(memmgrob_t *mmobjp, uint_t pages, uint_t *retrelpnr, 
 	}
 
 	uint_t retpnr = 0;
+	// 内存分配的核心函数
 	msadsc_t *retmsa = mm_divpages_core(marea, pages, &retpnr, flgs);
 	if (NULL == retmsa) {
 		*retrelpnr = 0;
@@ -658,6 +711,14 @@ msadsc_t *mm_divpages_fmwk(memmgrob_t *mmobjp, uint_t pages, uint_t *retrelpnr, 
 	return retmsa;
 }
 
+/**
+ * 内存分配页面接口
+ * 	mmobjp: 内存管理数据结构指针
+ * 	pages: 请求分配的内存页面数
+ * 	retrealpnr: 存放实际分配内存页面数的指针
+ * 	mrtype: 请求的分配内存页面的内存区类型
+ * 	flgs: 请求分配的内存页面的标志位
+ */
 msadsc_t *mm_division_pages(memmgrob_t *mmobjp, uint_t pages, uint_t *retrealpnr, uint_t mrtype, uint_t flgs)
 {
 	if (NULL == mmobjp || NULL == retrealpnr || 0 == mrtype) {
@@ -1038,12 +1099,16 @@ bool_t mpobf_add_msadsc(bafhlst_t *bafhp, msadsc_t *freemstat, msadsc_t *freemen
 		system_error("(~0UL)<=bafhp->af_fobjnr\n");
 		return FALSE;
 	}
-
+	
 	freemstat->md_indxflgs.mf_olkty = MF_OLKTY_ODER;
+	// 设置起始页面指向结束页
 	freemstat->md_odlink = freemend;
 	freemend->md_indxflgs.mf_olkty = MF_OLKTY_BAFH;
+	// 结束页面指向所属的bafhlst_t结构
 	freemend->md_odlink = bafhp;
+	// 把起始页面挂载到所属的bafhlst_t结构中
 	list_add(&freemstat->md_list, &bafhp->af_frelst);
+	// 增加bafhlst_t结构的空闲页面对象和总的页面对象的计数
 	bafhp->af_fobjnr++;
 	bafhp->af_mobjnr++;
 	return TRUE;
@@ -1055,8 +1120,9 @@ bool_t mm_merpages_onbafhlst(msadsc_t *freemsa, uint_t freepgs, bafhlst_t *relbf
 	msadsc_t *mnxs = freemsa, *mnxe = &freemsa[freepgs - 1];
 	bafhlst_t *tmpbf = relbf;
 
+	// 从实际要开始遍历，直到最高的那个bafhlst_t结构
 	for (; tmpbf < merbf; tmpbf++) {
-
+		// 查看最大地址连续、且空闲msadsc_t结构，如释放的是第0个msadsc_t结构我们就去查找第1个msadsc_t结构是否空闲，且与第0个msadsc_t结构的地址是不是连续的
 		rets = mm_find_cmsa2blk(tmpbf, &mnxs, &mnxe);
 		if (1 == rets) {
 			break;
@@ -1067,6 +1133,7 @@ bool_t mm_merpages_onbafhlst(msadsc_t *freemsa, uint_t freepgs, bafhlst_t *relbf
 		}
 	}
 
+	// 把合并的msadsc_t结构（从mnxs到mnxe）加入到对应的bafhlst_t结构中
 	if (mpobf_add_msadsc(tmpbf, mnxs, mnxe) == FALSE) {
 		return FALSE;
 	}
@@ -1108,6 +1175,7 @@ bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 
 	bafhlst_t *retrelbf = NULL, *retmerbf = NULL;
 	bool_t rets = FALSE;
+	// 根据freepgs返回请求释放的和最大释放的bafhlst_t结构指针
 	rets = onfpgs_retn_bafhlst(malckp, freepgs, &retrelbf, &retmerbf);
 	if (FALSE == rets) {
 		return FALSE;
@@ -1117,8 +1185,10 @@ bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 		return FALSE;
 	}
 
+	// 设置msadsc_t结构的信息，完成释放，返回1表示不需要下一步合并操作，返回2表示要进行合并操作
 	sint_t mopms = mm_merpages_opmsadsc(retrelbf, freemsa, freepgs);
 	if (2 == mopms) {
+		// 把msadsc_t结构进行合并然后加入对应bafhlst_t结构
 		rets = mm_merpages_onbafhlst(freemsa, freepgs, retrelbf, retmerbf);
 		if (TRUE == rets) {
 			mm_update_memarea(malckp, freepgs, 1);
@@ -1138,6 +1208,7 @@ bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 	return FALSE;
 }
 
+// 释放内存页面核心
 bool_t mm_merpages_core(memarea_t *marea, msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == marea || NULL == freemsa || 1 > freepgs) {
@@ -1151,20 +1222,25 @@ bool_t mm_merpages_core(memarea_t *marea, msadsc_t *freemsa, uint_t freepgs)
 	bool_t rets = FALSE;
 	cpuflg_t cpuflg;
 
+	// 内存区加锁
 	knl_spinlock_cli(&marea->ma_lock, &cpuflg);
 
+	// 针对一个内存区进行操作
 	rets = mm_merpages_onmarea(marea, freemsa, freepgs);
+	// 内存区解锁
 	knl_spinunlock_sti(&marea->ma_lock, &cpuflg);
 	return rets;
 }
 
 bool_t mm_merpages_fmwk(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t freepgs)
 {
+	// 获取要释放msadsc_t结构所在的内存区
 	memarea_t *marea = onfrmsa_retn_marea(mmobjp, freemsa, freepgs);
 	if (NULL == marea) {
 		return FALSE;
 	}
 
+	// 释放内存页面的核心函数
 	bool_t rets = mm_merpages_core(marea, freemsa, freepgs);
 	if (FALSE == rets) {
 		return FALSE;
@@ -1172,12 +1248,19 @@ bool_t mm_merpages_fmwk(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t freepgs)
 	return rets;
 }
 
+/**
+ * 释放内存页面接口
+ * 	mmobjp: 内存管理数据结构指针
+ * 	freemsa: 释放内存页面对应的首个msadsc_t结构指针
+ * 	freepgs: 请求释放的内存页面数
+ */
 bool_t mm_merge_pages(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == mmobjp || NULL == freemsa || 1 > freepgs) {
 		return FALSE;
 	}
 
+	// 调用释放内存页面的框架函数
 	bool_t rets = mm_merpages_fmwk(mmobjp, freemsa, freepgs);
 	if (FALSE == rets) {
 		return FALSE;
