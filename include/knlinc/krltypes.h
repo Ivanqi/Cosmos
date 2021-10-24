@@ -6,7 +6,6 @@
 
 #include "krlsem_t.h"
 #include "krlintupt_t.h"
-#include "krlpagempol.h"
 #include "krlpagempol_t.h"
 #include "krlobjsmpol_t.h"
 #include "krlmm_t.h"

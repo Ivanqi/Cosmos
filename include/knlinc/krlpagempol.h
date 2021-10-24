@@ -1,73 +1,41 @@
 /**********************************************************
-    内核层内存页面池管理头文件krlpagempol_t.h
+    内核层内存页面池管理头文件krlpagempol.h
 ***********************************************************/
-#ifndef _KRLPAGEMPOL_T_H
-#define _KRLPAGEMPOL_T_H
+#ifndef _KRLPAGEMPOL_H
+#define _KRLPAGEMPOL_H
 
-#define MPALCLST_MAX 5
-
-#define PMPLMAP_MAX 32
-#define KMEMPALCSZ_MIN 1
-#define KMEMPALCSZ_MAX 0x400000
-
-#define OBJSORPAGE 2048
-#define KPMPORHALM (PAGE_SIZE*31)
-
-#define MPLHTY_PAGE 1
-#define MPLHTY_OBJS 2
-
-#define OBJS_ALIGN(x) ALIGN(x,4) 
-#define PHYMSA_MAX 512
-#define PAGE_SIZE 0x1000
-#define PAGE_SZRBIT (12)
-
-typedef struct s_PGLMAP {
-    adr_t            pgl_start;
-    struct s_PGLMAP* pgl_next;
-} pglmap_t;
-
-typedef struct s_MPLHEAD {
-    spinlock_t      mh_lock;
-    list_h_t        mh_list;
-    uint_t          mh_hedty;
-    adr_t           mh_start;
-    adr_t           mh_end;
-    adr_t           mh_firtfreadr;
-    pglmap_t*       mh_firtpmap;
-    uint_t          mh_objnr;
-    uint_t          mh_aliobsz;
-    uint_t          mh_objsz;
-    uint_t          mh_nxtpsz;
-    uint_t          mh_afindx;
-    uint_t          mh_pmnr;
-    pglmap_t*       mh_pmap;
-} mplhead_t;
-
-typedef struct s_MSAHEAD {
-    uint_t mlh_nr;
-    list_h_t mlh_msalst;
-} msahead_t;
-
-
-typedef struct s_KMEMPOOL {
-    spinlock_t      mp_lock;
-    list_h_t        mp_list;
-    uint_t          mp_stus;
-    uint_t          mp_flgs;
-    spinlock_t      mp_pglock;
-    spinlock_t      mp_oblock;
-    uint_t          mp_pgmplnr;
-    uint_t          mp_obmplnr;
-    list_h_t        mp_pgmplmheadl;
-    list_h_t        mp_obmplmheadl;
-    mplhead_t*      mp_pgmplmhcach;
-    mplhead_t*      mp_obmplmhcach;
-#ifdef CFG_X86_PLATFORM
-    msahead_t       mp_msalsthead[PHYMSA_MAX]; 
-#endif
-} kmempool_t;
-
-
-
-
-#endif // KRLPAGEMPOL_T_H
+void init_krlpagempol();
+void kmempool_t_init(kmempool_t* initp);
+adr_t kmempool_page_new_callhalmm(size_t msize);
+bool_t kmempool_page_delete_callhalmm(adr_t fradr,size_t frze);
+void mplhead_t_init(mplhead_t* initp);
+bool_t objs_delete_on_mplhead(mplhead_t* mplhdp,adr_t fradr);
+adr_t objs_new_on_mplhead(mplhead_t* mplhdp);
+bool_t page_delete_on_mplhead(mplhead_t* mplhdp,adr_t fradr);
+adr_t page_new_on_mplhead(mplhead_t* mplhdp);
+mplhead_t* objs_mpool_init(kmempool_t* kmplockp,mplhead_t* initp,size_t msize,adr_t start,adr_t end);
+mplhead_t* page_mpool_init(kmempool_t* kmplockp,mplhead_t* initp,size_t msize,adr_t start,adr_t end);
+bool_t del_objs_mpool(kmempool_t* kmplockp,mplhead_t* mphdp);
+bool_t del_page_mpool(kmempool_t* kmplockp,mplhead_t* mphdp);
+mplhead_t* new_objs_mpool(kmempool_t* kmplockp,size_t msize);
+mplhead_t* new_page_mpool(kmempool_t* kmplockp,size_t msize);
+mplhead_t* objsdel_mplhead_isok(mplhead_t* mhp,adr_t fradr,size_t msize);
+mplhead_t* pagedel_mplhead_isok(mplhead_t* mhp,adr_t fradr,size_t msize);
+mplhead_t* objsnew_mplhead_isok(mplhead_t* mhp,size_t msize);
+mplhead_t* pagenew_mplhead_isok(mplhead_t* mhp,size_t msize);
+mplhead_t* kmemplob_retn_mplhead(kmempool_t* kmplockp,size_t msize);
+mplhead_t* kmempldelpg_retn_mplhead(kmempool_t* kmplockp,adr_t fradr,size_t msize);
+mplhead_t* kmemplpg_retn_mplhead(kmempool_t* kmplockp,size_t msize);
+adr_t kmempool_pages_core_new(size_t msize);
+bool_t kmempool_pages_core_delete(adr_t fradr,size_t frsz);
+adr_t kmempool_objsz_core_new(size_t msize);
+bool_t kmempool_objsz_core_delete(adr_t fradr,size_t frsz);
+adr_t kmempool_objsz_new(size_t msize);
+bool_t kmempool_objsz_delete(adr_t fradr,size_t frsz);
+adr_t kmempool_pages_new(size_t msize);
+bool_t kmempool_pages_delete(adr_t fradr,size_t frsz);
+adr_t kmempool_onsize_new(size_t msize);
+bool_t kmempool_onsize_delete(adr_t fradr,size_t frsz);
+adr_t kmempool_new(size_t msize);
+bool_t kmempool_delete(adr_t fradr,size_t frsz);
+#endif // _KRLPAGEMPOL_H
