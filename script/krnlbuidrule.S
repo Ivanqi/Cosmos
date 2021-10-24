@@ -3,7 +3,8 @@
 ###################################################################
 
 CCSTR		= 	'CC -[M] 正在构建... '$<
-PRINTCSTR 	=	@echo $(CCSTR) 
+PRINTCSTR 	=	@echo $(CCSTR)
+PRINTCFLAGS  =   @echo $(CFLAGS)
 
 %.krnl : $(CCBUILDPATH)%.c
 [$(CC) $(CFLAGS) -o $@ $<
@@ -21,9 +22,10 @@ PRINTCSTR 	=	@echo $(CCSTR)
 [$(CC) $(CFLAGS) -o $@ $<
 [$(PRINTCSTR)
 
+
 %.o : $(CCBUILDPATH)%.S
 [$(CC) $(CFLAGS) -o $@ $<
-[$(PRINTCSTR)	
+[$(PRINTCSTR)
 
 %.lds : $(CCBUILDPATH)%.S
 [$(CC) $(CPPFLGSLDS) -o $@ $<

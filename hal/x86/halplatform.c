@@ -102,7 +102,7 @@ ok_l:
     return &fhdscstart[rethn];
 }
 
-void get_file_rvadrandsz(char_t *fname, machbstart_t *mbsp, u64_t *retadr, u64_t *retz)
+void get_file_rvadrandsz(char_t *fname, machbstart_t *mbsp, u64_t *retadr, u64_t *retsz)
 {
     u64_t padr = 0, fsz = 0;
     if (NULL == fname || NULL == mbsp) {
