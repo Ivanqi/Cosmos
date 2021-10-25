@@ -6,18 +6,27 @@
 
 #define MSAD_PAGE_MAX (8)
 
+// 挂入链表的类型
 #define MF_OLKTY_INIT (0)
 #define MF_OLKTY_ODER (1)
 #define MF_OLKTY_BAFH (2)
 #define MF_OLKTY_TOBJ (3)
 
+// 是否挂入链表
 #define MF_LSTTY_LIST (0)
+
+// 分配类型(内核、应用、空闲)
 #define MF_MOCTY_FREE (0)
 #define MF_MOCTY_KRNL (1)
 #define MF_MOCTY_USER (2)
+
 #define MF_MRV1_VAL (0)
+
+// 分配计数
 #define MF_UINDX_INIT (0)
 #define MF_UINDX_MAX (0xffffff)
+
+// 属于哪个区
 #define MF_MARTY_INIT (0)
 #define MF_MARTY_HWD (1)
 #define MF_MARTY_KRL (2)
@@ -33,16 +42,35 @@ typedef struct s_MSADFLGS {
 	u32_t mf_uindx:24;	// 分配计数
 } __attribute__((packed)) msadflgs_t;
 
+// 分配位
 #define  PAF_NO_ALLOC (0)
 #define  PAF_ALLOC (1)
+
+// 共享位
 #define  PAF_NO_SHARED (0)
+
+// 交换位
 #define  PAF_NO_SWAP (0)
+
+// 缓存位
 #define  PAF_NO_CACHE (0)
+
+// 映射位
 #define  PAF_NO_KMAP (0)
+
+// 锁定位
 #define  PAF_NO_LOCK (0)
+
+// 脏位
 #define  PAF_NO_DIRTY (0)
+
+// 忙位
 #define  PAF_NO_BUSY (0)
+
+// 保留位
 #define  PAF_RV2_VAL (0)
+
+// 页物理地址位
 #define  PAF_INIT_PADRS (0)
 
 // 物理地址和标志

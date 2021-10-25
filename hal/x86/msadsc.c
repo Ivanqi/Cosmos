@@ -9,21 +9,38 @@ void msadsc_t_init(msadsc_t *initp)
 {
 	list_init(&initp->md_list);
 	knl_spinlock_init(&initp->md_lock);
+
+	// 挂入链表的类型
 	initp->md_indxflgs.mf_olkty = MF_OLKTY_INIT;
+	// 是否挂入链表
 	initp->md_indxflgs.mf_lstty = MF_LSTTY_LIST;
+	// 分配类型(内核、应用、空闲)
 	initp->md_indxflgs.mf_mocty = MF_MOCTY_FREE;
+	// 属于哪个区
 	initp->md_indxflgs.mf_marty = MF_MARTY_INIT;
+	// 分配计数
 	initp->md_indxflgs.mf_uindx = MF_UINDX_INIT;
+	// 分配位
 	initp->md_phyadrs.paf_alloc = PAF_NO_ALLOC;
+	// 共享位
 	initp->md_phyadrs.paf_shared = PAF_NO_SHARED;
+	// 交换位
 	initp->md_phyadrs.paf_swap = PAF_NO_SWAP;
+	// 缓存位
 	initp->md_phyadrs.paf_cache = PAF_NO_CACHE;
+	// 映射位
 	initp->md_phyadrs.paf_kmap = PAF_NO_KMAP;
+	// 锁定位
 	initp->md_phyadrs.paf_lock = PAF_NO_LOCK;
+	// 脏位
 	initp->md_phyadrs.paf_dirty = PAF_NO_DIRTY;
+	// 忙位
 	initp->md_phyadrs.paf_busy = PAF_NO_BUSY;
+	// 保留位
 	initp->md_phyadrs.paf_rv2 = PAF_RV2_VAL;
+	// 页物理地址位
 	initp->md_phyadrs.paf_padrs = PAF_INIT_PADRS;
+	// 相邻且相同大小msdsc的指针
 	initp->md_odlink = NULL;
 	return;
 }
@@ -53,12 +70,12 @@ bool_t ret_msadsc_vadrandsz(machbstart_t *mbsp, msadsc_t **retmasvp, u64_t *retm
 	}
 
 	phymmarge_t *pmagep = (phymmarge_t *)phyadr_to_viradr((adr_t)mbsp->mb_e820expadr);
+	// msadnr 页面数量，usrmemsz 总使用内存数
 	u64_t usrmemsz = 0, msadnr = 0;
 	for (u64_t i = 0; i < mbsp->mb_e820exnr; i++) {
-		if (PMR_T_OSAPUSERRAM == pmagep[i].pmr_type)
-		{
+		if (PMR_T_OSAPUSERRAM == pmagep[i].pmr_type) {
 			usrmemsz += pmagep[i].pmr_lsize;
-			msadnr += (pmagep[i].pmr_lsize >> 12);
+			msadnr += (pmagep[i].pmr_lsize >> 12);	// 2 的 12次方，4096.
 		}
 	}
 
@@ -68,11 +85,12 @@ bool_t ret_msadsc_vadrandsz(machbstart_t *mbsp, msadsc_t **retmasvp, u64_t *retm
 		return FALSE;
 	}
 
-	//msadnr=usrmemsz>>12;
+	// msadnr = usrmemsz >> 12;
 	if (0 != initchkadr_is_ok(mbsp, mbsp->mb_nextwtpadr, (msadnr * sizeof(msadsc_t)))) {
 		system_error("ret_msadsc_vadrandsz initchkadr_is_ok err\n");
 	}
 
+	// msadsc_t 的开始地址
 	*retmasvp = (msadsc_t *)phyadr_to_viradr((adr_t)mbsp->mb_nextwtpadr);
 	*retmasnr = msadnr;
 	return TRUE;
@@ -91,7 +109,7 @@ void write_one_msadsc(msadsc_t *msap, u64_t phyadr)
 
 /**
  * 扫描 phymmarge_t 结构体数组中的信息，只要它的类型是可用内存，就建立一个 msadsc_t 结构体，并把其中的开始地址作为第一个页面地址
- * 接着，要给这个开始地址加上 0x1000，如此循环，直到其结束地址
+ * 接着，要给这个开始地址加上 0x1000(4096)，如此循环，直到其结束地址
  * 当这个 phymmarge_t 结构体的地址区间，它对应的所有 msadsc_t 结构体都建立完成之后，就开始下一个 phymmarge_t 结构体
  * 依次类推，最后，我们就能建好所有可用物理内存页面对应的 msadsc_t 结构体
  */
