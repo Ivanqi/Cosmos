@@ -9,8 +9,8 @@
 #define MMSTUS_OK (1)
 
 typedef struct s_ARCLST {
-    list_h_t al_lru1;
-	list_h_t al_lru2;
+    list_h_t al_lru1;		// lru双向链表
+	list_h_t al_lru2;		// lru双向链表
 	uint_t al_lru1nr;
 	uint_t al_lru2nr;
 } arclst_t;
@@ -24,6 +24,7 @@ typedef struct s_MMAFRETS {
 	u32_t mat_mask;
 } __attribute__((packed)) mmafrets_t;
 
+// 内存页的匿名函数
 struct s_MEMAREA;
 typedef struct s_MAFUNCOBJS {
     mmstus_t (*mafo_init)(struct s_MEMAREA* memarea, void* valp, uint_t val);
@@ -74,20 +75,24 @@ typedef struct s_MEMDIVMER {
 } memdivmer_t;
 
 #define MA_TYPE_INIT 0
-#define MA_TYPE_HWAD 1
-#define MA_TYPE_KRNL 2
-#define MA_TYPE_PROC 3
-#define MA_TYPE_SHAR 4
-#define MEMAREA_MAX 4
-#define MA_HWAD_LSTART 0
-#define MA_HWAD_LSZ 0x2000000							// Cosmos.bin的位置
-#define MA_HWAD_LEND (MA_HWAD_LSTART+MA_HWAD_LSZ-1)
-#define MA_KRNL_LSTART 0x2000000
-#define MA_KRNL_LSZ (0x400000000 - 0x2000000)
-#define MA_KRNL_LEND (MA_KRNL_LSTART + MA_KRNL_LSZ-1)
-#define MA_PROC_LSTART 0x400000000						// 物理内存大小16GB
-#define MA_PROC_LSZ (0xffffffffffffffff - 0x400000000)
-#define MA_PROC_LEND (MA_PROC_LSTART + MA_PROC_LSZ)
+#define MA_TYPE_HWAD 1	// 硬件区
+#define MA_TYPE_KRNL 2	// 内核区
+#define MA_TYPE_PROC 3	// 应用区
+#define MA_TYPE_SHAR 4	// 共享区
+
+#define MEMAREA_MAX 4	// 内存区块数
+
+#define MA_HWAD_LSTART 0								// 硬件区开始地址
+#define MA_HWAD_LSZ 0x2000000							// 硬件区结束地址，Cosmos.bin的位置
+#define MA_HWAD_LEND (MA_HWAD_LSTART + MA_HWAD_LSZ - 1)	// 硬件区内存长度
+
+#define MA_KRNL_LSTART 0x2000000						// 内核区开始地址
+#define MA_KRNL_LSZ (0x400000000 - 0x2000000)			// 内核区结束地址
+#define MA_KRNL_LEND (MA_KRNL_LSTART + MA_KRNL_LSZ - 1)	// 内核区内存长度
+
+#define MA_PROC_LSTART 0x400000000						// 应用区开始地址，物理内存大小16GB
+#define MA_PROC_LSZ (0xffffffffffffffff - 0x400000000)	// 应用区结束地址
+#define MA_PROC_LEND (MA_PROC_LSTART + MA_PROC_LSZ)		// 应用去内存长度
 
 /**
  * 0x400000000  16GB

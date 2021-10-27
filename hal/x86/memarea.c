@@ -61,7 +61,7 @@ void bafhlst_t_init(bafhlst_t *initp, u32_t stus, uint_t oder, uint_t oderpnr)
 void memdivmer_t_init(memdivmer_t *initp)
 {
 	knl_spinlock_init(&initp->dm_lock);
-	initp->dm_stus = 0;
+	initp->dm_stus = 0;			// 状态
 	initp->dm_dmmaxindx = 0;
 	initp->dm_phydmindx = 0;
 	initp->dm_predmindx = 0;
@@ -126,19 +126,19 @@ bool_t init_memarea_core(machbstart_t *mbsp)
 		memarea_t_init(&virmarea[mai]);
 	}
 
-	// 设置硬件区的类型和空间大小
+	// 设置硬件区的类型和空间大小(硬件区)
 	virmarea[0].ma_type = MA_TYPE_HWAD;
 	virmarea[0].ma_logicstart = MA_HWAD_LSTART;
 	virmarea[0].ma_logicend = MA_HWAD_LEND;
 	virmarea[0].ma_logicsz = MA_HWAD_LSZ;
 
-	// 设置内核区的类型和空间大小
+	// 设置内核区的类型和空间大小(内核区)
 	virmarea[1].ma_type = MA_TYPE_KRNL;
 	virmarea[1].ma_logicstart = MA_KRNL_LSTART;
 	virmarea[1].ma_logicend = MA_KRNL_LEND;
 	virmarea[1].ma_logicsz = MA_KRNL_LSZ;
 
-	// 设置应用区的类型和空间大小
+	// 设置应用区的类型和空间大小(应用区)
 	virmarea[2].ma_type = MA_TYPE_PROC;
 	virmarea[2].ma_logicstart = MA_PROC_LSTART;
 	virmarea[2].ma_logicend = MA_PROC_LEND;
@@ -187,17 +187,17 @@ uint_t continumsadsc_is_ok(msadsc_t *prevmsa, msadsc_t *nextmsa, msadflgs_t *cmp
 		if (prevmsa->md_indxflgs.mf_marty == cmpmdfp->mf_marty &&
 			0 == prevmsa->md_indxflgs.mf_uindx &&
 			MF_MOCTY_FREE == prevmsa->md_indxflgs.mf_mocty &&
-			PAF_NO_ALLOC == prevmsa->md_phyadrs.paf_alloc)
-		{
+			PAF_NO_ALLOC == prevmsa->md_phyadrs.paf_alloc) {
+
 			if (nextmsa->md_indxflgs.mf_marty == cmpmdfp->mf_marty &&
 				0 == nextmsa->md_indxflgs.mf_uindx &&
 				MF_MOCTY_FREE == nextmsa->md_indxflgs.mf_mocty &&
-				PAF_NO_ALLOC == nextmsa->md_phyadrs.paf_alloc)
-			{
-				if ((nextmsa->md_phyadrs.paf_padrs << PSHRSIZE) - (prevmsa->md_phyadrs.paf_padrs << PSHRSIZE) == PAGESIZE)
-				{
+				PAF_NO_ALLOC == nextmsa->md_phyadrs.paf_alloc) {
+
+				if ((nextmsa->md_phyadrs.paf_padrs << PSHRSIZE) - (prevmsa->md_phyadrs.paf_padrs << PSHRSIZE) == PAGESIZE) {
 					return 2;
 				}
+				
 				return 1;
 			}
 			return 1;
