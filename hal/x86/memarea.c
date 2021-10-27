@@ -177,6 +177,15 @@ bool_t find_inmarea_msadscsegmant(memarea_t *mareap, msadsc_t *fmstat, uint_t fm
 	return TRUE;
 }
 
+/**
+ * 检测前后两个msadsc_t结构体的msadflgs_t是否和cmpmdfp一致且空闲的
+ * 
+ * 返回值
+ *  返回-1，返回失败
+ * 	返回0，返回失败
+ * 	返回1，前后两个msadsc_t结构体的msadflgs_t是否和cmpmdfp一致且空闲的
+ * 	返回2，在1的基础上，前后两个msadsc_t是连续的
+ */
 uint_t continumsadsc_is_ok(msadsc_t *prevmsa, msadsc_t *nextmsa, msadflgs_t *cmpmdfp)
 {
 	if (NULL == prevmsa || NULL == cmpmdfp) {
@@ -184,20 +193,17 @@ uint_t continumsadsc_is_ok(msadsc_t *prevmsa, msadsc_t *nextmsa, msadflgs_t *cmp
 	}
 
 	if (NULL != prevmsa && NULL != nextmsa) {
-		if (prevmsa->md_indxflgs.mf_marty == cmpmdfp->mf_marty &&
-			0 == prevmsa->md_indxflgs.mf_uindx &&
-			MF_MOCTY_FREE == prevmsa->md_indxflgs.mf_mocty &&
-			PAF_NO_ALLOC == prevmsa->md_phyadrs.paf_alloc) {
+		if (prevmsa->md_indxflgs.mf_marty == cmpmdfp->mf_marty && 0 == prevmsa->md_indxflgs.mf_uindx &&
+			MF_MOCTY_FREE == prevmsa->md_indxflgs.mf_mocty && PAF_NO_ALLOC == prevmsa->md_phyadrs.paf_alloc) {
 
-			if (nextmsa->md_indxflgs.mf_marty == cmpmdfp->mf_marty &&
-				0 == nextmsa->md_indxflgs.mf_uindx &&
-				MF_MOCTY_FREE == nextmsa->md_indxflgs.mf_mocty &&
-				PAF_NO_ALLOC == nextmsa->md_phyadrs.paf_alloc) {
-
+			if (nextmsa->md_indxflgs.mf_marty == cmpmdfp->mf_marty && 0 == nextmsa->md_indxflgs.mf_uindx &&
+				MF_MOCTY_FREE == nextmsa->md_indxflgs.mf_mocty && PAF_NO_ALLOC == nextmsa->md_phyadrs.paf_alloc) {
+				
+				// 前后两个msadsc_t刚好为一页
 				if ((nextmsa->md_phyadrs.paf_padrs << PSHRSIZE) - (prevmsa->md_phyadrs.paf_padrs << PSHRSIZE) == PAGESIZE) {
 					return 2;
 				}
-				
+
 				return 1;
 			}
 			return 1;
@@ -208,6 +214,7 @@ uint_t continumsadsc_is_ok(msadsc_t *prevmsa, msadsc_t *nextmsa, msadflgs_t *cmp
 	return (~0UL);
 }
 
+// 返回从这个msadsc_t结构开始到下一个非空闲、地址非连续的msadsc_t结构对应的msadsc_t结构索引号到retfindmnr变量中
 bool_t scan_len_msadsc(msadsc_t *mstat, msadflgs_t *cmpmdfp, uint_t mnr, uint_t *retmnr)
 {
 	uint_t retclok = 0;
@@ -363,18 +370,21 @@ bool_t merlove_scan_continumsadsc(memarea_t *mareap, msadsc_t *fmstat, uint_t *f
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
+
         case MA_TYPE_KRNL:
         {
             muindx = MF_MARTY_KRL << 5;
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
+
         case MA_TYPE_PROC:
         {
             muindx = MF_MARTY_PRC << 5;
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
+
         default:
         {
             muindx = 0;
@@ -395,7 +405,7 @@ bool_t merlove_scan_continumsadsc(memarea_t *mareap, msadsc_t *fmstat, uint_t *f
 	// 从外层函数的fntmnr变量开始遍历所有msadsc_t结构
 	for (; tmidx < fmsanr; tmidx++) {
 
-		// 一个msadsc_t结构是否属于这个内存区，是否空闲
+		// 一个msadsc_t结构是否属于这个内存区，是否空闲且没有分配的
 		if (msastat[tmidx].md_indxflgs.mf_marty == mdfp->mf_marty && 0 == msastat[tmidx].md_indxflgs.mf_uindx &&
 			MF_MOCTY_FREE == msastat[tmidx].md_indxflgs.mf_mocty && PAF_NO_ALLOC == msastat[tmidx].md_phyadrs.paf_alloc) {
 			// 返回从这个msadsc_t结构开始到下一个非空闲、地址非连续的msadsc_t结构对应的msadsc_t结构索引号到retfindmnr变量中
@@ -485,7 +495,7 @@ uint_t merlove_setallmarflgs_onmemarea(memarea_t *mareap, msadsc_t *mstat, uint_
 		if (MF_MARTY_INIT == mstat[mix].md_indxflgs.mf_marty) {
 			// 获取msadsc_t结构对应的地址
 			phyadr = mstat[mix].md_phyadrs.paf_padrs << PSHRSIZE;
-			// 和内存区的地址区间比较
+			// 和内存区的地址区间比较。看msadsc_t落在哪里区域
 			if (phyadr >= mareap->ma_logicstart && ((phyadr + PAGESIZE) - 1) <= mareap->ma_logicend) {
 				// 设置msadsc_t结构的标签
 				mstat[mix].md_indxflgs.mf_marty = mdfp->mf_marty;

@@ -35,14 +35,20 @@
 #define PTENSHL  12
 #define PDTNSHR  10
 #define PTENSHR  10
-#define PDTNSIZE (1UL << PDTNSHR)
-#define PTENSIZE (1UL << PTENSHR)
-#define PAGESIZE (1UL << PSHRSIZE)
-#define PRMSIZEO (1UL << PDENSHL)
-#define PDTN_MASK	(~(PDTNSIZE - 1))
+
+// 0UL 表示 无符号长整型 0, 1UL 表示 无符号长整型 1
+#define PDTNSIZE (1UL << PDTNSHR)   // 1 * 2 ^ 10 = 1024
+#define PTENSIZE (1UL << PTENSHR)   // 1 * 2 ^ 10 = 1024
+#define PAGESIZE (1UL << PSHRSIZE)  // 1 * 2 ^ 12 = 4096
+#define PRMSIZEO (1UL << PDENSHL)   // 1 * 2 ^ 22 = 4194304
+
+#define PDTN_MASK   (~(PDTNSIZE - 1))
 #define PTEN_MASK	(~(PTENSIZE - 1))
-#define PAGE_MASK       (~(PAGESIZE - 1))
+#define PAGE_MASK   (~(PAGESIZE - 1))
+
+// 页对齐
 #define PAGE_ALIGN(n) ALIGN(n, PAGESIZE)// (((n)+0xfff)&0xfffff000)// PAGE_ALIGN(x)((PAGESIZE-(x&(~(PAGE_MASK))))+x)
+
 #define PTPNFUN(phyadr) (phyadr >> PSHRSIZE)
 #define PNTPFUN(PN) (PN << PSHRSIZE)
 #define PDENFN(phyadr) ((phyadr >> PDENSHL))

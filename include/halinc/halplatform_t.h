@@ -91,7 +91,7 @@ typedef struct s_MACHBSTART
     u64_t   mb_e820expadr;      // e820map_t结构数组的首地址
     u64_t   mb_e820exnr;        // e820map_t数据数组元素个数
     u64_t   mb_e820exsz;        // e820map_t结构数据大小
-    
+
     u64_t   mb_memznpadr;
     u64_t   mb_memznnr;
     u64_t   mb_memznsz;
@@ -101,6 +101,7 @@ typedef struct s_MACHBSTART
     u64_t   mb_memmapnr;
     u64_t   mb_memmapsz;
     u64_t   mb_memmapchksum;
+    
     u64_t   mb_pml4padr;        // 机器页表数据地址
     u64_t   mb_subpageslen;     // 机器页表个数
     u64_t   mb_kpmapphymemsz;   // 操作系统映射空间大小

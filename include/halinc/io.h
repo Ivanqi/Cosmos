@@ -282,6 +282,7 @@ KLINE u32_t read_kcr2() {
     return cr2;
 }
 
+// 设置cr3寄存器
 KLINE void set_cr3(u64_t pl4adr) {
 	__asm__ __volatile__(
 		

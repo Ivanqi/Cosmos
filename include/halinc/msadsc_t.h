@@ -28,10 +28,10 @@
 
 // 属于哪个区
 #define MF_MARTY_INIT (0)
-#define MF_MARTY_HWD (1)
-#define MF_MARTY_KRL (2)
-#define MF_MARTY_PRC (3)
-#define MF_MARTY_SHD (4)
+#define MF_MARTY_HWD (1)	// 硬件区
+#define MF_MARTY_KRL (2)	// 内核区
+#define MF_MARTY_PRC (3)	// 应用区
+#define MF_MARTY_SHD (4)	// 共享区
 
 // 内存空间地址描述符标志
 typedef struct s_MSADFLGS {
