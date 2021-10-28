@@ -44,6 +44,7 @@ void mm_update_memarea(memarea_t *malokp, uint_t pgnr, uint_t flgs)
 	return;
 }
 
+// 根据分配页面数计算出分配页面在dm_mdmlielst数组中下标
 KLINE sint_t retn_divoder(uint_t pages)
 {
 	sint_t pbits = search_64rlbits((uint_t)pages) - 1;
@@ -79,6 +80,7 @@ memarea_t *onfrmsa_retn_marea(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t free
 	return NULL;
 }
 
+// 返回mrtype对应的内存区结构的指针
 memarea_t *onmrtype_retn_marea(memmgrob_t *mmobjp, uint_t mrtype)
 {
 	for (uint_t mi = 0; mi < mmobjp->mo_mareanr; mi++) {
@@ -89,6 +91,7 @@ memarea_t *onmrtype_retn_marea(memmgrob_t *mmobjp, uint_t mrtype)
 	return NULL;
 }
 
+// 从dm_mdmlielst数组从后往前遍历，找到bafhlst_t下有空闲msadsc_t的就返回
 bafhlst_t *onma_retn_maxbafhlst(memarea_t *malckp)
 {
 	for (s64_t li = (MDIVMER_ARR_LMAX - 1); li >= 0; li--) {
@@ -99,6 +102,7 @@ bafhlst_t *onma_retn_maxbafhlst(memarea_t *malckp)
 	return NULL;
 }
 
+// 把msadsc_t设置成已分配
 msadsc_t *mm_divpages_opmsadsc(msadsc_t *msastat, uint_t mnr)
 {
 	if (NULL == msastat || 0 == mnr) {
@@ -144,6 +148,7 @@ msadsc_t *mm_divpages_opmsadsc(msadsc_t *msastat, uint_t mnr)
 	// 多个msadsc_t结构的情况下，末端msadsc_t结构也设置已分配状态
 	mend->md_indxflgs.mf_uindx++;
 	mend->md_phyadrs.paf_alloc = PAF_ALLOC;
+
 	msastat->md_indxflgs.mf_olkty = MF_OLKTY_ODER;
 	msastat->md_odlink = mend;
 	return msastat;
@@ -300,6 +305,7 @@ bool_t onfpgs_retn_bafhlst(memarea_t *malckp, uint_t freepgs, bafhlst_t **retrel
 	return TRUE;
 }
 
+// 从bafhlst_t获取一个msadsc_t
 msadsc_t *mm_divipages_onbafhlst(bafhlst_t *bafhp)
 {
 	if (NULL == bafhp) {
@@ -310,20 +316,31 @@ msadsc_t *mm_divipages_onbafhlst(bafhlst_t *bafhp)
 		return NULL;
 	}
 
+	// 队列为空
 	if (list_is_empty_careful(&bafhp->af_frelst) == TRUE) {
 		return NULL;
 	}
 
+	// 得到链表上的一个msadsc_t
 	msadsc_t *tmp = list_entry(bafhp->af_frelst.next, msadsc_t, md_list);
 	list_del(&tmp->md_list);
 	tmp->md_indxflgs.mf_uindx++;
 	tmp->md_phyadrs.paf_alloc = PAF_ALLOC;
+
 	bafhp->af_fobjnr--;
 	bafhp->af_mobjnr--;
 	bafhp->af_alcindx++;
+
 	return tmp;
 }
 
+/**
+ * 返回一个msadsc_t
+ * 返回值
+ * 	false。retmstat， retmend 都为NULL
+ * 	true. retmstat， retmend 不为NULL
+ * 
+ */
 bool_t mm_retnmsaob_onbafhlst(bafhlst_t *bafhp, msadsc_t **retmstat, msadsc_t **retmend)
 {
 	if (NULL == bafhp || NULL == retmstat || NULL == retmend) {
@@ -352,6 +369,7 @@ bool_t mm_retnmsaob_onbafhlst(bafhlst_t *bafhp, msadsc_t **retmstat, msadsc_t **
 	bafhp->af_fobjnr--;
 	// 增加分配计数
 	bafhp->af_freindx++;
+
 	*retmstat = tmp;
 	// 返回当前msadsc_t结构连续的那个结尾的msadsc_t结构
 	*retmend = (msadsc_t *)tmp->md_odlink;
@@ -364,6 +382,7 @@ bool_t mm_retnmsaob_onbafhlst(bafhlst_t *bafhp, msadsc_t **retmstat, msadsc_t **
 	return TRUE;
 }
 
+// 判断当前memarea的空闲页面和总页面是否符合要分配的页面内存
 bool_t scan_mapgsalloc_ok(memarea_t *malckp, uint_t pages)
 {
 	if (NULL == malckp || 1 > pages) {
@@ -373,11 +392,14 @@ bool_t scan_mapgsalloc_ok(memarea_t *malckp, uint_t pages)
 	if (malckp->ma_freepages >= pages && malckp->ma_maxpages >= pages) {
 		return TRUE;
 	}
+
 	return FALSE;
 }
 
+// 分配内存
 msadsc_t *mm_maxdivpages_onmarea(memarea_t *malckp, uint_t *retrelpnr)
 {
+	// 从dm_mdmlielst数组从后往前遍历，找到bafhlst_t下有空闲msadsc_t的就返回
 	bafhlst_t *bafhp = onma_retn_maxbafhlst(malckp);
 	if (NULL == bafhp) {
 		*retrelpnr = 0;
@@ -387,6 +409,7 @@ msadsc_t *mm_maxdivpages_onmarea(memarea_t *malckp, uint_t *retrelpnr)
 	msadsc_t *retmsa = NULL;
 
 	msadsc_t *retmstat = NULL, *retmend = NULL;
+	// 返回一个msadsc_t
 	bool_t rets = mm_retnmsaob_onbafhlst(bafhp, &retmstat, &retmend);
 
 	if (FALSE == rets || NULL == retmstat || NULL == retmend) {
@@ -394,6 +417,7 @@ msadsc_t *mm_maxdivpages_onmarea(memarea_t *malckp, uint_t *retrelpnr)
 		return NULL;
 	}
 
+	// 把msadsc_t设置成已分配
 	retmsa = mm_divpages_opmsadsc(retmstat, bafhp->af_oderpnr);
 
 	if (NULL == retmsa) {
@@ -464,6 +488,7 @@ uint_t chek_divlenmsa(msadsc_t *msastat, msadsc_t *msaend, uint_t mnr)
 	return ok;
 }
 
+// 开始分割连续的msadsc_t结构，把剩下的一段连续的msadsc_t结构加入到对应该bafhlst_t结构中
 bool_t mrdmb_add_msa_bafh(bafhlst_t *bafhp, msadsc_t *msastat, msadsc_t *msaend)
 {
 	if (NULL == bafhp || NULL == msastat || NULL == msaend) {
@@ -499,6 +524,7 @@ bool_t mrdmb_add_msa_bafh(bafhlst_t *bafhp, msadsc_t *msastat, msadsc_t *msaend)
 	return TRUE;
 }
 
+// 实际在bafhlst_t结构中分配页面
 msadsc_t *mm_reldpgsdivmsa_bafhl(memarea_t *malckp, uint_t pages, uint_t *retrelpnr, bafhlst_t *relbfl, bafhlst_t *divbfl)
 {
 	msadsc_t *retmsa = NULL;
@@ -527,7 +553,7 @@ msadsc_t *mm_reldpgsdivmsa_bafhl(memarea_t *malckp, uint_t pages, uint_t *retrel
 			return NULL;
 		}
 
-		// 设置msadsc_t结构的相关信息表示已经删除
+		// 把msadsc_t设置成已分配
 		retmsa = mm_divpages_opmsadsc(retmstat, relbfl->af_oderpnr);
 		if (NULL == retmsa) {
 			*retrelpnr = 0;
@@ -580,6 +606,7 @@ msadsc_t *mm_reldivpages_onmarea(memarea_t *malckp, uint_t pages, uint_t *retrel
 		return NULL;
 	}
 
+	// 判断当前memarea的空闲页面和总页面是否符合要分配的页面内存
 	if (scan_mapgsalloc_ok(malckp, pages) == FALSE) {
 		*retrelpnr = 0;
 		return NULL;
@@ -587,7 +614,8 @@ msadsc_t *mm_reldivpages_onmarea(memarea_t *malckp, uint_t pages, uint_t *retrel
     
 	bafhlst_t *retrelbhl = NULL, *retdivbhl = NULL;
 
-	//根据页面数在内存区的m_mdmlielst数组中找出其中请求分配页面的bafhlst_t结构（retrelbhl）和实际要在其中分配页面的bafhlst_t结构(retdivbhl)
+	// 根据页面数在内存区的m_mdmlielst数组中找出其中请求分配页面的bafhlst_t结构（retrelbhl）
+	// 和实际要在其中分配页面的bafhlst_t结构(retdivbhl)
 	bool_t rets = onmpgs_retn_bafhlst(malckp, pages, &retrelbhl, &retdivbhl);
 	if (FALSE == rets) {
 		*retrelpnr = 0;
@@ -646,11 +674,13 @@ msadsc_t *mm_prcdivpages_onmarea(memarea_t *malckp, uint_t pages, uint_t *retrel
 	return retmsa;
 }
 
+// 内存分配的核心函数
 msadsc_t *mm_divpages_core(memarea_t *mareap, uint_t pages, uint_t *retrealpnr, uint_t flgs)
 {
 	uint_t retpnr = 0;
-	msadsc_t *retmsa = NULL; //,*tmpmsa=NULL;
+	msadsc_t *retmsa = NULL; // *tmpmsa = NULL;
 	cpuflg_t cpuflg;
+
 	if (DMF_RELDIV != flgs && DMF_MAXDIV != flgs) {
 		*retrealpnr = 0;
 		return NULL;
@@ -1483,15 +1513,16 @@ void test_onedivmer_all(memarea_t *ma)
 			stsc = x86_rdtsc();
 			retmsa = mm_division_pages(&memmgrob, pages, &retpnr, ma->ma_type, DMF_RELDIV);
 			etsc = x86_rdtsc();
-			if (NULL == retmsa)
-			{
+			if (NULL == retmsa) {
 				kprint("in for retmsa==NULL:%x\n", pages);
 				break;
 			}
+
 			write_one_mchkstuc(retmsa, retpnr);
 			kprint("所分配连续物理内存页面的首地址:%x,连续物理内存页面数:%d,连续物理内存大小:%dMB,CPU时钟周期:%d,PAGES:%d\n",
 				   (uint_t)(retmsa->md_phyadrs.paf_padrs << 12), (uint_t)retpnr, (uint_t)((retpnr << 12) >> 20), (uint_t)(etsc - stsc), (uint_t)pages);
 		}
+
 		chek_all_mchkstuc();
 		free_all_mchkstuc();
 	}

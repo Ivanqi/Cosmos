@@ -9,7 +9,7 @@
 // 挂入链表的类型
 #define MF_OLKTY_INIT (0)
 #define MF_OLKTY_ODER (1)
-#define MF_OLKTY_BAFH (2)
+#define MF_OLKTY_BAFH (2)	// 单个msadsc_t
 #define MF_OLKTY_TOBJ (3)
 
 // 是否挂入链表

@@ -240,6 +240,11 @@ KLINE u64_t x86_rdtsc(void) {
     return (((u64_t)ledx) << 32) | (u64_t)leax;
 }
 
+/**
+ * BSF(Bit Scan Forward): 位扫描找1, 低 -> 高
+ * BSR(Bit Scan Reverse): 位扫描找1, 高 -> 低
+ *  bsr，是Bit Scan Reverse的缩写，是逆向位扫描指令.用于获取一个二进制为1的最高位的位置
+ */
 KLINE sint_t search_64rlbits(u64_t val) {
     sint_t retbitnr = -1;
     __asm__ __volatile__(

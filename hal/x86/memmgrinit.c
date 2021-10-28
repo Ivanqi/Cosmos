@@ -31,7 +31,7 @@ void disp_memmgrob()
 	return;
 }
 
-// 初始化内存管理核心数据结构的地址和数量，并计算了一些统计信息
+// 初始化内存管理核心数据结构的地址和数量，并计算了一些统计信息/物理地址转为虚拟地址，便于以后使用
 void init_memmgrob()
 {
 	machbstart_t *mbsp = &kmachbsp;

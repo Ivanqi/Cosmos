@@ -27,6 +27,7 @@ KLINE void __list_add(list_h_t *new, list_h_t *prev, list_h_t *next) {
 
 KLINE void list_add(list_h_t *new, list_h_t *head) {
     __list_add(new, head, head->next);
+    return;
 }
 
 KLINE void list_add_tail(list_h_t *new, list_h_t *head) {
@@ -36,14 +37,13 @@ KLINE void list_add_tail(list_h_t *new, list_h_t *head) {
 
 KLINE void __list_del_entry(list_h_t *entry) {
     __list_del(entry->prev, entry->next);
+    return;
 }
 
 KLINE void list_del(list_h_t *entry) {
     __list_del(entry->prev, entry->next);
     list_init(entry);
     return;
-
-
 }
 
 KLINE void list_move(list_h_t *list, list_h_t *head) {
@@ -60,6 +60,14 @@ KLINE void list_move_tail(list_h_t *list, list_h_t *head) {
 
 KLINE bool_t list_is_empty(const list_h_t *head) {
     if (head->next == head) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+KLINE bool_t list_is_empty_careful(const list_h_t *head) {
+    list_h_t *next = head->next;
+    if (next == head && next == head->prev) {
         return TRUE;
     }
     return FALSE;

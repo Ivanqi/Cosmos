@@ -215,6 +215,7 @@ uint_t continumsadsc_is_ok(msadsc_t *prevmsa, msadsc_t *nextmsa, msadflgs_t *cmp
 }
 
 // 返回从这个msadsc_t结构开始到下一个非空闲、地址非连续的msadsc_t结构对应的msadsc_t结构索引号到retfindmnr变量中
+// 返回的是连续地址msadsc_t的结构体的个数
 bool_t scan_len_msadsc(msadsc_t *mstat, msadflgs_t *cmpmdfp, uint_t mnr, uint_t *retmnr)
 {
 	uint_t retclok = 0;
@@ -224,6 +225,7 @@ bool_t scan_len_msadsc(msadsc_t *mstat, msadflgs_t *cmpmdfp, uint_t mnr, uint_t 
 	}
 
 	for (uint_t tmdx = 0; tmdx < mnr - 1; tmdx++) {
+		// 检测前后两个msadsc_t结构体的msadflgs_t是否和cmpmdfp一致且空闲的，并且检测是否是连续的
 		retclok = continumsadsc_is_ok(&mstat[tmdx], &mstat[tmdx + 1], cmpmdfp);
 		if ((~0UL) == retclok) {
 			*retmnr = 0;
@@ -247,6 +249,7 @@ bool_t scan_len_msadsc(msadsc_t *mstat, msadflgs_t *cmpmdfp, uint_t mnr, uint_t 
 	return TRUE;
 }
 
+// 检查连续的msadsc_t 结构
 uint_t check_continumsadsc(memarea_t *mareap, msadsc_t *stat, msadsc_t *end, uint_t fmnr)
 {
 	msadsc_t *ms = stat, *me = end;
@@ -350,6 +353,7 @@ uint_t check_continumsadsc(memarea_t *mareap, msadsc_t *stat, msadsc_t *end, uin
 	return ok;
 }
 
+// 获取地址连续的msadsc_t结构体的开始、结束地址、一共多少个msadsc_t结构体，下一次循环的fntmnr
 bool_t merlove_scan_continumsadsc(memarea_t *mareap, msadsc_t *fmstat, uint_t *fntmsanr, uint_t fmsanr, 
         msadsc_t **retmsastatp, msadsc_t **retmsaendp, uint_t *retfmnr)
 {
@@ -562,6 +566,7 @@ uint_t test_setflgs(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 	return retnr;
 }
 
+// 根据地址连续的msadsc_t结构的数量查找合适bafhlst_t结构
 bafhlst_t *find_continumsa_inbafhlst(memarea_t *mareap, uint_t fmnr)
 {
 	bafhlst_t *retbafhp = NULL;
@@ -626,6 +631,7 @@ bool_t continumsadsc_add_procmareabafh(memarea_t *mareap, bafhlst_t *bafhp, msad
 	return TRUE;
 }
 
+// 根据地址连续的msadsc_t结构挂载到bafhlst_t结构中
 bool_t continumsadsc_add_bafhlst(memarea_t *mareap, bafhlst_t *bafhp, msadsc_t *fstat, msadsc_t *fend, uint_t fmnr)
 {
 	if (NULL == mareap || NULL == bafhp || NULL == fstat || NULL == fend || 0 == fmnr) {
@@ -643,7 +649,7 @@ bool_t continumsadsc_add_bafhlst(memarea_t *mareap, bafhlst_t *bafhp, msadsc_t *
 	fstat->md_indxflgs.mf_olkty = MF_OLKTY_ODER;
 	// 开始的msadsc_t结构指向最后的msadsc_t结构
 	fstat->md_odlink = fend;
-	// fstat==fend
+	// fstat == fend
 	fend->md_indxflgs.mf_olkty = MF_OLKTY_BAFH;
 	// 最后的msadsc_t结构指向它属于的bafhlst_t结构
 	fend->md_odlink = bafhp;
@@ -661,6 +667,7 @@ bool_t continumsadsc_add_bafhlst(memarea_t *mareap, bafhlst_t *bafhp, msadsc_t *
 	return TRUE;
 }
 
+// 为一段地址连续的msadsc_t结构寻找合适m_mdmlielst数组中的bafhlst_t结构
 bool_t continumsadsc_mareabafh_core(memarea_t *mareap, msadsc_t **rfstat, msadsc_t **rfend, uint_t *rfmnr)
 {
 
@@ -721,6 +728,7 @@ bool_t continumsadsc_mareabafh_core(memarea_t *mareap, msadsc_t **rfstat, msadsc
 	return FALSE;
 }
 
+// 把msadsc_t 结构体 挂载到合适的 m_mdmlielst 数组中的 bafhlst_t 结构中
 bool_t merlove_continumsadsc_mareabafh(memarea_t *mareap, msadsc_t *mstat, msadsc_t *mend, uint_t mnr)
 {
 	if (NULL == mareap || NULL == mstat || NULL == mend || 0 == mnr) {
