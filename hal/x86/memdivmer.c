@@ -5,9 +5,12 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+// 分配完成后，memmgrob_t更新
 void mm_update_memmgrob(uint_t realpnr, uint_t flgs)
 {
 	cpuflg_t cpuflg;
+
+	// 空闲减少，分配增加
 	if (0 == flgs) {
 		knl_spinlock_cli(&memmgrob.mo_lock, &cpuflg);
 		memmgrob.mo_alocpages += realpnr;
@@ -15,6 +18,7 @@ void mm_update_memmgrob(uint_t realpnr, uint_t flgs)
 		knl_spinunlock_sti(&memmgrob.mo_lock, &cpuflg);
 	}
 
+	// 空闲增加，分配减少
 	if (1 == flgs) {
 		knl_spinlock_cli(&memmgrob.mo_lock, &cpuflg);
 		memmgrob.mo_alocpages -= realpnr;
@@ -25,17 +29,20 @@ void mm_update_memmgrob(uint_t realpnr, uint_t flgs)
 	return;
 }
 
+// 分配完成后，更新memarea_t
 void mm_update_memarea(memarea_t *malokp, uint_t pgnr, uint_t flgs)
 {
 	if (NULL == malokp) {
 		return;
 	}
 
+	// 空闲减少，分配增加
 	if (0 == flgs) {
 		malokp->ma_freepages -= pgnr;
 		malokp->ma_allocpages += pgnr;
 	}
 
+	// 空闲增加，分配减少
 	if (1 == flgs) {
 		malokp->ma_freepages += pgnr;
 		malokp->ma_allocpages -= pgnr;
@@ -55,6 +62,7 @@ KLINE sint_t retn_divoder(uint_t pages)
 	return pbits;
 }
 
+// 获取要释放msadsc_t结构所在的内存区
 memarea_t *onfrmsa_retn_marea(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t freepgs)
 {
 
@@ -154,6 +162,12 @@ msadsc_t *mm_divpages_opmsadsc(msadsc_t *msastat, uint_t mnr)
 	return msastat;
 }
 
+/**
+ * 把msadsc_t设置成未分配
+ * 返回值
+ * 	1: 如果依然大于0说明它是共享页面 直接返回1指示不需要进行下一步操作
+ * 	2: 返回2指示需要进行下一步操作
+ */
 sint_t mm_merpages_opmsadsc(bafhlst_t *bafh, msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == bafh || NULL == freemsa || 1 > freepgs) {
@@ -519,6 +533,7 @@ bool_t mrdmb_add_msa_bafh(bafhlst_t *bafhp, msadsc_t *msastat, msadsc_t *msaend)
 	msaend->md_indxflgs.mf_olkty = MF_OLKTY_BAFH;
 	msaend->md_odlink = bafhp;
 	list_add(&msastat->md_list, &bafhp->af_frelst);
+
 	bafhp->af_mobjnr++;
 	bafhp->af_fobjnr++;
 	return TRUE;
@@ -590,6 +605,7 @@ msadsc_t *mm_reldpgsdivmsa_bafhl(memarea_t *malckp, uint_t pages, uint_t *retrel
 		divnr -= tmpbfl->af_oderpnr;
 	}
 
+	// 把msadsc_t设置成已分配
 	retmsa = mm_divpages_opmsadsc(retmstat, divnr);
 	if (NULL == retmsa) {
 		*retrelpnr = 0;
@@ -600,6 +616,7 @@ msadsc_t *mm_reldpgsdivmsa_bafhl(memarea_t *malckp, uint_t pages, uint_t *retrel
 	return retmsa;
 }
 
+// 分配内存，并且空闲内存合并形成更大的连续内存页面
 msadsc_t *mm_reldivpages_onmarea(memarea_t *malckp, uint_t pages, uint_t *retrelpnr)
 {
 	if (NULL == malckp || 1 > pages || NULL == retrelpnr) {
@@ -701,6 +718,7 @@ msadsc_t *mm_divpages_core(memarea_t *mareap, uint_t pages, uint_t *retrealpnr, 
 	}
 
 	if (DMF_RELDIV == flgs) {
+		// 分配内存，并且空闲内存合并形成更大的连续内存页面
 		retmsa = mm_reldivpages_onmarea(mareap, pages, &retpnr);
 		goto ret_step;
 	}
@@ -709,7 +727,9 @@ msadsc_t *mm_divpages_core(memarea_t *mareap, uint_t pages, uint_t *retrealpnr, 
 	retpnr = 0;
 ret_step:
 	if (NULL != retmsa && 0 != retpnr) {
+		// 分配完成后，更新memarea_t
 		mm_update_memarea(mareap, retpnr, 0);
+		//  分配完成后，memmgrob_t更新
 		mm_update_memmgrob(retpnr, 0);
 	}
 
@@ -842,6 +862,7 @@ msadsc_t *mm_divpages_procmarea(memmgrob_t *mmobjp, uint_t pages, uint_t *retrea
 	return retmsa;
 }
 
+// 待处理的内存是已经分配的
 bool_t scan_freemsa_isok(msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == freemsa || 1 > freepgs) {
@@ -1136,11 +1157,14 @@ bool_t mpobf_add_msadsc(bafhlst_t *bafhp, msadsc_t *freemstat, msadsc_t *freemen
 	freemend->md_indxflgs.mf_olkty = MF_OLKTY_BAFH;
 	// 结束页面指向所属的bafhlst_t结构
 	freemend->md_odlink = bafhp;
+
 	// 把起始页面挂载到所属的bafhlst_t结构中
 	list_add(&freemstat->md_list, &bafhp->af_frelst);
+
 	// 增加bafhlst_t结构的空闲页面对象和总的页面对象的计数
 	bafhp->af_fobjnr++;
 	bafhp->af_mobjnr++;
+	
 	return TRUE;
 }
 
@@ -1171,6 +1195,7 @@ bool_t mm_merpages_onbafhlst(msadsc_t *freemsa, uint_t freepgs, bafhlst_t *relbf
 	return TRUE;
 }
 
+// 
 bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == malckp || NULL == freemsa || 1 > freepgs) {
@@ -1179,8 +1204,11 @@ bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 
 	bafhlst_t *prcbf = NULL;
 	sint_t pocs = 0;
-	if (MA_TYPE_PROC == malckp->ma_type) {
+
+	// 应用区
+	if (MA_TYPE_PROC == malckp->ma_type) {	
 		prcbf = &malckp->ma_mdmdata.dm_onemsalst;
+		// 把msadsc_t设置成未分配
 		pocs = mm_merpages_opmsadsc(prcbf, freemsa, freepgs);
 
 		if (2 == pocs) {
@@ -1245,6 +1273,7 @@ bool_t mm_merpages_core(memarea_t *marea, msadsc_t *freemsa, uint_t freepgs)
 		return FALSE;
 	}
 
+	// 待处理的内存是已经分配的
 	if (scan_freemsa_isok(freemsa, freepgs) == FALSE) {
 		return FALSE;
 	}
@@ -1262,6 +1291,7 @@ bool_t mm_merpages_core(memarea_t *marea, msadsc_t *freemsa, uint_t freepgs)
 	return rets;
 }
 
+// 释放内存页面框架函数
 bool_t mm_merpages_fmwk(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t freepgs)
 {
 	// 获取要释放msadsc_t结构所在的内存区
