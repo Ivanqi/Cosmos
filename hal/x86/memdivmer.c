@@ -163,7 +163,7 @@ msadsc_t *mm_divpages_opmsadsc(msadsc_t *msastat, uint_t mnr)
 }
 
 /**
- * 把msadsc_t设置成未分配
+ * 把freemsa 的 msadsc_t设置成未分配
  * 返回值
  * 	1: 如果依然大于0说明它是共享页面 直接返回1指示不需要进行下一步操作
  * 	2: 返回2指示需要进行下一步操作
@@ -281,6 +281,7 @@ bool_t onmpgs_retn_bafhlst(memarea_t *malckp, uint_t pages, bafhlst_t **retrelba
 	return FALSE;
 }
 
+// 根据freepgs返回请求释放的和最大释放的bafhlst_t结构指针
 bool_t onfpgs_retn_bafhlst(memarea_t *malckp, uint_t freepgs, bafhlst_t **retrelbf, bafhlst_t **retmerbf)
 {
 	if (NULL == malckp || 1 > freepgs || NULL == retrelbf || NULL == retmerbf) {
@@ -886,6 +887,16 @@ bool_t scan_freemsa_isok(msadsc_t *freemsa, uint_t freepgs)
 	return TRUE;
 }
 
+/**
+ * 检查msadsc_t是否在bafhlst_t中
+ * 	1. 检查是否msadsc_t的个数，是单个还是多个
+ * 	2. msadsc_t是否属于bafhlst_t
+ * 	3. 检查msadsc_t是否分配
+ * 	4. 检查页物理地址相减的情况是否相等((_1me->md_phyadrs.paf_padrs - _1ms->md_phyadrs.paf_padrs) != (uint_t)(_1me - _1ms))
+ * 返回值
+ * 	1. 返回0，为错误
+ * 	2. 返回2，为正常
+ */
 sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 {
 	if (NULL == bafh || NULL == _1ms || NULL == _1me) {
@@ -896,7 +907,9 @@ sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 		return 0;
 	}
 
+	// 同一个结构体
 	if (_1ms == _1me) {
+		// 各种属性检查
 		if (MF_OLKTY_BAFH != _1me->md_indxflgs.mf_olkty) {
 			return 0;
 		}
@@ -959,6 +972,13 @@ sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 	return 2;
 }
 
+/**
+ * 检查 msadsc_t 之间的地址是否连续
+ * 
+ * 返回值
+ * 	成功: 2(msadsc_t1结束地址 重合于 msadsc_t2 开始地址) , 4(msadsc_t2结束地址 部分重合于 msadsc_t1开始地址)
+ * 	返回: 1(msadsc_t1 和 msadsc_t2不连续)
+ */
 sint_t mm_cmsa2blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t *_2ms, msadsc_t *_2me)
 {
 	if (NULL == bafh || NULL == _1ms || NULL == _1me || NULL == _2ms || NULL == _2me || _1ms == _2ms || _1me == _2me) {
@@ -966,17 +986,21 @@ sint_t mm_cmsa2blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_
 	}
 
 	sint_t ret1s = 0, ret2s = 0;
+	// 检查msadsc_t是否在bafhlst_t中
 	ret1s = mm_cmsa1blk_isok(bafh, _1ms, _1me);
 	if (0 == ret1s) {
 		system_error("mm_cmsa1blk_isok ret1s == 0\n");
 	}
 
+	// 检查msadsc_t是否在bafhlst_t中
 	ret2s = mm_cmsa1blk_isok(bafh, _2ms, _2me);
 	if (0 == ret2s) {
 		system_error("mm_cmsa1blk_isok ret2s == 0\n");
 	}
 
 	if (2 == ret1s && 2 == ret2s) {
+		// msadsc_t1的开始地址小于msadsc_t2的开始地址且msadsc_t1的结束地址小于msadsc_t2的结束地址
+		// 且msadsc_t1的结束地址 + 1 也不等于sadsc_t2的开始地址
 		if (_1ms < _2ms && _1me < _2me) {
 			if ((_1me + 1) != _2ms) {
 				return 1;
@@ -989,6 +1013,8 @@ sint_t mm_cmsa2blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_
 			return 2;
 		}
 
+		// msadsc_t1的开始地址大于msadsc_t2的开始地址且msadsc_t1的结束地址大于msadsc_t2的结束地址
+		// 且msadsc_t2的结束地址 + 1 也不等于sadsc_t1的开始地址
 		if (_1ms > _2ms && _1me > _2me) {
 			if ((_2me + 1) != _1ms) {
 				return 1;
@@ -1000,12 +1026,14 @@ sint_t mm_cmsa2blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_
 
 			return 4;
 		}
+
 		return 0;
 	}
 
 	return 0;
 }
 
+// 重新检查合并后的两个msadsc_t的属性
 bool_t chek_cl2molkflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t *_2ms, msadsc_t *_2me)
 {
 	if (NULL == bafh || NULL == _1ms || NULL == _1me || NULL == _2ms || NULL == _2me) {
@@ -1020,6 +1048,7 @@ bool_t chek_cl2molkflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t
 		return FALSE;
 	}
 
+	// 单个链表
 	if (_1ms == _1me && _2ms == _2me) {
 		if (MF_OLKTY_ODER != _1ms->md_indxflgs.mf_olkty || (msadsc_t *)_1ms->md_odlink != _2me) {
 			return FALSE;
@@ -1051,6 +1080,7 @@ bool_t chek_cl2molkflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t
 	return TRUE;
 }
 
+// 把两个连续msadsc_t重新设置链表属性且设置属于哪个bafhlst_t
 bool_t mm_clear_2msaolflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t *_2ms, msadsc_t *_2me)
 {
 	if (NULL == bafh || NULL == _1ms || NULL == _1me || NULL == _2ms || NULL == _2me) {
@@ -1063,15 +1093,28 @@ bool_t mm_clear_2msaolflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msads
 
 	_1me->md_indxflgs.mf_olkty = MF_OLKTY_INIT;
 	_1me->md_odlink = NULL;
+
 	_2ms->md_indxflgs.mf_olkty = MF_OLKTY_INIT;
 	_2ms->md_odlink = NULL;
+
 	_1ms->md_indxflgs.mf_olkty = MF_OLKTY_ODER;
 	_1ms->md_odlink = _2me;
+
 	_2me->md_indxflgs.mf_olkty = MF_OLKTY_BAFH;
 	_2me->md_odlink = bafh;
+	
 	return TRUE;
 }
 
+/**
+ * 查看最大地址连续、且空闲msadsc_t结构
+ * 如释放的是第0个msadsc_t结构我们就去查找第1个msadsc_t结构是否空闲，且与第0个msadsc_t结构的地址是不是连续的
+ * 同时返回合并后的新的msadsc_t的开始和结束地址
+ * 
+ * 返回值
+ * 	失败：1, 0
+ * 	成功: 2
+ */
 sint_t mm_find_cmsa2blk(bafhlst_t *fbafh, msadsc_t **rfnms, msadsc_t **rfnme)
 {
 	if (NULL == fbafh || NULL == rfnms || NULL == rfnme) {
@@ -1088,8 +1131,10 @@ sint_t mm_find_cmsa2blk(bafhlst_t *fbafh, msadsc_t **rfnms, msadsc_t **rfnme)
 	msadsc_t *tmpmsa = NULL, *blkms = NULL, *blkme = NULL;
 	sint_t rets = 0;
 
+	// 找出msadsc_t属于哪个空闲的af_frelst队列
 	list_for_each(tmplst, &fbafh->af_frelst) {
 		tmpmsa = list_entry(tmplst, msadsc_t, md_list);
+		// 检查 msadsc_t 之间的地址是否连续
 		rets = mm_cmsa2blk_isok(fbafh, freemstat, freemend, tmpmsa, &tmpmsa[fbafh->af_oderpnr - 1]);
 		if (2 == rets || 4 == rets) {
 			blkms = tmpmsa;
@@ -1105,8 +1150,11 @@ step1:
 		return 1;
 	}
 
+	// 2(freemstat结束地址 重合于 blkms 开始地址)
 	if (2 == rets) {
+		// 把两个连续msadsc_t重新设置链表属性且设置属于哪个bafhlst_t
 		if (mm_clear_2msaolflg(fbafh + 1, freemstat, freemend, blkms, blkme) == TRUE) {
+			// 重新检查合并后的两个msadsc_t的属性
 			if (chek_cl2molkflg(fbafh + 1, freemstat, freemend, blkms, blkme) == FALSE) {
 				system_error("chek_cl2molkflg err1\n");
 			}
@@ -1117,8 +1165,11 @@ step1:
 		return 0;
 	}
 
+	// 4(blkms结束地址 重合于 freemstat开始地址)
 	if (4 == rets) {
+		// 把两个连续msadsc_t重新设置链表属性且设置属于哪个bafhlst_t
 		if (mm_clear_2msaolflg(fbafh + 1, blkms, blkme, freemstat, freemend) == TRUE) {
+			// 把两个连续msadsc_t重新设置链表属性且设置属于哪个bafhlst_t
 			if (chek_cl2molkflg(fbafh + 1, blkms, blkme, freemstat, freemend) == FALSE) {
 				system_error("chek_cl2molkflg err2\n");
 			}
@@ -1132,6 +1183,7 @@ step1:
 	return 0;
 }
 
+// 把空闲的msadsc_t 挂载到bafhlst_t中
 bool_t mpobf_add_msadsc(bafhlst_t *bafhp, msadsc_t *freemstat, msadsc_t *freemend)
 {
 	if (NULL == bafhp || NULL == freemstat || NULL == freemend) {
@@ -1168,15 +1220,22 @@ bool_t mpobf_add_msadsc(bafhlst_t *bafhp, msadsc_t *freemstat, msadsc_t *freemen
 	return TRUE;
 }
 
+// 把msadsc_t结构进行合并然后加入对应bafhlst_t结构
 bool_t mm_merpages_onbafhlst(msadsc_t *freemsa, uint_t freepgs, bafhlst_t *relbf, bafhlst_t *merbf)
 {
 	sint_t rets = 0;
+	/**
+	 * mnxs: 要合并的msadsc_t结构体的开始地址
+	 * mnxe: 要合并的msadsc_t结构体的结束地址
+	 */
 	msadsc_t *mnxs = freemsa, *mnxe = &freemsa[freepgs - 1];
 	bafhlst_t *tmpbf = relbf;
 
 	// 从实际要开始遍历，直到最高的那个bafhlst_t结构
 	for (; tmpbf < merbf; tmpbf++) {
-		// 查看最大地址连续、且空闲msadsc_t结构，如释放的是第0个msadsc_t结构我们就去查找第1个msadsc_t结构是否空闲，且与第0个msadsc_t结构的地址是不是连续的
+		// 查看最大地址连续、且空闲msadsc_t结构，如释放的是第0个msadsc_t结构我们就去查找第1个msadsc_t结构是否空闲
+		// 且与第0个msadsc_t结构的地址是不是连续的
+		// 同时返回合并后的新的msadsc_t的开始和结束地址
 		rets = mm_find_cmsa2blk(tmpbf, &mnxs, &mnxe);
 		if (1 == rets) {
 			break;
@@ -1195,7 +1254,7 @@ bool_t mm_merpages_onbafhlst(msadsc_t *freemsa, uint_t freepgs, bafhlst_t *relbf
 	return TRUE;
 }
 
-// 
+// 把msadsc_t合并到memarea_t下的bafhlst_t的链表中
 bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == malckp || NULL == freemsa || 1 > freepgs) {
@@ -1210,11 +1269,13 @@ bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 		prcbf = &malckp->ma_mdmdata.dm_onemsalst;
 		// 把msadsc_t设置成未分配
 		pocs = mm_merpages_opmsadsc(prcbf, freemsa, freepgs);
-
+		// 继续执行流程
 		if (2 == pocs) {
+			// 把空闲的msadsc_t 挂载到bafhlst_t中
 			if (mpobf_add_msadsc(prcbf, freemsa, &freemsa[freepgs - 1]) == FALSE) {
 				system_error("mm_merpages_onmarea proc memarea merge fail\n");
 			}
+
 			mm_update_memarea(malckp, freepgs, 1);
 			mm_update_memmgrob(freepgs, 1);
 			return TRUE;
@@ -1231,8 +1292,15 @@ bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 		return FALSE;
 	}
 
+	// 非应用区
+
+	/**
+	 * retrelbf: 请求释放的bafhlst_t结构指针
+	 * retmerbf: 最大释放的bafhlst_t结构指针
+	 */
 	bafhlst_t *retrelbf = NULL, *retmerbf = NULL;
 	bool_t rets = FALSE;
+
 	// 根据freepgs返回请求释放的和最大释放的bafhlst_t结构指针
 	rets = onfpgs_retn_bafhlst(malckp, freepgs, &retrelbf, &retmerbf);
 	if (FALSE == rets) {
@@ -1263,6 +1331,7 @@ bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 	if (0 == mopms) {
 		return FALSE;
 	}
+
 	return FALSE;
 }
 

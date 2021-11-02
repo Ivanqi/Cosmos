@@ -248,7 +248,7 @@ KLINE u64_t x86_rdtsc(void) {
 KLINE sint_t search_64rlbits(u64_t val) {
     sint_t retbitnr = -1;
     __asm__ __volatile__(
-        "bsrq %1,%q0 \t\n"
+        "bsrq %1, %q0 \t\n"
         : "+r"(retbitnr)
         : "rm"(val));
     return retbitnr + 1;
@@ -257,7 +257,7 @@ KLINE sint_t search_64rlbits(u64_t val) {
 KLINE sint_t search_32rlbits(u32_t val) {
     sint_t retbitnr = -1;
     __asm__ __volatile__(
-        "bsrl %1,%0 \t\n"
+        "bsrl %1, %0 \t\n"
         : "+r"(retbitnr)
         : "rm"(val));
     return retbitnr + 1;
@@ -267,7 +267,7 @@ KLINE u32_t read_kesp() {
     u32_t esp;
 
     __asm__ __volatile__(
-        "movl %%esp,%0"
+        "movl %%esp, %0"
         : "=g"(esp)
         :
         : "memory");
@@ -279,7 +279,7 @@ KLINE u32_t read_kcr2() {
     u32_t cr2;
 
     __asm__ __volatile__(
-        "movl %%cr2,%0"
+        "movl %%cr2, %0"
         : "=g"(cr2)
         :
         : "memory");
