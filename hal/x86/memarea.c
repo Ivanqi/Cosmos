@@ -68,7 +68,13 @@ void memdivmer_t_init(memdivmer_t *initp)
 	initp->dm_divnr = 0;
 	initp->dm_mernr = 0;
 
-	// 循环初始化memdivmer_t结构体中dm_mdmlielst数组中的每个bafhlst_t结构的基本数据
+	/**
+	 * 循环初始化memdivmer_t结构体中dm_mdmlielst数组中的每个bafhlst_t结构的基本数据
+	 * bafhlst_t数组中的每个bafhlst_t，会根据其在数组中的序号n，存放全部2的n次方的连续页面，也就是说：
+	 * 	1. 第0个bafhlst_t，存放全部长度为1的内存段
+	 * 	2. 第1个bafhlst_t，存放全部长度为2的内存段
+	 * 	3. 第2个bafhlst_t，存放全部长度为4的内存段
+	 */
 	for (uint_t li = 0; li < MDIVMER_ARR_LMAX; li++) {
 		bafhlst_t_init(&initp->dm_mdmlielst[li], BAFH_STUS_DIVM, li, (1UL << li));
 	}

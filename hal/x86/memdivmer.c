@@ -291,6 +291,7 @@ bool_t onfpgs_retn_bafhlst(memarea_t *malckp, uint_t freepgs, bafhlst_t **retrel
 	// 获取bafhlst_t结构数组的开始地址
 	bafhlst_t *bafhstat = malckp->ma_mdmdata.dm_mdmlielst;
 	// 根据分配页面数计算出分配页面在dm_mdmlielst数组中下标
+	// 根据释放内存大小，用二进制1的查找，确定最大可以释放到bafhlst_t数组中的哪个bafhlst_t，避免内存碎片化
 	sint_t dividx = retn_divoder(freepgs);
 
 	if (0 > dividx || MDIVMER_ARR_LMAX <= dividx) {
