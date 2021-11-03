@@ -87,6 +87,8 @@ HAL_DEFGLOB_VARIABLE(igdtr_t, x64_igdt_reg)[CPUCORE_MAX];
 HAL_DEFGLOB_VARIABLE(iidtr_t, x64_iidt_reg);
 HAL_DEFGLOB_VARIABLE(machbstart_t, kmachbsp);
 HAL_DEFGLOB_VARIABLE(dftgraph_t, kdftgh);
+
+// 小内存管理
 HAL_DEFGLOB_VARIABLE(memmgrob_t, memmgrob);
 
 // 定义intfltdsc_t结构数组大小为256

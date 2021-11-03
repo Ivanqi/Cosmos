@@ -23,7 +23,7 @@ typedef struct s_MEMMGROB {
 	u64_t mo_msanr;
 	memarea_t* mo_mareastat;	// 内存区结构指针
 	u64_t mo_mareanr;
-	kmsobmgrhed_t mo_kmsobmgr;
+	kmsobmgrhed_t mo_kmsobmgr;	// 管理kmsob_t结构的数据结构
 	void* mo_privp;
 	void* mo_extp;
 } memmgrob_t;

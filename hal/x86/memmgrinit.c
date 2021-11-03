@@ -21,6 +21,9 @@ void init_memmgr()
 	init_merlove_mem();
 	init_memmgrob();
 
+	// 初始化kmsob
+	init_kmsob();
+
 	return;
 }
 
