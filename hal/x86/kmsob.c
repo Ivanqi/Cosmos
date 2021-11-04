@@ -132,6 +132,7 @@ void init_kmsob()
 	return;
 }
 
+// 更新kmsobmgrhed_t结构的信息
 void kmsob_updata_cache(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp, uint_t flgs)
 {
 	if (KUC_NEWFLG == flgs) {
@@ -140,8 +141,7 @@ void kmsob_updata_cache(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp,
 		return;
 	}
 
-	if (KUC_DELFLG == flgs)
-	{
+	if (KUC_DELFLG == flgs) {
 		kmobmgrp->ks_msobche = kmsp;
 		koblp->ol_cahe = kmsp;
 		return;
@@ -298,6 +298,7 @@ bool_t scan_dfszkmsob_isok(kmsob_t *kmsp, void *fadrs, size_t fsz)
 	return FALSE;
 }
 
+// 如果内存对象容器中没有空闲的内存次对象了就需要扩展对象容器的内存了
 uint_t scan_kmsob_objnr(kmsob_t *kmsp)
 {
 	if (NULL == kmsp) {
@@ -452,8 +453,12 @@ kmsob_t *_create_init_kmsob(kmsob_t *kmsp, size_t objsz, adr_t cvadrs, adr_t cva
 	uint_t ap = (uint_t)((uint_t)fohstat);			// fohstat 地址
 	freobjh_t *tmpfoh = (freobjh_t *)((uint_t)ap);	// fohstat 用于遍历的临时变量
 
+	/**
+	 * 在内存结束地址之前，建立多个freobjh_t结构体，然后放入kmsob_t结构体的链表中
+	 * 
+	 * 相当在kmsob_t结构体之后建立一个freobjh_t结构体数组
+	 */
 	for (; tmpfoh < fohend;) {
-		// 相当在kmsob_t结构体之后建立一个freobjh_t结构体数组
 		if ((ap + (uint_t)kmsp->so_objsz) <= (uint_t)cvadre) {
 			// 初始化每个freobjh_t结构体
 			freobjh_t_init(tmpfoh, 0, (void *)tmpfoh);
@@ -470,7 +475,13 @@ kmsob_t *_create_init_kmsob(kmsob_t *kmsp, size_t objsz, adr_t cvadrs, adr_t cva
 	return kmsp;
 }
 
-// 建立一个内存对象容器
+/**
+ * 建立一个内存对象容器
+ * 	这个函数会找物理页面管理器申请一块连续内存页面
+ * 	然后，在其中的开始部分建立kmsob_t结构的实例变量，又在kmsob_t结构的后面建立freobjh_t结构数组
+ * 	并把每个freobjh_t结构挂载到kmsob_t结构体中的so_frelist中
+ * 	最后再把kmsob_t结构，挂载到kmsobmgrhed_t结构对应的koblst_t结构中
+ */
 kmsob_t *_create_kmsob(kmsobmgrhed_t *kmmgrlokp, koblst_t *koblp, size_t objsz)
 {
 	if (NULL == kmmgrlokp || NULL == koblp || 1 > objsz) {
@@ -483,11 +494,11 @@ kmsob_t *_create_kmsob(kmsobmgrhed_t *kmmgrlokp, koblst_t *koblp, size_t objsz)
 	uint_t pages = 1;
 
 	if (128 < objsz) {
-		pages = 2;
+		pages = 2;	// 2048 字节
 	}
 
 	if (512 < objsz) {
-		pages = 4;
+		pages = 4;	// 4095 字节
 	}
 
 	// 为内存对象容器分配物理内存空间，这是我们之前实现的物理内存页面管理器
@@ -514,13 +525,14 @@ kmsob_t *_create_kmsob(kmsobmgrhed_t *kmmgrlokp, koblst_t *koblp, size_t objsz)
 	// 初始化kmsob_t并建立内存对象
 	kmsp = _create_init_kmsob((kmsob_t *)vadrs, koblp->ol_sz, vadrs, vadre, msa, relpnr);
 	if (NULL == kmsp) {
-		// 把kmsob_t结构，挂载到对应的koblst_t结构中去
+		// 把kmsob_t结构，挂载到对应的koblst_t结构中去.因为无法初始化kmsobt_t，所以要释放内存
 		if (mm_merge_pages(&memmgrob, msa, relpnr) == FALSE) {
 			system_error("_create_kmsob mm_merge_pages fail\n");
 		}
 		return NULL;
 	}
 
+	// 把内存对象容器数据结构，挂载到对应的koblst_t结构中去
 	if (kmsob_add_koblst(koblp, kmsp) == FALSE) {
 		system_error(" _create_kmsob kmsob_add_koblst FALSE\n");
 	}
@@ -530,7 +542,10 @@ kmsob_t *_create_kmsob(kmsobmgrhed_t *kmmgrlokp, koblst_t *koblp, size_t objsz)
 	return kmsp;
 }
 
-// 实际分配的内存对象
+/**
+ * 实际分配的内存对象
+ * 	从空闲内存对象链表头中取出第一个内存对象，返回它的首地址
+ */
 void *kmsob_new_opkmsob(kmsob_t *kmsp, size_t msz)
 {
 	if (NULL == kmsp || 1 > msz) {
@@ -551,7 +566,13 @@ void *kmsob_new_opkmsob(kmsob_t *kmsp, size_t msz)
 	return (void *)(fobh);
 }
 
-// 扩展内存页面
+/**
+ * 扩展内存页面
+ * 	如果不断重复分配同一大小的内存对象，那么内存对象容器中的内存对象，迟早要分配完的
+ * 	一旦内存对象分配完，内存对象容器就没有空闲的内存空间产生内存对象，就要扩展内存空间
+ * 
+ *  所以，分配另一块连续的内存空间，作为空间的内存对象，并且把这块内存空间加内存对象容器中统一管理
+ */
 bool_t kmsob_extn_pages(kmsob_t *kmsp)
 {
 	if (NULL == kmsp) {
@@ -587,12 +608,17 @@ bool_t kmsob_extn_pages(kmsob_t *kmsp)
 
 	u64_t phyadr = msa->md_phyadrs.paf_padrs << PSHRSIZE;
 	u64_t phyade = phyadr + (relpnr << PSHRSIZE) - 1;
+	/**
+	 * vadrs: 内存开始地址
+	 * vadre: 内存结束地址
+	 */
 	adr_t vadrs = phyadr_to_viradr((adr_t)phyadr);
 	adr_t vadre = phyadr_to_viradr((adr_t)phyade);
 
 	// 求出物理内存页面数对应在kmsob_t的so_mc.mc_lst数组中下标
 	sint_t mscidx = retn_mscidx(relpnr);
 
+	// 判断 mscidx 是否大于 MSCLST_MAX，是则释放分配的内存
 	if (MSCLST_MAX <= mscidx || 0 > mscidx) {
 		if (mm_merge_pages(&memmgrob, msa, relpnr) == FALSE) {
 			system_error("kmsob_extn_pages mm_merge_pages fail\n");
@@ -686,6 +712,7 @@ void *kmsob_new_core(size_t msz)
 		}
 	}
 
+	// 从空闲内存对象链表头中取出第一个内存对象，返回它的首地址
 	retptr = kmsob_new_onkmsob(kmsp, msz);
 	if (NULL == retptr) {
 		retptr = NULL;
@@ -731,6 +758,13 @@ uint_t scan_freekmsob_isok(kmsob_t *kmsp)
 	return 1;
 }
 
+/**
+ * 实际销毁内存对象容器
+ * 	频繁请求的是不同大小的内存对象，那么空的内存对象容器会越来越多
+ * 	这会占用大量内存，所以我们必须要把空的内存对象容器销毁
+ * 
+ * 	首先要释放内存对象容器的扩展空间所占用的物理内存页面，最后才可以释放内存对象容器自身占用物理内存页面
+ */
 bool_t _destroy_kmsob_core(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp)
 {
 	if (NULL == kmobmgrp || NULL == koblp || NULL == kmsp) {
@@ -821,7 +855,11 @@ bool_t _destroy_kmsob(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp)
 	return FALSE;
 }
 
-// 释放内存对象
+/**
+ * 释放内存对象
+ * 	把要释放内存对象的空间，重新初始化，变成一个freobjh_t结构的实例变量
+ * 	最后把这个freobjh_t结构加入到kmsobj_t结构中空闲链表中，这就实现了内存对象的释放
+ */
 bool_t kmsob_del_opkmsob(kmsob_t *kmsp, void *fadrs, size_t fsz)
 {
 	if (NULL == kmsp || NULL == fadrs || 1 > fsz) {
@@ -889,18 +927,21 @@ bool_t kmsob_delete_core(void *fadrs, size_t fsz)
 		goto ret_step;
 	}
 
+	// 查找释放内存对象所属的kmsob_t结构
 	kmsp = onkoblst_retn_delkmsob(koblp, fadrs, fsz);
 	if (NULL == kmsp) {
 		rets = FALSE;
 		goto ret_step;
 	}
 
+	// 释放内存对象
 	rets = kmsob_delete_onkmsob(kmsp, fadrs, fsz);
 	if (FALSE == rets) {
 		rets = FALSE;
 		goto ret_step;
 	}
 
+	// 销毁内存对象容器
 	if (_destroy_kmsob(kmobmgrp, koblp, kmsp) == FALSE) {
 		rets = FALSE;
 		goto ret_step;

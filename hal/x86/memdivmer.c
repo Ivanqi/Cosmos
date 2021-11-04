@@ -441,7 +441,7 @@ msadsc_t *mm_maxdivpages_onmarea(memarea_t *malckp, uint_t *retrelpnr)
 		return NULL;
 	}
 
-	*retrelpnr = bafhp->af_oderpnr;
+	*retrelpnr = bafhp->af_oderpnr;	// bafhlst_t 的连续页面地址
 	return retmsa;
 }
 
