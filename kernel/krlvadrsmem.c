@@ -225,6 +225,7 @@ void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
 bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 {
 	kmvarsdsc_t *kmvdc = NULL, *stackkmvdc = NULL;
+	// 分配一个kmvarsdsc_t
 	if (NULL == vma) {
 		return FALSE;
 	}
@@ -234,28 +235,37 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 		return FALSE;
 	}
 
+	// 分配一个栈区的kmvarsdsc_t
 	stackkmvdc = new_kmvarsdsc();
 	if (NULL == stackkmvdc) {
 		del_kmvarsdsc(kmvdc);
 		return FALSE;
 	}
 
+	// 虚拟区间开始地址0x1000
 	kmvdc->kva_start = USER_VIRTUAL_ADDRESS_START + 0x1000;
+	// 虚拟区间结束地址0x5000
 	kmvdc->kva_end = kmvdc->kva_start + 0x4000;
 	kmvdc->kva_mcstruct = vma;
 
+	// 栈虚拟区间开始地址0x1000USER_VIRTUAL_ADDRESS_END - 0x40000000
 	stackkmvdc->kva_start = PAGE_ALIGN(USER_VIRTUAL_ADDRESS_END - 0x40000000);
+	// 栈虚拟区间结束地址0x1000USER_VIRTUAL_ADDRESS_END
 	stackkmvdc->kva_end = USER_VIRTUAL_ADDRESS_END;
 	stackkmvdc->kva_mcstruct = vma;
 
 	knl_spinlock(&vma->vs_lock);
 	vma->vs_isalcstart = USER_VIRTUAL_ADDRESS_START;
 	vma->vs_isalcend = USER_VIRTUAL_ADDRESS_END;
+	// 设置虚拟地址空间的开始区间为kmvdc
 	vma->vs_startkmvdsc = kmvdc;
+	// 设置虚拟地址空间的开始区间为栈区 
 	vma->vs_endkmvdsc = stackkmvdc;
 
+	// 加入链表
 	list_add_tail(&kmvdc->kva_list, &vma->vs_list);
 	list_add_tail(&stackkmvdc->kva_list, &vma->vs_list);
+	// 计数加2
 	vma->vs_kmvdscnr += 2;
 	knl_spinunlock(&vma->vs_lock);
 	return TRUE;
@@ -303,9 +313,11 @@ void test_vadr()
 
 void init_kvirmemadrs()
 {
+	// 初始化mmadrsdsc_t结构非常简单
 	mmadrsdsc_t_init(&initmmadrsdsc);
 	kvirmemadrs_t_init(&krlvirmemadrs);
 	kvma_seting_kvirmemadrs(&krlvirmemadrs);
+	// 初始化进程的用户空间
 	kvma_inituserspace_virmemadrs(&initmmadrsdsc.msd_virmemadrs);
 	hal_mmu_init(&initmmadrsdsc.msd_mmu);
 	hal_mmu_load(&initmmadrsdsc.msd_mmu);
