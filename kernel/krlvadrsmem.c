@@ -282,10 +282,14 @@ void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 	initp->msd_flag = 0;
 	initp->msd_stus = 0;
 	initp->msd_scount = 0;
+
 	krlsem_t_init(&initp->msd_sem);
 	krlsem_set_sem(&initp->msd_sem, SEM_FLG_MUTEX, SEM_MUTEX_ONE_LOCK);
+
 	mmudsc_t_init(&initp->msd_mmu);
+
 	virmemadrs_t_init(&initp->msd_virmemadrs);
+	
 	initp->msd_stext = 0;
 	initp->msd_etext = 0;
 	initp->msd_sdata = 0;

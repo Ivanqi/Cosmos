@@ -8,6 +8,7 @@
 #if((defined CFG_X86_PLATFORM) || (defined CFG_S3C2440A_PLATFORM))   
 
 KRL_DEFGLOB_VARIABLE(kvirmemadrs_t, krlvirmemadrs);
+// 虚拟内存
 KRL_DEFGLOB_VARIABLE(mmadrsdsc_t, initmmadrsdsc);
 KRL_DEFGLOB_VARIABLE(kmempool_t,oskmempool);
 
