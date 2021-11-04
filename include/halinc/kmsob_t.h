@@ -34,6 +34,7 @@ typedef struct s_MSOMDC {
 	uint_t mc_kmobinpnr;
 } msomdc_t;
 
+// 内存对象
 typedef struct s_FREOBJH {
     list_h_t oh_list;		// 链表
 	uint_t oh_stus;			// 对象状态
@@ -61,7 +62,7 @@ typedef struct s_KMSOB {
 	void* so_extdp;			// 本结构扩展数据指针
 } kmsob_t;
 
-// 管理内存对象容器扩展容量
+// 管理内存对象容器扩展容量，用于表示内存对西那个容器扩展内存
 typedef struct s_KMBEXT {
     list_h_t mt_list;	// 链表
 	adr_t mt_vstat;		// 内存对象容器扩展容量开始地址
@@ -70,7 +71,7 @@ typedef struct s_KMBEXT {
 	uint_t mt_mobjnr;	// 内存对象容器扩展容量的内存有多少对象
 } kmbext_t;
 
-// 挂载kmsob_t结构
+// 挂载kmsob_t结构,用于表示内存对象容器
 typedef struct s_KOBLST {
     list_h_t ol_emplst;	// 挂载kmsobj_t结构的链表
 	kmsob_t* ol_cahe;	// 最近一次查找的kmsobj_t结构

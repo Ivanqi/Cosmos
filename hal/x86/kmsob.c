@@ -315,6 +315,7 @@ uint_t scan_kmsob_objnr(kmsob_t *kmsp)
 	return 0;
 }
 
+// 返回合适的kmsob_t
 kmsob_t *onkoblst_retn_newkmsob(koblst_t *koblp, size_t msz)
 {
 	kmsob_t *kmsp = NULL, *tkmsp = NULL;
@@ -379,6 +380,7 @@ kmsob_t *onkoblst_retn_delkmsob(koblst_t *koblp, void *fadrs, size_t fsz)
 	return NULL;
 }
 
+// koblst_t的内存对象大小大于要分配的数量，就返回这个koblst_t
 koblst_t *onmsz_retn_koblst(kmsobmgrhed_t *kmmgrhlokp, size_t msz)
 {
 	// 遍历ks_msoblst数组
@@ -444,10 +446,11 @@ kmsob_t *_create_init_kmsob(kmsob_t *kmsp, size_t objsz, adr_t cvadrs, adr_t cva
 	kmsp->so_mc.mc_kmobinpnr = (uint_t)relpnr;
 
 	// 设置内存对象的开始地址为kmsob_t结构之后，结束地址为内存对象容器的结束地址
+	// kmsp + 1 移动 kmsob_t 个字节
 	freobjh_t *fohstat = (freobjh_t *)(kmsp + 1), *fohend = (freobjh_t *)cvadre;
 
-	uint_t ap = (uint_t)((uint_t)fohstat);
-	freobjh_t *tmpfoh = (freobjh_t *)((uint_t)ap);
+	uint_t ap = (uint_t)((uint_t)fohstat);			// fohstat 地址
+	freobjh_t *tmpfoh = (freobjh_t *)((uint_t)ap);	// fohstat 用于遍历的临时变量
 
 	for (; tmpfoh < fohend;) {
 		// 相当在kmsob_t结构体之后建立一个freobjh_t结构体数组
@@ -500,7 +503,11 @@ kmsob_t *_create_kmsob(kmsobmgrhed_t *kmmgrlokp, koblst_t *koblp, size_t objsz)
 
 	u64_t phyadr = msa->md_phyadrs.paf_padrs << PSHRSIZE;
 	u64_t phyade = phyadr + (relpnr << PSHRSIZE) - 1;
-	// 计算它们的虚拟地址
+	/**
+	 * 计算它们的虚拟地址
+	 * 	vadrs: 开始地址
+	 * 	vadre: 结束地址
+	 */
 	adr_t vadrs = phyadr_to_viradr((adr_t)phyadr);
 	adr_t vadre = phyadr_to_viradr((adr_t)phyade);
 
@@ -659,15 +666,17 @@ void *kmsob_new_core(size_t msz)
 	koblst_t *koblp = NULL;
 	kmsob_t *kmsp = NULL;
 	cpuflg_t cpuflg;
+	// 对kmsobmgrhed_t结构加锁
 	knl_spinlock_cli(&kmobmgrp->ks_lock, &cpuflg);
 
-	// 对kmsobmgrhed_t结构加锁
+	// koblst_t的内存对象大小大于要分配的数量，就返回这个koblst_t
 	koblp = onmsz_retn_koblst(kmobmgrp, msz);
 	if (NULL == koblp) {
 		retptr = NULL;
 		goto ret_step;
 	}
 
+	// 返回合适的kmsob_t
 	kmsp = onkoblst_retn_newkmsob(koblp, msz);
 	if (NULL == kmsp) {
 		kmsp = _create_kmsob(kmobmgrp, koblp, koblp->ol_sz);
