@@ -775,6 +775,7 @@ bool_t _destroy_kmsob_core(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *km
 		return FALSE;
 	}
 
+	// 将kmsob_t 脱链
 	list_h_t *tmplst = NULL;
 	msadsc_t *msa = NULL;
 	msclst_t *mscp = kmsp->so_mc.mc_lst;
@@ -782,11 +783,14 @@ bool_t _destroy_kmsob_core(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *km
 	koblp->ol_emnr--;
 	kmobmgrp->ks_msobnr--;
 
+	// 更新kmsobmgrhed_t结构的信息
 	kmsob_updata_cache(kmobmgrp, koblp, kmsp, KUC_DSYFLG);
 
 	/**
 	 * 释放内存对象容器扩展空间的物理内存页面
 	 * 遍历kmsob_t结构中的so_mc.mc_lst数组
+	 * 
+	 * 遍历释放kmsob_t中全部扩展结构占用的内存页面【先脱链、再释放】
 	 */
 	for (uint_t j = 0; j < MSCLST_MAX; j++) {
 		if (0 < mscp[j].ml_msanr) {
@@ -809,6 +813,8 @@ bool_t _destroy_kmsob_core(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *km
 	/**
 	 * 释放内存对象容器本身占用的物理内存页面
 	 * 遍历每个so_mc.mc_kmobinlst中的msadsc_t结构。它只会遍历一次
+	 * 
+	 * 释放kmsob_t自身占用的全部页面【先脱链，再释放】
 	 */
 	list_for_each_head_dell(tmplst, &kmsp->so_mc.mc_kmobinlst) {
 		msa = list_entry(tmplst, msadsc_t, md_list);

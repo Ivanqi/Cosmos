@@ -77,14 +77,14 @@
 #define VGAADRD 0xc0000ULL
 
 // 内存类型
-#define RAM_USABLE 1            // 可以内存
+#define RAM_USABLE 1            // 可用内存
 #define RAM_RESERV 2            // 保留内存不可使用
 #define RAM_ACPIREC 3           // ACPI表相关
 #define RAM_ACPINVS 4           // ACPI NVS空间
 #define RAM_AREACON 5           // 包含坏内存
 
 
-#define PMR_T_OSAPUSERRAM 1
+#define PMR_T_OSAPUSERRAM 1     // 可用
 #define PMR_T_RESERVRAM 2
 #define PMR_T_HWUSERRAM 8
 #define PMR_T_ARACONRAM 0xf
