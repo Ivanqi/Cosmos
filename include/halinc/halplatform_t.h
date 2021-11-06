@@ -91,12 +91,14 @@ typedef struct s_MACHBSTART
     u64_t   mb_e820expadr;      // e820map_t结构数组的首地址
     u64_t   mb_e820exnr;        // e820map_t数据数组元素个数
     u64_t   mb_e820exsz;        // e820map_t结构数据大小
-
+    
+    // memarea_t结构的首地址
     u64_t   mb_memznpadr;
     u64_t   mb_memznnr;
     u64_t   mb_memznsz;
     u64_t   mb_memznchksum;
 
+    // msadsc_t结构的首地址
     u64_t   mb_memmappadr;
     u64_t   mb_memmapnr;
     u64_t   mb_memmapsz;

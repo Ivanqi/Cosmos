@@ -19,6 +19,7 @@ void init_memmgr()
 
 	// 合并内存页到内存区中
 	init_merlove_mem();
+	// 物理地址转虚拟地址，便于以后使用
 	init_memmgrob();
 
 	// 初始化kmsob
