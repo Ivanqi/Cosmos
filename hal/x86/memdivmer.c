@@ -596,7 +596,7 @@ msadsc_t *mm_reldpgsdivmsa_bafhl(memarea_t *malckp, uint_t pages, uint_t *retrel
 	}
 
 	uint_t divnr = divbfl->af_oderpnr;
-	// 从高bafhlst_t数组元素中向下遍历
+	// 从高bafhlst_t数组元素中向下遍历。多出来的内存不断除以2挂载到上一个bafhlst_t中
 	for (bafhlst_t *tmpbfl = divbfl - 1; tmpbfl >= relbfl; tmpbfl--) {
 		// 开始分割连续的msadsc_t结构，把剩下的一段连续的msadsc_t结构加入到对应该bafhlst_t结构中
 		if (mrdmb_add_msa_bafh(tmpbfl, &retmstat[tmpbfl->af_oderpnr], (msadsc_t *)retmstat->md_odlink) == FALSE) {

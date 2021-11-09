@@ -255,7 +255,10 @@ bool_t scan_len_msadsc(msadsc_t *mstat, msadflgs_t *cmpmdfp, uint_t mnr, uint_t 
 	return TRUE;
 }
 
-// 检查连续的msadsc_t 结构
+/**
+ * 检查连续的msadsc_t 结构
+ * 为了判断有多少个连续的msadsc_t 属于 memarea_t
+ */
 uint_t check_continumsadsc(memarea_t *mareap, msadsc_t *stat, msadsc_t *end, uint_t fmnr)
 {
 	msadsc_t *ms = stat, *me = end;
@@ -265,24 +268,25 @@ uint_t check_continumsadsc(memarea_t *mareap, msadsc_t *stat, msadsc_t *end, uin
 		return 0;
 	}
 
+	// memarea_t 分类
 	switch (mareap->ma_type) {
 	    case MA_TYPE_HWAD:
 	    {
-            muindx = MF_MARTY_HWD << 5;
+            muindx = MF_MARTY_HWD << 5;			// 硬件区
             mdfp = (msadflgs_t *)(&muindx);
             break;
 	    }
 
         case MA_TYPE_KRNL:
         {
-            muindx = MF_MARTY_KRL << 5;
+            muindx = MF_MARTY_KRL << 5;			// 内核区
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
 
         case MA_TYPE_PROC:
         {
-            muindx = MF_MARTY_PRC << 5;
+            muindx = MF_MARTY_PRC << 5;			// 应用区
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
@@ -300,6 +304,7 @@ uint_t check_continumsadsc(memarea_t *mareap, msadsc_t *stat, msadsc_t *end, uin
 	}
 
 	uint_t ok = 0;
+	// 单个 msadsc_t
 	if (ms == me) {
 		if (0 != ms->md_indxflgs.mf_uindx) {
 			return 0;
@@ -324,6 +329,7 @@ uint_t check_continumsadsc(memarea_t *mareap, msadsc_t *stat, msadsc_t *end, uin
 		return ok + 1;
 	}
 
+	// 对 msadsc_t 和 msadsc_t + 1的类型检测，直到遍历完me
 	for (; ms < me; ms++) {
 		if (ms->md_indxflgs.mf_marty != mdfp->mf_marty || (ms + 1)->md_indxflgs.mf_marty != mdfp->mf_marty) {
 			return 0;
@@ -376,21 +382,21 @@ bool_t merlove_scan_continumsadsc(memarea_t *mareap, msadsc_t *fmstat, uint_t *f
 	switch (mareap->ma_type) {
         case MA_TYPE_HWAD:
         {
-            muindx = MF_MARTY_HWD << 5;
+            muindx = MF_MARTY_HWD << 5;			// 硬件区
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
 
         case MA_TYPE_KRNL:
         {
-            muindx = MF_MARTY_KRL << 5;
+            muindx = MF_MARTY_KRL << 5;			// 内核区
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
 
         case MA_TYPE_PROC:
         {
-            muindx = MF_MARTY_PRC << 5;
+            muindx = MF_MARTY_PRC << 5;			// 应用区
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
@@ -527,19 +533,19 @@ uint_t test_setflgs(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 	switch (mareap->ma_type) {
         case MA_TYPE_HWAD:
         {
-            muindx = MF_MARTY_HWD << 5;
+            muindx = MF_MARTY_HWD << 5;		// 硬件区标签
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
         case MA_TYPE_KRNL:
         {
-            muindx = MF_MARTY_KRL << 5;
+            muindx = MF_MARTY_KRL << 5;		// 内核区标签
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
         case MA_TYPE_PROC:
         {
-            muindx = MF_MARTY_PRC << 5;
+            muindx = MF_MARTY_PRC << 5;		// 应用区标签
             mdfp = (msadflgs_t *)(&muindx);
             break;
         }
@@ -775,6 +781,9 @@ bool_t merlove_mem_onmemarea(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 	uint_t fntmnr = 0;
 	bool_t retscan = FALSE;
 
+	/**
+	 * 遍历 memarea_t 数组，然后对应单个memarea_t类型中对应的连续的msadsc_t有多少个
+	 */
 	for (; fntmnr < msanr;) {
 		// 获取最多且地址连续的msadsc_t结构体的开始、结束地址、一共多少个msadsc_t结构体，下一次循环的fntmnr
 		retscan = merlove_scan_continumsadsc(mareap, fntmsap, &fntmnr, msanr, &retstatmsap, &retendmsap, &retfindmnr);
