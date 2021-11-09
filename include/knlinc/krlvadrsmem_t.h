@@ -41,7 +41,7 @@ ypedef struct KVMEMCOBJ {
 	void* kco_extp;
 } kvmemcobj_t;
 
-
+// 用于管理所有的kvmemcbox_t结构
 typedef struct KVMEMCBOXMGR {
 	list_h_t kbm_list;         // 链表
 	spinlock_t kbm_lock;       // 保护自身的自旋链
@@ -56,6 +56,7 @@ typedef struct KVMEMCBOXMGR {
 	void* kbm_ext;             // 扩展数据指针
 } kvmemcboxmgr_t;
 
+// 用于挂载msadsc_t结构的页面盒子
 typedef struct KVMEMCBOX {
 	list_h_t kmb_list;          // 链表
 	spinlock_t kmb_lock;        // 保护自身的自旋锁
@@ -94,6 +95,7 @@ typedef struct PGTABPAGE {
 	uint_t     ptp_msanr;
 } pgtabpage_t;
 
+// 虚拟地址区间
 typedef struct KMVARSDSC {
 	spinlock_t kva_lock;        // 保护自身自旋锁
 	u32_t  kva_maptype;         // 映射类型
@@ -113,7 +115,7 @@ typedef struct KVIRMEMADRS {
 	u64_t  kvs_flgs;
 	uint_t kvs_kmvdscnr;
 	kmvarsdsc_t* kvs_startkmvdsc;
-	kmvarsdsc_t* kvs_endkmvdsc;	
+	kmvarsdsc_t* kvs_endkmvdsc;
 	kmvarsdsc_t* kvs_krlmapdsc;
 	kmvarsdsc_t* kvs_krlhwmdsc;
 	kmvarsdsc_t* kvs_krlolddsc;
@@ -131,6 +133,7 @@ typedef struct KVIRMEMADRS {
 
 typedef struct s_MMADRSDSC mmadrsdsc_t;
 
+// 管理整个虚拟地址空间的kmvarsdsc_t结构
 typedef struct s_VIRMEMADRS {
 	spinlock_t vs_lock;             // 保护自身的自旋锁
 	u32_t  vs_resalin;
@@ -150,6 +153,7 @@ typedef struct s_VIRMEMADRS {
 	void* vs_ext;                   // 扩展数据指针
 } virmemadrs_t;
 
+// 进程数据结构下的一个结构，它包含virmemadrs_t结构和mmudsc_t结构
 typedef struct s_MMADRSDSC {
 	spinlock_t msd_lock;            // 保护自身的自旋锁
 	list_h_t msd_list;              // 链表

@@ -27,7 +27,6 @@ teststc_t *new_teststc()
 
 void del_teststc(teststc_t *delstc)
 {
-
 	if ((NULL != delstc)) {
 		teststc_t_init(delstc);
 		if (TRUE == kmsob_delete((void *)delstc, sizeof(teststc_t))) {
@@ -222,6 +221,7 @@ void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
 	return;
 }
 
+// 建立了一个虚拟地址区间和一个栈区，栈区位于虚拟地址空间的顶端
 bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 {
 	kmvarsdsc_t *kmvdc = NULL, *stackkmvdc = NULL;
@@ -317,14 +317,18 @@ void test_vadr()
 
 void init_kvirmemadrs()
 {
-	// 初始化mmadrsdsc_t结构非常简单
+	// 初始化mmadrsdsc_t结构
 	mmadrsdsc_t_init(&initmmadrsdsc);
+
 	kvirmemadrs_t_init(&krlvirmemadrs);
+
 	kvma_seting_kvirmemadrs(&krlvirmemadrs);
-	// 初始化进程的用户空间
+	// 初始化进程的用户空间.建立了一个虚拟地址区间和一个栈区，栈区位于虚拟地址空间的顶端
 	kvma_inituserspace_virmemadrs(&initmmadrsdsc.msd_virmemadrs);
+
 	hal_mmu_init(&initmmadrsdsc.msd_mmu);
 	hal_mmu_load(&initmmadrsdsc.msd_mmu);
+
 	test_vadr();
 	return;
 }

@@ -5,6 +5,7 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+// MMU 初始化
 void mmudsc_t_init(mmudsc_t* init)
 {
     if(NULL == init) {

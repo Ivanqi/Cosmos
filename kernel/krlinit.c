@@ -5,7 +5,8 @@
 #include "cosmosmctrl.h"
 void init_krl()
 {
-    // init_krlmm();
+    // 初始化内核功能层的内存管理
+    init_krlmm();
 	// init_krldevice();
     // init_krldriver();
 	// init_krlsched();
