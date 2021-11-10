@@ -155,6 +155,7 @@ void kvirmemadrs_t_init(kvirmemadrs_t *initp)
 	return;
 }
 
+// 创建一个kmvarsdsc_t
 kmvarsdsc_t *new_kmvarsdsc()
 {
 	kmvarsdsc_t *kmvdc = NULL;
@@ -209,14 +210,18 @@ void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
 		system_error("kvma_seting_kvirmemadrs nomem err\n");
 	}
 
+	// 内核空格键
 	kvma->kvs_isalcstart = KRNL_VIRTUAL_ADDRESS_START + KRNL_MAP_VIRTADDRESS_SIZE;
 	kvma->kvs_isalcend = KRNL_VIRTUAL_ADDRESS_END;
+	// 线性映射区
 	kmvdc->kva_start = KRNL_VIRTUAL_ADDRESS_START;
 	kmvdc->kva_end = KRNL_VIRTUAL_ADDRESS_START + KRNL_MAP_VIRTADDRESS_SIZE;
 	kmvdc->kva_mcstruct = kvma;
+
 	kvma->kvs_startkmvdsc = kmvdc;
 	kvma->kvs_endkmvdsc = kmvdc;
 	kvma->kvs_krlmapdsc = kmvdc;
+
 	kvma->kvs_kmvdscnr++;
 	return;
 }
@@ -301,15 +306,20 @@ void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 	return; 
 }
 
+// 测试函数
 void test_vadr()
 {
+	// 分配一个0x1000大小的虚拟地址空间
 	adr_t vadr = vma_new_vadrs(&initmmadrsdsc, NULL, 0x1000, 0, 0);
+	// 返回NULL表示分配失败
 	if (NULL == vadr) {
 		kprint("分配虚拟地址空间失败\n");
 	}
 
+	// 在刷屏幕上打印分配虚拟地址空间的开始地址
 	kprint("分配虚拟地址空间地址:%x\n", vadr);
 	kprint("开始写入分配虚拟地址空间\n");
+	// 访问虚拟地址空间，把这空间全部设置为0 
 	hal_memset((void*)vadr, 0, 0x1000);
 	kprint("结束写入分配虚拟地址空间\n");
 	return;
@@ -333,30 +343,38 @@ void init_kvirmemadrs()
 	return;
 }
 
-
+// 检查kmvarsdsc_t结构
 kmvarsdsc_t *vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr, adr_t start, size_t vassize)
 {
 	kmvarsdsc_t *nextkmvd = NULL;
 	adr_t newend = start + (adr_t)vassize;
 
+	// 如果curr不是最后一个先检查当前kmvarsdsc_t结构
 	if (list_is_last(&curr->kva_list, &vmalocked->vs_list) == FALSE) {
+		// 就获取curr的下一个kmvarsdsc_t结构
 		nextkmvd = list_next_entry(curr, kmvarsdsc_t, kva_list);
-        
+
+		// 由系统动态决定分配虚拟空间的开始地址
 		if (NULL == start) {
+			//如果curr的结束地址加上分配的大小小于等于下一个kmvarsdsc_t结构的开始地址就返回curr
 			if ((curr->kva_end + (adr_t)vassize) <= nextkmvd->kva_start) {
 				return curr;
 			}
 		} else {
+			// 否则比较应用指定分配的开始，结束地址是不是在curr和下一个kmvarsdsc_t结构之间
 			if ((curr->kva_end <= start) && (newend <= nextkmvd->kva_start)) {
 				return curr;
 			}
 		}
 	} else {
+		// 否则curr为最后一个kmvarsdsc_t结构
 		if (NULL == start) {
+			// curr的结束地址加上分配空间的大小是不是小于整个虚拟地址空间
 			if ((curr->kva_end + (adr_t)vassize) < vmalocked->vs_isalcend) {
 				return curr;
 			}
 		} else {
+			// 否则比较应用指定分配的开始、结束地址是不是在curr的结束地址和整个虚拟地址空间的结束地址之间
 			if ((curr->kva_end <= start) && (newend < vmalocked->vs_isalcend)) {
 				return curr;
 			}
@@ -366,31 +384,38 @@ kmvarsdsc_t *vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr
 	return NULL;
 }
 
+// 查找kmvarsdsc_t结构
 kmvarsdsc_t *vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize)
 {
 	kmvarsdsc_t *kmvdcurrent = NULL, *curr = vmalocked->vs_currkmvdsc;
 	adr_t newend = start + vassize;
 	list_h_t *listpos = NULL;
 
+	// 分配的虚拟空间大小小于4KB不行
 	if (0x1000 > vassize) {
 		return NULL;
 	}
 
+	// 将要分配虚拟地址空间的结束地址大于整个虚拟地址空间
 	if (newend > vmalocked->vs_isalcend) {
 		return NULL;
 	}
 
 	if (NULL != curr) {
+		// 先检查当前kmvarsdsc_t结构
 		kmvdcurrent = vma_find_kmvarsdsc_is_ok(vmalocked, curr, start, vassize);
 		if (NULL != kmvdcurrent) {
 			return kmvdcurrent;
 		}
 	}
 
+	// 遍历virmemadrs_t中的所有的kmvarsdsc_t结构
 	list_for_each(listpos, &vmalocked->vs_list) {
 		curr = list_entry(listpos, kmvarsdsc_t, kva_list);
+		// 检查每个kmvarsdsc_t结构
 		kmvdcurrent = vma_find_kmvarsdsc_is_ok(vmalocked, curr, start, vassize);
 		if (NULL != kmvdcurrent) {
+			// 如果符合要求就返回
 			return kmvdcurrent;
 		}
 	}
@@ -405,60 +430,73 @@ adr_t vma_new_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vas
 	virmemadrs_t *vma = &mm->msd_virmemadrs;
 	knl_spinlock(&vma->vs_lock);
 
+	// 查找虚拟地址区间
 	currkmvd = vma_find_kmvarsdsc(vma, start, vassize);
 	if (NULL == currkmvd) {
 		retadrs = NULL;
 		goto out;
 	}
 
+	// 进行虚拟地址区间进行检查查看是否复用这个数据结构
 	if (((NULL == start) || (start == currkmvd->kva_end)) && (vaslimits == currkmvd->kva_limits) && (vastype == currkmvd->kva_maptype)) {
+		// 能复用的化，当前虚拟地址区间的结束地址返回
 		retadrs = currkmvd->kva_end;
+		// 扩展当前虚拟地址区间的结束地址为分配虚拟地址区间大小
 		currkmvd->kva_end += vassize;
 		vma->vs_currkmvdsc = currkmvd;
 		goto out;
 	}
 
+	// 建立一个新的kmvarsdsc_t虚拟地址区间结构
 	newkmvd = new_kmvarsdsc();
 	if (NULL == newkmvd) {
 		retadrs = NULL;
 		goto out;
 	}
 
+	// 如果分配的开始地址为NULL就由系统动态决定
 	if (NULL == start) {
+		// 当然是接着当前虚拟地址区间之后开始
 		newkmvd->kva_start = currkmvd->kva_end;
 	} else {
+		// 否则这个新的虚拟地址区间的开始就是请求分配的开始地址
 		newkmvd->kva_start = start;
 	}
 
+	// 设置新的虚拟地址区间的结束地址
 	newkmvd->kva_end = newkmvd->kva_start + vassize;
 	newkmvd->kva_limits = vaslimits;
 	newkmvd->kva_maptype = vastype;
 	newkmvd->kva_mcstruct = vma;
 	vma->vs_currkmvdsc = newkmvd;
 
+	// 将新的虚拟地址区间加入到virmemadrs_t结构中
 	list_add(&newkmvd->kva_list, &currkmvd->kva_list);
+	// 看看新的虚拟地址区间是否是最后一个
 	if (list_is_last(&newkmvd->kva_list, &vma->vs_list) == TRUE) {
 		vma->vs_endkmvdsc = newkmvd;
 	}
-
+	// 返回新的虚拟地址区间的开始地址
 	retadrs = newkmvd->kva_start;
 out:
 	knl_spinunlock(&vma->vs_lock);
 	return retadrs;
 }
 
+// 分配虚拟地址空间的接口
 adr_t vma_new_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimits, u32_t vastype)
 {
 	if (NULL == mm || 1 > vassize) {
 		return NULL;
 	}
 
+	// 进行参数检查，开始地址要和页面(1KB)对齐，结束地址不能超过整个虚拟地址空间
 	if (NULL != start) {
 		if (((start & 0xfff) != 0) || (0x1000 > start) || (USER_VIRTUAL_ADDRESS_END < (start + vassize))) {
 			return NULL;
 		}
 	}
-
+	// 调用虚拟地址空间分配的核心函数
 	return vma_new_vadrs_core(mm, start, VADSZ_ALIGN(vassize), vaslimits, vastype);
 }
 
@@ -473,13 +511,16 @@ kmvarsdsc_t *vma_del_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t
 	}
 
 	if (NULL != curr) {
+		// 释放的虚拟地址空间落在了当前kmvarsdsc_t结构表示的虚拟地址区间
 		if ((curr->kva_start) <= start && (newend <= curr->kva_end)) {
 			return curr;
 		}
 	}
 
+	// 遍历所有的kmvarsdsc_t结构
 	list_for_each(listpos, &vmalocked->vs_list) {
 		curr = list_entry(listpos, kmvarsdsc_t, kva_list);
+		// 释放的虚拟地址空间是否落在了其中的某个kmvarsdsc_t结构表示的虚拟地址空间
 		if ((start >= curr->kva_start) && (newend <= curr->kva_end)) {
 			return curr;
 		}
@@ -540,6 +581,7 @@ bool_t vma_del_unmapping(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, size_t
 	return vma_del_unmapping_phyadrs(mm, kmvd, start, end);
 }
 
+// 释放虚拟地址空间的核心函数
 bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 {
 	bool_t rets = FALSE;
@@ -547,23 +589,28 @@ bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 	virmemadrs_t *vma = &mm->msd_virmemadrs;
 	knl_spinlock(&vma->vs_lock);
 
+	// 查找要释放虚拟地址空间的kmvarsdsc_t结构
 	delkmvd = vma_del_find_kmvarsdsc(vma, start, vassize);
 	if (NULL == delkmvd) {
 		rets = FALSE;
 		goto out;
 	}
 
+	// 第一种情况要释放的虚拟地址空间正好等于查找的kmvarsdsc_t结构
 	if ((delkmvd->kva_start == start) && (delkmvd->kva_end == (start + (adr_t)vassize))) {
 		vma_del_unmapping(mm, delkmvd, start, vassize);
 		vma_del_set_endcurrkmvd(vma, delkmvd);
 		knl_put_kvmemcbox(delkmvd->kva_kvmbox);
+		// 脱链
 		list_del(&delkmvd->kva_list);
+		// 删除kmvarsdsc_t结构
 		del_kmvarsdsc(delkmvd);
 		vma->vs_kmvdscnr--;
 		rets = TRUE;
 		goto out;
 	}
 
+	// 第二种情况要释放的虚拟地址空间是在查找的kmvarsdsc_t结构的上半部分
 	if ((delkmvd->kva_start == start) && (delkmvd->kva_end > (start + (adr_t)vassize))) {
 		delkmvd->kva_start = start + (adr_t)vassize;
 		vma_del_unmapping(mm, delkmvd, start, vassize);
@@ -571,22 +618,28 @@ bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 		goto out;
 	}
 
+	// 第三种情况要释放的虚拟地址空间是在查找的kmvarsdsc_t结构的下半部分
 	if ((delkmvd->kva_start < start) && (delkmvd->kva_end == (start + (adr_t)vassize))) {
+		// 所以直接把查找的kmvarsdsc_t结构的结束地址设置为释放虚拟地址空间的开始地址
 		delkmvd->kva_end = start;
 		vma_del_unmapping(mm, delkmvd, start, vassize);
 		rets = TRUE;
 		goto out;
 	}
 
+	// 第四种情况要释放的虚拟地址空间是在查找的kmvarsdsc_t结构的中间
 	if ((delkmvd->kva_start < start) && (delkmvd->kva_end > (start + (adr_t)vassize))) {
+		// 所以要再新建一个kmvarsdsc_t结构来处理释放虚拟地址空间的下半虚拟部分地址空间
 		newkmvd = new_kmvarsdsc();
 		if (NULL == newkmvd) {
 			rets = FALSE;
 			goto out;
 		}
 
+		// 让新的kmvarsdsc_t结构指向查找的kmvarsdsc_t结构的后半部分虚拟地址空间
 		newkmvd->kva_end = delkmvd->kva_end;
 		newkmvd->kva_start = start + (adr_t)vassize;
+		// 和查找到的kmvarsdsc_t结构保持一致
 		newkmvd->kva_limits = delkmvd->kva_limits;
 		newkmvd->kva_maptype = delkmvd->kva_maptype;
 		newkmvd->kva_mcstruct = vma;
@@ -596,10 +649,10 @@ bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 		newkmvd->kva_kvmbox = delkmvd->kva_kvmbox;
 
 		vma_del_unmapping(mm, delkmvd, start, vassize);
-
+		// 加入链表
 		list_add(&newkmvd->kva_list, &delkmvd->kva_list);
 		vma->vs_kmvdscnr++;
-        
+        // 是否为最后一个kmvarsdsc_t结构
 		if (list_is_last(&newkmvd->kva_list, &vma->vs_list) == TRUE) {
 			vma->vs_endkmvdsc = newkmvd;
 			vma->vs_currkmvdsc = newkmvd;
@@ -618,12 +671,14 @@ out:
 	return rets;
 }
 
+// 释放虚拟地址空间的接口
 bool_t vma_del_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 {
+	// 对参数进行检查
 	if (NULL == mm || 1 > vassize || NULL == start) {
 		return FALSE;
 	}
-
+	// 调用核心处理函数
 	return vma_del_vadrs_core(mm, start, VADSZ_ALIGN(vassize));
 }
 
@@ -914,15 +969,19 @@ kmvarsdsc_t *vma_map_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t vadrs)
 {
 	list_h_t *pos = NULL;
 	kmvarsdsc_t *curr = vmalocked->vs_currkmvdsc;
-
+	
+	// 看看上一次刚刚被操作的kmvarsdsc_t结构
 	if (NULL != curr) {
+		// 虚拟地址是否落在kmvarsdsc_t结构表示的虚拟地址区间
 		if ((vadrs >= curr->kva_start) && (vadrs < curr->kva_end)) {
 			return curr;
 		}
 	}
 
+	// 遍历每个kmvarsdsc_t结构
 	list_for_each(pos, &vmalocked->vs_list) {
 		curr = list_entry(pos, kmvarsdsc_t, kva_list);
+		// 虚拟地址是否落在kmvarsdsc_t结构表示的虚拟地址区间
 		if ((vadrs >= curr->kva_start) && (vadrs < curr->kva_end)) {
 			return curr;
 		}
@@ -934,10 +993,12 @@ kmvarsdsc_t *vma_map_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t vadrs)
 kvmemcbox_t *vma_map_retn_kvmemcbox(kmvarsdsc_t *kmvd)
 {
 	kvmemcbox_t *kmbox = NULL;
+	// 如果kmvarsdsc_t结构中已经存在了kvmemcbox_t结构，则直接返回
 	if (NULL == kmvd) {
 		return NULL;
 	}
 
+	// 新建一个kvmemcbox_t结构
 	if (NULL != kmvd->kva_kvmbox) {
 		return kmvd->kva_kvmbox;
 	}
@@ -947,6 +1008,7 @@ kvmemcbox_t *vma_map_retn_kvmemcbox(kmvarsdsc_t *kmvd)
 		return NULL;
 	}
 
+	// 指向这个新建的kvmemcbox_t结构
 	kmvd->kva_kvmbox = kmbox;
 	return kmvd->kva_kvmbox;
 }
@@ -1030,32 +1092,36 @@ adr_t vma_map_msa_fault(mmadrsdsc_t *mm, kvmemcbox_t *kmbox, adr_t vadrs, u64_t 
 	if (NULL == mm || NULL == kmbox || NULL == vadrs) {
 		return NULL;
 	}
-
+	// 分配一个物理内存页面，挂载到kvmemcbox_t中，并返回对应的msadsc_t结构
 	usermsa = vma_new_usermsa(mm, kmbox);
 	if (NULL == usermsa) {
+		// 没有物理内存页面返回NULL表示失败
 		return NULL;
 	}
-
+	// 获取msadsc_t对应的内存页面的物理地址
 	phyadrs = msadsc_ret_addr(usermsa);
-
+	// 建立MMU页表完成虚拟地址到物理地址的映射
 	if (hal_mmu_transform(&mm->msd_mmu, vadrs, phyadrs, flags) == TRUE) {
+		// 映射成功则返回物理地址
 		return phyadrs;
 	}
-
+	// 映射失败就要先释放分配的物理内存页面
 	vma_del_usermsa(mm, kmbox, usermsa, phyadrs);
 	return NULL;
 }
 
+// 接口函数
 adr_t vma_map_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t vadrs, u64_t flags)
 {
 	kvmemcbox_t *kmbox = kmvd->kva_kvmbox;
 	if (NULL == kmbox) {
 		return NULL;
 	}
-
+	// 调用核心函数，flags表示页表条目中的相关权限、存在、类型等位段
 	return vma_map_msa_fault(mm, kmbox, vadrs, flags);
 }
 
+// 缺页异常处理核心函数
 sint_t vma_map_fairvadrs_core(mmadrsdsc_t *mm, adr_t vadrs)
 {
 	sint_t rets = FALSE;
@@ -1064,19 +1130,19 @@ sint_t vma_map_fairvadrs_core(mmadrsdsc_t *mm, adr_t vadrs)
 	kmvarsdsc_t *kmvd = NULL;
 	kvmemcbox_t *kmbox = NULL;
 	knl_spinlock(&vma->vs_lock);
-
+	// 查找对应的kmvarsdsc_t结构
 	kmvd = vma_map_find_kmvarsdsc(vma, vadrs);
 	if (NULL == kmvd) {
 		rets = -EFAULT;
 		goto out;
 	}
-
+	// 返回kmvarsdsc_t结构下对应kvmemcbox_t结构
 	kmbox = vma_map_retn_kvmemcbox(kmvd);
 	if (NULL == kmbox) {
 		rets = -ENOMEM;
 		goto out;
 	}
-
+	// 分配物理内存页面并建立MMU页表
 	phyadrs = vma_map_phyadrs(mm, kmvd, vadrs, (0 | PML4E_US | PML4E_RW | PML4E_P));
 	if (NULL == phyadrs) {
 		rets = -ENOMEM;
@@ -1090,20 +1156,25 @@ out:
 	return rets;
 }
 
+// 缺页异常处理接口
 sint_t vma_map_fairvadrs(mmadrsdsc_t *mm, adr_t vadrs)
 {
+	// 对参数进行检查
 	if ((0x1000 > vadrs) || (USER_VIRTUAL_ADDRESS_END < vadrs) || (NULL == mm)) {
 		return -EPARAM;
 	}
 
+	// 进行缺页异常的核心处理
 	return vma_map_fairvadrs_core(mm, vadrs);
 }
 
+// 由异常分发器调用的接口
 sint_t krluserspace_accessfailed(adr_t fairvadrs)
 {
+	// 这里应该获取当前进程的mm，但是现在我们没有进程，才initmmadrsdsc代替
 	mmadrsdsc_t* mm = &initmmadrsdsc;
-
-	if(USER_VIRTUAL_ADDRESS_END < fairvadrs) {
+	// 应用程序的虚拟地址不可能大于USER_VIRTUAL_ADDRESS_END
+	if (USER_VIRTUAL_ADDRESS_END < fairvadrs) {
 		return -EACCES;
 	}
 

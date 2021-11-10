@@ -33,13 +33,13 @@
 
 #define KRNL_MAP_VIRTADDRESS_SIZE 0x400000000
 
-#define KRNL_VIRTUAL_ADDRESS_START 0xffff800000000000   // 内核虚拟空间从0xffff800000000000开始
-#define KRNL_VIRTUAL_ADDRESS_END 0xffffffffffffffff
-#define USER_VIRTUAL_ADDRESS_START 0
-#define USER_VIRTUAL_ADDRESS_END 0x00007fffffffffff
+#define KRNL_VIRTUAL_ADDRESS_START 0xffff800000000000   // 内核虚拟空间从0xffff800000000000开始.  线性映射区
+#define KRNL_VIRTUAL_ADDRESS_END 0xffffffffffffffff     // 内核虚拟空间结束地址
+#define USER_VIRTUAL_ADDRESS_START 0                    // 用户虚拟空间开始地址
+#define USER_VIRTUAL_ADDRESS_END 0x00007fffffffffff     // 用户虚拟空间结束地址
 
-#define KRNL_MAP_PHYADDRESS_START 0
-#define KRNL_MAP_PHYADDRESS_END 0x400000000
+#define KRNL_MAP_PHYADDRESS_START 0                     // 内核物理地址开始地址
+#define KRNL_MAP_PHYADDRESS_END 0x400000000             // 内核物理地址结束地址
 #define KRNL_MAP_PHYADDRESS_SIZE 0x400000000
 
 #define KRNL_MAP_VIRTADDRESS_START KRNL_VIRTUAL_ADDRESS_START

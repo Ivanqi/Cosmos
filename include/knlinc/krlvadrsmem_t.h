@@ -104,8 +104,8 @@ typedef struct KMVARSDSC {
 	u64_t  kva_limits;
 	vaslknode_t kva_lknode;
 	void*  kva_mcstruct;        // 指向它的上层结构
-	adr_t  kva_start;           // 虚拟地址的开始
-	adr_t  kva_end;             // 虚拟地址的结束
+	adr_t  kva_start;           // 线性映射区开始地址
+	adr_t  kva_end;             // 线性映射区结束地址
 	kvmemcbox_t* kva_kvmbox;    // 管理这个结构映射的物理页面
 	void*  kva_kvmcobj;
 } kmvarsdsc_t;
@@ -119,8 +119,8 @@ typedef struct KVIRMEMADRS {
 	kmvarsdsc_t* kvs_krlmapdsc;
 	kmvarsdsc_t* kvs_krlhwmdsc;
 	kmvarsdsc_t* kvs_krlolddsc;
-	adr_t kvs_isalcstart;
-	adr_t kvs_isalcend;
+	adr_t kvs_isalcstart;		// 内核空间开始地址
+	adr_t kvs_isalcend;			// 内核空间结束地址
 	void* kvs_privte;
 	void* kvs_ext;
 	list_h_t kvs_testhead;

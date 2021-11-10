@@ -193,9 +193,21 @@ void hal_do_hwint(uint_t intnumb, void *krnlsframp)
 // 异常分发器
 void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
 {
-    kprint("faultnumb:%x\n", faultnumb);
-    for (;;)
-        ;
+    adr_t fairvadrs;
+    kprint("faultnumb is :%d\n", faultnumb);
+
+    if (faultnumb == 14) {
+        // 获取缺页的地址
+        fairvadrs = (adr_t)read_cr2();
+        kprint("异常地址:%x,此地址禁止访问\n", fairvadrs);
+        if (krluserspace_accessfailed(fairvadrs) != 0) {
+            // 处理缺页失败就死机
+            system_error("缺页处理失败\n");
+        }
+        // 成功就返回
+        return;
+    }
+    die(0);
     return;
 }
 
