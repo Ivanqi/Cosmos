@@ -743,9 +743,10 @@ void hal_mmu_refresh()
 	return;
 }
 
+// MMU
 bool_t hal_mmu_init(mmudsc_t* mmu)
 {
-	bool_t  rets = FALSE;
+	bool_t rets = FALSE;
 	adr_t pcr3 = NULL, vcr3 = NULL;
 	cr3s_t cr3;
 	if (NULL == mmu) {

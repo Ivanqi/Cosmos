@@ -28,7 +28,7 @@ typedef struct KVMCOBJMGR {
 	list_h_t kom_kvmcodelhead;
 } kvmcobjmgr_t;
 
-ypedef struct KVMEMCOBJ {
+typedef struct KVMEMCOBJ {
 	list_h_t kco_list;
 	spinlock_t kco_lock;
 	u32_t kco_cont;

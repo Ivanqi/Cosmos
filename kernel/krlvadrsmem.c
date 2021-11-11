@@ -210,7 +210,7 @@ void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
 		system_error("kvma_seting_kvirmemadrs nomem err\n");
 	}
 
-	// 内核空格键
+	// 内核空间区
 	kvma->kvs_isalcstart = KRNL_VIRTUAL_ADDRESS_START + KRNL_MAP_VIRTADDRESS_SIZE;
 	kvma->kvs_isalcend = KRNL_VIRTUAL_ADDRESS_END;
 	// 线性映射区
@@ -278,7 +278,7 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 
 void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 {
-	if(NULL == initp) {
+	if (NULL == initp) {
 		return;
 	}
 
@@ -297,7 +297,7 @@ void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 	
 	initp->msd_stext = 0;
 	initp->msd_etext = 0;
-	initp->msd_sdata = 0;
+	initp->msd_sdata = 0;	 // 应用的数据去的开始、结束地址
 	initp->msd_edata = 0;
 	initp->msd_sbss = 0;
 	initp->msd_ebss = 0;
