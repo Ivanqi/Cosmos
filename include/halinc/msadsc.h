@@ -24,4 +24,20 @@ bool_t search_krloccupymsadsc_core(machbstart_t* mbsp);
 
 void init_search_krloccupymm(machbstart_t* mbsp);
 
+KLINE adr_t msadsc_ret_addr(msadsc_t *msa)
+{
+    if (NULL == msa) {
+        return NULL;
+    }
+    return (msa->md_phyadrs.paf_padrs << PAGPHYADR_SZLSHBIT);
+}
+
+KLINE adr_t msadsc_ret_vaddr(msadsc_t *msa)
+{
+    if (NULL == msa) {
+        return NULL;
+    }
+    return phyadr_to_viradr(msadsc_ret_addr(msa));
+}
+
 #endif

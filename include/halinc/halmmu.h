@@ -192,7 +192,7 @@ KLINE void tdirearr_t_init(tdirearr_t* init) {
     if (NULL == init) {
         return;
     }
-
+    // 内存置0
     hal_memset((void*)init, 0, sizeof(tdirearr_t));
     return;
 }

@@ -92,16 +92,18 @@ void virmemadrs_t_init(virmemadrs_t *initp)
 	initp->vs_flgs = 0;
 	initp->vs_kmvdscnr = 0;
 	initp->vs_mm = NULL;
-	initp->vs_startkmvdsc = 0;
-	initp->vs_endkmvdsc = NULL;
-	initp->vs_currkmvdsc = NULL;
+	initp->vs_startkmvdsc = 0;		// 开始的虚拟地址区间
+	initp->vs_endkmvdsc = NULL;		// 结束的虚拟地址区间
+	initp->vs_currkmvdsc = NULL;	// 当前的虚拟地址区间
 	initp->vs_krlmapdsc = NULL;
 	initp->vs_krlhwmdsc = NULL;
 	initp->vs_krlolddsc = NULL;
-	initp->vs_isalcstart = 0;
-	initp->vs_isalcend = 0;
-	initp->vs_privte = 0;
-	initp->vs_ext = 0;
+
+	initp->vs_isalcstart = 0;		// 能分配的开始虚拟地址
+	initp->vs_isalcend = 0;			// 能分配的结束虚拟地址
+
+	initp->vs_privte = 0;			// 私有数据指针
+	initp->vs_ext = 0;				// 扩展数据指针
 	return;
 }
 
@@ -226,7 +228,11 @@ void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
 	return;
 }
 
-// 建立了一个虚拟地址区间和一个栈区，栈区位于虚拟地址空间的顶端
+/**
+ * 建立了一个虚拟地址区间和一个栈区，栈区位于虚拟地址空间的顶端
+ * 	1. vma 的 0 ～ 0x00007fffffffffff 设置为可分配的虚拟地址
+ * 	2. vma 设置两个区域。 虚拟地址区间：kmvdc(0x1000 ~ 0x5000), 栈区：stackkmvdc(0x00007FFFBFFFFFFF ～ 0x00007fffffffffff)
+ */
 bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 {
 	kmvarsdsc_t *kmvdc = NULL, *stackkmvdc = NULL;
@@ -251,15 +257,18 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	kmvdc->kva_start = USER_VIRTUAL_ADDRESS_START + 0x1000;
 	// 虚拟区间结束地址0x5000
 	kmvdc->kva_end = kmvdc->kva_start + 0x4000;
-	kmvdc->kva_mcstruct = vma;
+	kmvdc->kva_mcstruct = vma;	// kmvdc的上层结构为vma
 
+	// 0x00007FFFBFFFFFFF ～ 0x00007fffffffffff
 	// 栈虚拟区间开始地址0x1000USER_VIRTUAL_ADDRESS_END - 0x40000000
 	stackkmvdc->kva_start = PAGE_ALIGN(USER_VIRTUAL_ADDRESS_END - 0x40000000);
 	// 栈虚拟区间结束地址0x1000USER_VIRTUAL_ADDRESS_END
 	stackkmvdc->kva_end = USER_VIRTUAL_ADDRESS_END;
-	stackkmvdc->kva_mcstruct = vma;
+	stackkmvdc->kva_mcstruct = vma;	// stackkmvdc 的 上层结构为vma
 
 	knl_spinlock(&vma->vs_lock);
+
+	// 0 ～ 0x00007fffffffffff
 	vma->vs_isalcstart = USER_VIRTUAL_ADDRESS_START;
 	vma->vs_isalcend = USER_VIRTUAL_ADDRESS_END;
 	// 设置虚拟地址空间的开始区间为kmvdc

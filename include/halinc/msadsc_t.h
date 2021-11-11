@@ -4,7 +4,9 @@
 #ifndef _MSADSC_T_H
 #define _MSADSC_T_H
 
+#define PAGPHYADR_SZLSHBIT (12)
 #define MSAD_PAGE_MAX (8)
+#define MSA_SIZE (1 << PAGPHYADR_SZLSHBIT)
 
 // 挂入链表的类型
 #define MF_OLKTY_INIT (0)

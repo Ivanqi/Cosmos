@@ -716,6 +716,7 @@ adr_t hal_mmu_untransform(mmudsc_t* mmu, adr_t vadrs)
 	return hal_mmu_untransform_core(mmu, vadrs);
 }
 
+// 往cr3写入
 void hal_mmu_load(mmudsc_t* mmu)
 {
 	if (NULL == mmu) {

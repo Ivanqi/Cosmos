@@ -166,10 +166,10 @@ typedef struct TDIREARR {
 } __attribute__((packed)) tdirearr_t;
 
 typedef struct CR3SFLGS {
-    u64_t c3s_pcid : 12;  // 0
-    u64_t c3s_plm4a : 40; // 12
-    u64_t c3s_rv : 11;    // 52
-    u64_t c3s_tbc : 1;    // 63
+    u64_t c3s_pcid:12;  // 0
+    u64_t c3s_plm4a:40; // 12
+    u64_t c3s_rv:11;    // 52
+    u64_t c3s_tbc:1;    // 63
 } __attribute__((packed)) cr3sflgs_t;
 
 // CR3 寄存器

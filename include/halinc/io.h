@@ -290,13 +290,45 @@ KLINE u32_t read_kcr2() {
 // 设置cr3寄存器
 KLINE void set_cr3(u64_t pl4adr) {
 	__asm__ __volatile__(
-		
-             "movq %0,%%cr3 \n\t"
-	     :
-             : "r"(pl4adr)
-             : "memory"//, "edx"
-        );
+		"movq %0,%%cr3 \n\t"
+	    :
+        : "r"(pl4adr)
+        : "memory"//, "edx"
+    );
 	return;
+}
+
+KLINE uint_t read_cr2()
+{
+    uint_t regtmp = 0;
+    __asm__ __volatile__(
+        "movq %%cr2, %0\n\t"
+        : "=r"(regtmp)
+        :
+        : "memory");
+    return regtmp;
+}
+
+KLINE uint_t read_cr3()
+{
+    uint_t regtmp = 0;
+    __asm__ __volatile__(
+        "movq %%cr3, %0\n\t"
+        : "=r"(regtmp)
+        :
+        : "memory");
+    return regtmp;
+}
+
+KLINE void write_cr3(uint_t r_val)
+{
+    __asm__ __volatile__(
+        "movq %0, %%cr3 \n\t"
+        :
+        : "r"(r_val)
+        : "memory" //, "edx"
+    );
+    return;
 }
 
 #endif

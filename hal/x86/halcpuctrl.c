@@ -162,6 +162,7 @@ void knl_spinunlock_sti(spinlock_t *lock, cpuflg_t *cpuflg)
     return;
 }
 
+// 内存设置
 void hal_memset(void *setp, size_t n, u8_t setval)
 {
     u8_t *_p = (u8_t *)setp;

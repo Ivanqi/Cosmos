@@ -33,7 +33,7 @@
 
 #define KRNL_MAP_VIRTADDRESS_SIZE 0x400000000
 
-#define KRNL_VIRTUAL_ADDRESS_START 0xffff800000000000   // 内核虚拟空间从0xffff800000000000开始.  线性映射区
+#define KRNL_VIRTUAL_ADDRESS_START 0xffff800000000000   // 内核虚拟空间从0xffff800000000000开始
 #define KRNL_VIRTUAL_ADDRESS_END 0xffffffffffffffff     // 内核虚拟空间结束地址
 #define USER_VIRTUAL_ADDRESS_START 0                    // 用户虚拟空间开始地址
 #define USER_VIRTUAL_ADDRESS_END 0x00007fffffffffff     // 用户虚拟空间结束地址
@@ -42,8 +42,8 @@
 #define KRNL_MAP_PHYADDRESS_END 0x400000000             // 内核物理地址结束地址
 #define KRNL_MAP_PHYADDRESS_SIZE 0x400000000
 
-#define KRNL_MAP_VIRTADDRESS_START KRNL_VIRTUAL_ADDRESS_START
-#define KRNL_MAP_VIRTADDRESS_END (KRNL_MAP_VIRTADDRESS_START+KRNL_MAP_VIRTADDRESS_SIZE)
+#define KRNL_MAP_VIRTADDRESS_START KRNL_VIRTUAL_ADDRESS_START                               // 线性映射区. 0xffff800000000000
+#define KRNL_MAP_VIRTADDRESS_END (KRNL_MAP_VIRTADDRESS_START + KRNL_MAP_VIRTADDRESS_SIZE)   // 线性映射区. 0xffff800400000000
 #define KRNL_ADDR_ERROR 0xf800000000000
 
 #define MBS_MIGC (u64_t)((((u64_t)'L')<<56)|(((u64_t)'M')<<48)|(((u64_t)'O')<<40)|(((u64_t)'S')<<32)|(((u64_t)'M')<<24)|(((u64_t)'B')<<16)|(((u64_t)'S')<<8)|((u64_t)'P'))
