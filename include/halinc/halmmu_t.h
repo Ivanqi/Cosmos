@@ -60,19 +60,19 @@
 #define PML4E_HAVE_MASK (~0xfff)
 
 typedef struct MDIREFLAGS {
-    u64_t m_p : 1;    // 0
-    u64_t m_rw : 1;   // 1
-    u64_t m_us : 1;   // 2
-    u64_t m_pwt : 1;  // 3
-    u64_t m_pcd : 1;  // 4
-    u64_t m_a : 1;    // 5
-    u64_t m_d : 1;    // 6
-    u64_t m_pat : 1;  // 7
-    u64_t m_g : 1;    // 8
-    u64_t m_ig1 : 3;  // 9\10\11
-    u64_t m_msa : 40; // 12
-    u64_t m_ig2 : 11; // 52
-    u64_t m_xd : 1;   // 63
+    u64_t m_p:1;    // 0
+    u64_t m_rw:1;   // 1
+    u64_t m_us:1;   // 2
+    u64_t m_pwt:1;  // 3
+    u64_t m_pcd:1;  // 4
+    u64_t m_a:1;    // 5
+    u64_t m_d:1;    // 6
+    u64_t m_pat:1;  // 7
+    u64_t m_g:1;    // 8
+    u64_t m_ig1:3;  // 9\10\11
+    u64_t m_msa:40; // 12
+    u64_t m_ig2:11; // 52
+    u64_t m_xd:1;   // 63
 } __attribute__((packed)) mdireflags_t;
 
 typedef struct MDIRE {
@@ -83,22 +83,21 @@ typedef struct MDIRE {
 } __attribute__((packed)) mdire_t;
 
 typedef struct IDIREFLAGS {
-    u64_t i_p : 1;     // 0
-    u64_t i_rw : 1;    // 1
-    u64_t i_us : 1;    // 2
-    u64_t i_pwt : 1;   // 3
-    u64_t i_pcd : 1;   // 4
-    u64_t i_a : 1;     // 5
-    u64_t i_ig1 : 1;   // 6
-    u64_t i_ps : 1;    // 74kb==0
-    u64_t i_ig2 : 4;   // 8\9\10\11
-    u64_t i_mdir : 40; // 12
-    u64_t i_ig3 : 11;  // 52
-    u64_t i_xd : 1;    // 63
+    u64_t i_p:1;     // 0
+    u64_t i_rw:1;    // 1
+    u64_t i_us:1;    // 2
+    u64_t i_pwt:1;   // 3
+    u64_t i_pcd:1;   // 4
+    u64_t i_a:1;     // 5
+    u64_t i_ig1:1;   // 6
+    u64_t i_ps:1;    // 74kb==0
+    u64_t i_ig2:4;   // 8\9\10\11
+    u64_t i_mdir:40; // 12
+    u64_t i_ig3:11;  // 52
+    u64_t i_xd:1;    // 63
 } __attribute__((packed)) idireflags_t;
 
-typedef struct IDIRE
-{
+typedef struct IDIRE {
     union {
         idireflags_t i_flags;
         u64_t i_entry;
@@ -106,18 +105,18 @@ typedef struct IDIRE
 } __attribute__((packed)) idire_t;
 
 typedef struct SDIREFLAGS {
-    u64_t s_p : 1;     //0
-    u64_t s_rw : 1;    //1
-    u64_t s_us : 1;    //2
-    u64_t s_pwt : 1;   //3
-    u64_t s_pcd : 1;   //4
-    u64_t s_a : 1;     //5
-    u64_t s_ig1 : 1;   //6
-    u64_t s_ps : 1;    //74kb==0
-    u64_t s_ig2 : 4;   //8\9\10\11
-    u64_t s_idir : 40; //12
-    u64_t s_ig3 : 11;  //52
-    u64_t s_xd : 1;    //63
+    u64_t s_p:1;     //0
+    u64_t s_rw:1;    //1
+    u64_t s_us:1;    //2
+    u64_t s_pwt:1;   //3
+    u64_t s_pcd:1;   //4
+    u64_t s_a:1;     //5
+    u64_t s_ig1:1;   //6
+    u64_t s_ps:1;    //74kb==0
+    u64_t s_ig2:4;   //8\9\10\11
+    u64_t s_idir:40; //12
+    u64_t s_ig3:11;  //52
+    u64_t s_xd:1;    //63
 } __attribute__((packed)) sdireflags_t;
 
 typedef struct SDIRE {
@@ -128,18 +127,18 @@ typedef struct SDIRE {
 } __attribute__((packed)) sdire_t;
 
 typedef struct TDIREFLAGS {
-    u64_t t_p : 1;     // 0
-    u64_t t_rw : 1;    // 1
-    u64_t t_us : 1;    // 2
-    u64_t t_pwt : 1;   // 3
-    u64_t t_pcd : 1;   // 4
-    u64_t t_a : 1;     // 5
-    u64_t t_ig1 : 1;   // 6
-    u64_t t_rv1 : 1;   // 7
-    u64_t t_ig2 : 4;   // 8\9\10\11
-    u64_t t_sdir : 40; // 12
-    u64_t t_ig3 : 11;  // 52
-    u64_t t_xd : 1;    // 63
+    u64_t t_p:1;     // 0
+    u64_t t_rw:1;    // 1
+    u64_t t_us:1;    // 2
+    u64_t t_pwt:1;   // 3
+    u64_t t_pcd:1;   // 4
+    u64_t t_a:1;     // 5
+    u64_t t_ig1:1;   // 6
+    u64_t t_rv1:1;   // 7
+    u64_t t_ig2:4;   // 8\9\10\11
+    u64_t t_sdir:40; // 12
+    u64_t t_ig3:11;  // 52
+    u64_t t_xd:1;    // 63
 } __attribute__((packed)) tdireflags_t;
 
 typedef struct TDIRE {
@@ -165,9 +164,10 @@ typedef struct TDIREARR {
     tdire_t tde_arr[TDIRE_MAX];
 } __attribute__((packed)) tdirearr_t;
 
+// 64位的CR3
 typedef struct CR3SFLGS {
     u64_t c3s_pcid:12;  // 0
-    u64_t c3s_plm4a:40; // 12
+    u64_t c3s_plm4a:40; // 12, 写入物理地址的高20位
     u64_t c3s_rv:11;    // 52
     u64_t c3s_tbc:1;    // 63
 } __attribute__((packed)) cr3sflgs_t;
@@ -184,7 +184,7 @@ typedef struct MMUDSC {
     spinlock_t mud_lock;
     u64_t mud_stus;
     u64_t mud_flag;
-    tdirearr_t *mud_tdirearr;
+    tdirearr_t *mud_tdirearr;   // cr3的虚拟地址
     cr3s_t mud_cr3;             // cr3寄存器    
     list_h_t mud_tdirhead;
     list_h_t mud_sdirhead;

@@ -200,6 +200,11 @@ bool_t del_virmemadrs(virmemadrs_t *vmdsc)
 	return kmsob_delete((void *)vmdsc, sizeof(virmemadrs_t));
 }
 
+/**
+ * 1. 设置内存空间区地址
+ * 2. 设置线性映射区
+ * 3. 把线性映射区挂载到内存空间区中
+ */
 void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
 {
 	kmvarsdsc_t *kmvdc = NULL;
@@ -341,6 +346,7 @@ void init_kvirmemadrs()
 
 	kvirmemadrs_t_init(&krlvirmemadrs);
 
+	// 初始化内核空间区和线性映射区
 	kvma_seting_kvirmemadrs(&krlvirmemadrs);
 	// 初始化进程的用户空间.建立了一个虚拟地址区间和一个栈区，栈区位于虚拟地址空间的顶端
 	kvma_inituserspace_virmemadrs(&initmmadrsdsc.msd_virmemadrs);
@@ -432,6 +438,7 @@ kmvarsdsc_t *vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vas
 	return NULL;
 }
 
+// 虚拟内存分配
 adr_t vma_new_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimits, u32_t vastype)
 {
 	adr_t retadrs = NULL;

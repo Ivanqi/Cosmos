@@ -744,7 +744,11 @@ void hal_mmu_refresh()
 	return;
 }
 
-// MMU
+/**
+ * MMU
+ * 	1. 读取cr3的物理地址
+ * 	2. 然后把cr3的虚拟地址复制到mmu->mud_tdirearr中
+ */
 bool_t hal_mmu_init(mmudsc_t* mmu)
 {
 	bool_t rets = FALSE;
@@ -766,6 +770,7 @@ bool_t hal_mmu_init(mmudsc_t* mmu)
 	pcr3 = (adr_t)(cr3.c3s_c3sflgs.c3s_plm4a << 12);
 	vcr3 = phyadr_to_viradr(pcr3);
 
+	// 把 vcr3拷贝到mmu->mud_tdirearr
 	hal_memcpy((void*)vcr3, (void*)mmu->mud_tdirearr, sizeof(tdirearr_t));
 	
 	mmu->mud_cr3.c3s_entry = (u64_t)viradr_to_phyadr((adr_t)mmu->mud_tdirearr);

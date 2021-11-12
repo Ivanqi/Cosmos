@@ -309,6 +309,7 @@ KLINE uint_t read_cr2()
     return regtmp;
 }
 
+// 读取cr3
 KLINE uint_t read_cr3()
 {
     uint_t regtmp = 0;
@@ -320,6 +321,7 @@ KLINE uint_t read_cr3()
     return regtmp;
 }
 
+// 往cr3写入
 KLINE void write_cr3(uint_t r_val)
 {
     __asm__ __volatile__(
