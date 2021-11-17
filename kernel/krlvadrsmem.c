@@ -516,6 +516,7 @@ adr_t vma_new_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimit
 	return vma_new_vadrs_core(mm, start, VADSZ_ALIGN(vassize), vaslimits, vastype);
 }
 
+// 查找要释放虚拟地址空间的kmvarsdsc_t结构
 kmvarsdsc_t *vma_del_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize)
 {
 	kmvarsdsc_t *curr = vmalocked->vs_currkmvdsc;
