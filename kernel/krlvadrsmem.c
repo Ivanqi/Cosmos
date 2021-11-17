@@ -566,6 +566,7 @@ void vma_del_set_endcurrkmvd(virmemadrs_t *vmalocked, kmvarsdsc_t *del)
 	return;
 }
 
+// 删除映射的物理内存
 bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, adr_t end)
 {
 	adr_t phyadrs;
@@ -585,6 +586,7 @@ bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start
 	return rets;
 }
 
+// 删除映射的物理内存
 bool_t vma_del_unmapping(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, size_t vassize)
 {
 	adr_t end;

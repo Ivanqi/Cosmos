@@ -648,6 +648,7 @@ idirearr_t* mmu_find_idirearr(sdirearr_t* sdirearr, adr_t vadrs)
 	return sdire_ret_idirearr(&dire);
 }
 
+// 查找mmu中的sdirearr
 sdirearr_t* mmu_find_sdirearr(tdirearr_t* tdirearr, adr_t vadrs)
 {
 	uint_t tindex;
@@ -656,6 +657,7 @@ sdirearr_t* mmu_find_sdirearr(tdirearr_t* tdirearr, adr_t vadrs)
 		return NULL;
 	}
 
+	// 通过 vadrs地址获取 tdire 下标
 	tindex = mmu_tdire_index(vadrs);
 
 	dire = tdirearr->tde_arr[tindex];
@@ -674,18 +676,22 @@ adr_t hal_mmu_untransform_core(mmudsc_t* mmu, adr_t vadrs)
 	idirearr_t* idirearr;
 	mdirearr_t* mdirearr;
 	knl_spinlock(&mmu->mud_lock);
+
+	// 通过 mmu 查找 sdirearr
 	sdirearr = mmu_find_sdirearr(mmu->mud_tdirearr, vadrs);
 	if (NULL == sdirearr) {
 		retadr = NULL;
 		goto out;
 	}
 
+	// 通过 sdirearr 查找 idirearr
 	idirearr = mmu_find_idirearr(sdirearr, vadrs);
 	if (NULL == idirearr) {
 		retadr = NULL;
 		goto untf_sdirearr;
 	}
 
+	// 通过 idirearr 查找 mdirearr
 	mdirearr = mmu_find_mdirearr(idirearr, vadrs);
 	if (NULL == mdirearr) {
 		retadr = NULL;

@@ -40,6 +40,7 @@ bool_t mmu_clean_tdirearrmsas(mmudsc_t* mmulocked);
 bool_t hal_mmu_clean(mmudsc_t* mmu);
 void dump_mmu(mmudsc_t* dump);
 
+// 通过 vadrs地址获取 tdire 下标
 KLINE uint_t mmu_tdire_index(adr_t vadrs) {
 	return (uint_t)((vadrs >> TDIRE_IV_RSHTBIT) & TDIRE_IV_BITMASK);
 }
