@@ -51,6 +51,7 @@ KLINE void atomic_inc(atomic_t *v) {
     );
 }
 
+// 原子操作：减1
 KLINE void atomic_dec(atomic_t *v) {
     __asm__ __volatile__(
         "lock;"

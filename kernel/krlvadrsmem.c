@@ -1421,6 +1421,7 @@ bool_t knl_put_kvmemcbox(kvmemcbox_t* kmbox)
 
 	knl_spinlock(&kmbmgr->kbm_lock);
 	
+	// 减1
 	refcount_dec(&kmbox->kmb_cont);
 	if (refcount_read(&kmbox->kmb_cont) >= 1) {
 		rets = TRUE;
