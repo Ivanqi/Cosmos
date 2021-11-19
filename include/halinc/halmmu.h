@@ -39,25 +39,38 @@ bool_t mmu_clean_sdirearrmsas(mmudsc_t* mmulocked);
 bool_t mmu_clean_tdirearrmsas(mmudsc_t* mmulocked);
 bool_t hal_mmu_clean(mmudsc_t* mmu);
 void dump_mmu(mmudsc_t* dump);
+/**
+ * 虚拟地址转化为物理地址
+ *  1. 用虚拟地址的高10位乘以4，作为页目录表内的偏移地址，加上页目录表的物理地址，所得之和，便是页目录的物理地址。读取该页目录项，从中获取页表物理地址
+ *  2. 用虚拟地址的中间10位乘以4，作为页表内的偏移地址，加上在上一步得到的页表物理地址，所得的和，便是页表项的物理地址。读取该页表项，从中获取到分配的物理页地址
+ *  3. 虚拟地址的高10位和中间10位分别是PDE和PTE的索引值，所以它们需要乘以4
+ *      但低12位就不是索引值，其表示范围是0 ~ 0xfff作为页内偏移最合适。所以虚拟地址的低12位加上上一步中得到的物理页地址，所得的和便是最终转换的物理地址
+ * 
+ * 物理地址转虚拟地址
+ *  公式为0x3ff << 22 + 中间10位 << 12 + 低12位
+ */
 
-// 通过 vadrs地址获取 tdire 下标
+// vadrs右移39位(vadrs除以2的39次方) 并且 不能超过 0x1ffUL(511)
 KLINE uint_t mmu_tdire_index(adr_t vadrs) {
-	return (uint_t)((vadrs >> TDIRE_IV_RSHTBIT) & TDIRE_IV_BITMASK);
+	return (uint_t)((vadrs >> TDIRE_IV_RSHTBIT) & TDIRE_IV_BITMASK);   
 }
 
+// vadrs右移30位(vadrs除以2的30次方) 并且 不能超过 0x1ffUL(511)
 KLINE uint_t mmu_sdire_index(adr_t vadrs) {
 	return (uint_t)((vadrs >> SDIRE_IV_RSHTBIT) & SDIRE_IV_BITMASK);
 }
 
+// vadrs右移21位(vadrs除以2的21次方) 并且 不能超过 0x1ffUL(511)
 KLINE uint_t mmu_idire_index(adr_t vadrs) {
 	return (uint_t)((vadrs >> IDIRE_IV_RSHTBIT) & IDIRE_IV_BITMASK);
 }
 
+// vadrs右移12位(vadrs除以2的12次方) 并且 不能超过 0x1ffUL(511)
 KLINE uint_t mmu_mdire_index(adr_t vadrs) {
 	return (uint_t)((vadrs >> MDIRE_IV_RSHTBIT) & MDIRE_IV_BITMASK);
 }
 
-
+// cr3初始化
 KLINE void cr3s_t_init(cr3s_t* init) {
     if (NULL == init) {
         return;

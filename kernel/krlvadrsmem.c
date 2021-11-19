@@ -302,11 +302,14 @@ void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 	initp->msd_stus = 0;
 	initp->msd_scount = 0;
 
+	// 信号设置
 	krlsem_t_init(&initp->msd_sem);
 	krlsem_set_sem(&initp->msd_sem, SEM_FLG_MUTEX, SEM_MUTEX_ONE_LOCK);
 
+	// mmu设置
 	mmudsc_t_init(&initp->msd_mmu);
 
+	// 虚拟内存设置
 	virmemadrs_t_init(&initp->msd_virmemadrs);
 	
 	initp->msd_stext = 0;
@@ -574,6 +577,7 @@ bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start
 	mmudsc_t *mmu = &mm->msd_mmu;
 	kvmemcbox_t *kmbox = kmvd->kva_kvmbox;
 
+	// 遍历所有虚拟内存
 	for (adr_t vadrs = start; vadrs < end; vadrs += VMAP_MIN_SIZE) {
 		phyadrs = hal_mmu_untransform(mmu, vadrs);
 		if (NULL != phyadrs && NULL != kmbox) {

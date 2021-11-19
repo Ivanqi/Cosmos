@@ -46,6 +46,7 @@ msadsc_t* mmu_new_tdirearr(mmudsc_t* mmulocked)
 		return NULL;
 	}
 
+	// 物理内存转虚拟内存
 	tdirearr = (tdirearr_t*)msadsc_ret_vaddr(msa);
 
     tdirearr_t_init(tdirearr);
