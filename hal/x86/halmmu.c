@@ -660,7 +660,7 @@ sdirearr_t* mmu_find_sdirearr(tdirearr_t* tdirearr, adr_t vadrs)
 
 	// 通过 vadrs地址获取 tdire 下标
 	tindex = mmu_tdire_index(vadrs);
-
+	// 通过虚拟的地址的高39位，往cr3中获取页表的物理地址
 	dire = tdirearr->tde_arr[tindex];
 
 	if (sdire_is_have(&dire) == FALSE) {

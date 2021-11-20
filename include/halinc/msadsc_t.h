@@ -6,7 +6,7 @@
 
 #define PAGPHYADR_SZLSHBIT (12)
 #define MSAD_PAGE_MAX (8)
-#define MSA_SIZE (1 << PAGPHYADR_SZLSHBIT)
+#define MSA_SIZE (1 << PAGPHYADR_SZLSHBIT)	// 2 的 12次方，页目标大小是4KB，也就是4096个字节
 
 // 挂入链表的类型
 #define MF_OLKTY_INIT (0)

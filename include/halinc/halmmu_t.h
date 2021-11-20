@@ -164,7 +164,11 @@ typedef struct TDIREARR {
     tdire_t tde_arr[TDIRE_MAX];
 } __attribute__((packed)) tdirearr_t;
 
-// 64位的CR3
+/**
+ * 64位的CR3，cr3存储的是页表物理地址
+ *  用cr3寄存器中的页表物理地址加上偏移量便是该页表的物理地址
+ *  从该页表项中得到映射的物理页地址，然后用线性地址的低12位与该物理页地址相加，所得的地址之和便是最终要访问的物理地址
+ */
 typedef struct CR3SFLGS {
     u64_t c3s_pcid:12;  // 0
     u64_t c3s_plm4a:40; // 12, 写入物理地址的高20位

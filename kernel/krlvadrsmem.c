@@ -577,7 +577,7 @@ bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start
 	mmudsc_t *mmu = &mm->msd_mmu;
 	kvmemcbox_t *kmbox = kmvd->kva_kvmbox;
 
-	// 遍历所有虚拟内存
+	// 遍历所有虚拟内存。4KB内存移动
 	for (adr_t vadrs = start; vadrs < end; vadrs += VMAP_MIN_SIZE) {
 		phyadrs = hal_mmu_untransform(mmu, vadrs);
 		if (NULL != phyadrs && NULL != kmbox) {
