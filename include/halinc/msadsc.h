@@ -24,12 +24,12 @@ bool_t search_krloccupymsadsc_core(machbstart_t* mbsp);
 
 void init_search_krloccupymm(machbstart_t* mbsp);
 
+// 页物理地址左移12位(2的12次方)
 KLINE adr_t msadsc_ret_addr(msadsc_t *msa)
 {
     if (NULL == msa) {
         return NULL;
     }
-    // 页物理地址左移12位(2的12次方)
     return (msa->md_phyadrs.paf_padrs << PAGPHYADR_SZLSHBIT);
 }
 

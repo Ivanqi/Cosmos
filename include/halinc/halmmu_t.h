@@ -59,6 +59,7 @@
 #define PDPTE_HAVE_MASK (~0xfff)
 #define PML4E_HAVE_MASK (~0xfff)
 
+// 页目录项
 typedef struct MDIREFLAGS {
     u64_t m_p:1;    // 0
     u64_t m_rw:1;   // 1
@@ -75,6 +76,7 @@ typedef struct MDIREFLAGS {
     u64_t m_xd:1;   // 63
 } __attribute__((packed)) mdireflags_t;
 
+// 页目录项
 typedef struct MDIRE {
     union {
         mdireflags_t m_flags;
@@ -82,21 +84,23 @@ typedef struct MDIRE {
     } __attribute__((packed));
 } __attribute__((packed)) mdire_t;
 
+// 页目录指针项
 typedef struct IDIREFLAGS {
-    u64_t i_p:1;     // 0
-    u64_t i_rw:1;    // 1
-    u64_t i_us:1;    // 2
-    u64_t i_pwt:1;   // 3
-    u64_t i_pcd:1;   // 4
-    u64_t i_a:1;     // 5
-    u64_t i_ig1:1;   // 6
-    u64_t i_ps:1;    // 74kb==0
-    u64_t i_ig2:4;   // 8\9\10\11
-    u64_t i_mdir:40; // 12
-    u64_t i_ig3:11;  // 52
-    u64_t i_xd:1;    // 63
+    u64_t i_p:1;     // 0, 意为存在位. 若为1表示该页存在物理内存中, 若为0表示该表不在物理内存中
+    u64_t i_rw:1;    // 1, 意为读写位. 若为1表示可读可写，若为0表示可读不可写
+    u64_t i_us:1;    // 2, 意为普通用户/超级用户位. 若为1时，表示处于User级, 若为0时，表示处于Supervisor级，特权级别为3的程序不允许访问该页
+    u64_t i_pwt:1;   // 3, 意为页级通写位，也称页级写透位. 若为1表示此项采用通用方式，表达该页不仅是普通内存，还是高速缓存, 这里直接置0就可以了
+    u64_t i_pcd:1;   // 4, 意为页级高速缓存禁止位. 若为1表示该页启用高速缓存, 为0表示禁止该页缓存。这里将其置0
+    u64_t i_a:1;     // 5, 意为访问位. 若为1表示该页被CPU访问过了，所以该位是由CPU设置的
+    u64_t i_ig1:1;   // 6, 意为脏页位. 当CPU对一个页面执行写操作时，就会设置对应页表项的D位为1
+    u64_t i_ps:1;    // 74kb==0。7, 意为页属性表位. 将此位置0即可
+    u64_t i_ig2:4;   // 8\9\10\11, G, Global，意为全局位. AVL，意为Available位,表示可用
+    u64_t i_mdir:40; // 12, 从13开始是物理页地址
+    u64_t i_ig3:11;  // 52, 忽略
+    u64_t i_xd:1;    // 63  XD，执行屏蔽位
 } __attribute__((packed)) idireflags_t;
 
+// 页目录指针项
 typedef struct IDIRE {
     union {
         idireflags_t i_flags;
@@ -104,21 +108,23 @@ typedef struct IDIRE {
     } __attribute__((packed));
 } __attribute__((packed)) idire_t;
 
+// 顶级目录项
 typedef struct SDIREFLAGS {
-    u64_t s_p:1;     //0
-    u64_t s_rw:1;    //1
-    u64_t s_us:1;    //2
-    u64_t s_pwt:1;   //3
-    u64_t s_pcd:1;   //4
-    u64_t s_a:1;     //5
-    u64_t s_ig1:1;   //6
-    u64_t s_ps:1;    //74kb==0
-    u64_t s_ig2:4;   //8\9\10\11
-    u64_t s_idir:40; //12
-    u64_t s_ig3:11;  //52
-    u64_t s_xd:1;    //63
+    u64_t s_p:1;     // 0, 意为存在位. 若为1表示该页存在物理内存中, 若为0表示该表不在物理内存中
+    u64_t s_rw:1;    // 1, 意为读写位. 若为1表示可读可写，若为0表示可读不可写
+    u64_t s_us:1;    // 2, 意为普通用户/超级用户位. 若为1时，表示处于User级, 若为0时，表示处于Supervisor级，特权级别为3的程序不允许访问该页
+    u64_t s_pwt:1;   // 3, 意为页级通写位，也称页级写透位. 若为1表示此项采用通用方式，表达该页不仅是普通内存，还是高速缓存, 这里直接置0就可以了
+    u64_t s_pcd:1;   // 4, 意为页级高速缓存禁止位. 若为1表示该页启用高速缓存, 为0表示禁止该页缓存。这里将其置0
+    u64_t s_a:1;     // 5, 意为访问位. 若为1表示该页被CPU访问过了，所以该位是由CPU设置的
+    u64_t s_ig1:1;   // 6, 意为脏页位. 当CPU对一个页面执行写操作时，就会设置对应页表项的D位为1
+    u64_t s_ps:1;    // 74kb==0, 7, 意为页属性表位. 将此位置0即可
+    u64_t s_ig2:4;   // 8\9\10\11, G, Global，意为全局位. AVL，意为Available位,表示可用
+    u64_t s_idir:40; // 12, 从13开始是物理页地址
+    u64_t s_ig3:11;  // 52, 忽略
+    u64_t s_xd:1;    // 63  XD，执行屏蔽位
 } __attribute__((packed)) sdireflags_t;
 
+// 顶级目录项
 typedef struct SDIRE {
     union {
         sdireflags_t s_flags;
@@ -126,21 +132,23 @@ typedef struct SDIRE {
     } __attribute__((packed));
 } __attribute__((packed)) sdire_t;
 
+// 63位的顶级页目录项
 typedef struct TDIREFLAGS {
-    u64_t t_p:1;     // 0
-    u64_t t_rw:1;    // 1
-    u64_t t_us:1;    // 2
-    u64_t t_pwt:1;   // 3
-    u64_t t_pcd:1;   // 4
-    u64_t t_a:1;     // 5
-    u64_t t_ig1:1;   // 6
-    u64_t t_rv1:1;   // 7
-    u64_t t_ig2:4;   // 8\9\10\11
-    u64_t t_sdir:40; // 12
-    u64_t t_ig3:11;  // 52
-    u64_t t_xd:1;    // 63
+    u64_t t_p:1;     // 0, 意为存在位. 若为1表示该页存在物理内存中, 若为0表示该表不在物理内存中
+    u64_t t_rw:1;    // 1, 意为读写位. 若为1表示可读可写，若为0表示可读不可写
+    u64_t t_us:1;    // 2, 意为普通用户/超级用户位. 若为1时，表示处于User级, 若为0时，表示处于Supervisor级，特权级别为3的程序不允许访问该页
+    u64_t t_pwt:1;   // 3, 意为页级通写位，也称页级写透位. 若为1表示此项采用通用方式，表达该页不仅是普通内存，还是高速缓存, 这里直接置0就可以了
+    u64_t t_pcd:1;   // 4, 意为页级高速缓存禁止位. 若为1表示该页启用高速缓存, 为0表示禁止该页缓存。这里将其置0
+    u64_t t_a:1;     // 5, 意为访问位. 若为1表示该页被CPU访问过了，所以该位是由CPU设置的
+    u64_t t_ig1:1;   // 6, 意为脏页位. 当CPU对一个页面执行写操作时，就会设置对应页表项的D位为1
+    u64_t t_rv1:1;   // 7, 意为页属性表位. 将此位置0即可
+    u64_t t_ig2:4;   // 8\9\10\11, G, Global，意为全局位. AVL，意为Available位,表示可用
+    u64_t t_sdir:40; // 12, 从13开始是物理页地址
+    u64_t t_ig3:11;  // 52, 忽略
+    u64_t t_xd:1;    // 63  XD，执行屏蔽位
 } __attribute__((packed)) tdireflags_t;
 
+// 页表项
 typedef struct TDIRE {
     union {
         tdireflags_t t_flags;
@@ -148,18 +156,22 @@ typedef struct TDIRE {
     } __attribute__((packed));
 } __attribute__((packed)) tdire_t;
 
+// 项目录项管理结构体
 typedef struct MDIREARR {
     mdire_t mde_arr[MDIRE_MAX];
 } __attribute__((packed)) mdirearr_t;
 
+// 页目录指针项管理结构体
 typedef struct IDIREARR {
     idire_t ide_arr[IDIRE_MAX];
 } __attribute__((packed)) idirearr_t;
 
+// 顶级页目录项管理结构体。 2MB页表 顶级页目录项。内含512个顶级页目录项
 typedef struct SDIREARR {
     sdire_t sde_arr[SDIRE_MAX];
 } __attribute__((packed)) sdirearr_t;
 
+// 页表项管理结构体
 typedef struct TDIREARR {
     tdire_t tde_arr[TDIRE_MAX];
 } __attribute__((packed)) tdirearr_t;
@@ -184,6 +196,7 @@ typedef struct CR3S {
     } __attribute__((packed));
 } __attribute__((packed)) cr3s_t;
 
+// MMU 管理结构体
 typedef struct MMUDSC {
     spinlock_t mud_lock;
     u64_t mud_stus;

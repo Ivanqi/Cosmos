@@ -579,8 +579,10 @@ bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start
 
 	// 遍历所有虚拟内存。4KB内存移动
 	for (adr_t vadrs = start; vadrs < end; vadrs += VMAP_MIN_SIZE) {
+		// 清除对应地址的顶级页目录项、页目录指针项、页目录项
 		phyadrs = hal_mmu_untransform(mmu, vadrs);
 		if (NULL != phyadrs && NULL != kmbox) {
+			// 清楚物理地址
 			if (vma_del_usermsa(mm, kmbox, NULL, phyadrs) == FALSE) {
 				rets = FALSE;
 			}

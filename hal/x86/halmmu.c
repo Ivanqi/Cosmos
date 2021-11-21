@@ -250,6 +250,7 @@ msadsc_t* mmu_new_mdirearr(mmudsc_t* mmulocked)
     return msa;
 }
 
+// 清空页目录项对应的物理内存
 bool_t mmu_del_mdirearr(mmudsc_t* mmulocked, mdirearr_t* mdirearr, msadsc_t* msa)
 {
 	list_h_t* pos;
@@ -259,11 +260,14 @@ bool_t mmu_del_mdirearr(mmudsc_t* mmulocked, mdirearr_t* mdirearr, msadsc_t* msa
 		return FALSE;
 	}
 
+	// 得到物理地址
 	tblphyadr = viradr_to_phyadr((adr_t)mdirearr);
 
 	if (NULL != msa) {
+		// 物理地址相等
 		if (msadsc_ret_addr(msa) == tblphyadr) {
-			list_del(&msa->md_list);
+			list_del(&msa->md_list);	// 从 msadsc_t的md_list链表中释放
+			// 释放物理内存
 			if (mm_merge_pages(&memmgrob, msa, onfrmsa_retn_fpagenr(msa)) == FALSE) {
 				system_error("mmu_del_tdirearr err\n");
 				return FALSE;
@@ -274,6 +278,7 @@ bool_t mmu_del_mdirearr(mmudsc_t* mmulocked, mdirearr_t* mdirearr, msadsc_t* msa
 	}
 
 	list_for_each(pos, &mmulocked->mud_mdirhead) {
+		// 得到物理地址
 		tmpmsa = list_entry(pos, msadsc_t, md_list);
 		if (msadsc_ret_addr(tmpmsa) == tblphyadr) {
 			list_del(&tmpmsa->md_list);
@@ -289,6 +294,7 @@ bool_t mmu_del_mdirearr(mmudsc_t* mmulocked, mdirearr_t* mdirearr, msadsc_t* msa
 	return FALSE;
 }
 
+// 得到物理地址
 adr_t mmu_untransform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs)
 {
 	uint_t mindex;
@@ -298,6 +304,7 @@ adr_t mmu_untransform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs
 		return NULL;
 	}
 
+	// vadrs右移12位(vadrs除以2的12次方)。从页表项列表中获取页表
 	mindex = mmu_mdire_index(vadrs);
 	
 	mdire = mdirearr->mde_arr[mindex];
@@ -305,6 +312,7 @@ adr_t mmu_untransform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs
 		return NULL;
 	}
 
+	// 返回物理地址
 	retadr = mmumsa_ret_padr(&mdire);
 	
 	mdirearr->mde_arr[mindex].m_entry = 0;
@@ -324,6 +332,7 @@ bool_t mmu_transform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs,
 	return TRUE;
 }
 
+// 清空vadrs的页目录指针项
 bool_t mmu_untransform_mdire(mmudsc_t* mmulocked, idirearr_t* idirearr, msadsc_t* msa, adr_t vadrs)
 {
 	uint_t iindex;
@@ -341,14 +350,17 @@ bool_t mmu_untransform_mdire(mmudsc_t* mmulocked, idirearr_t* idirearr, msadsc_t
 	}
 
 	mdirearr = idire_ret_mdirearr(&idire);
+	//  检测页目录项目不为空
 	if (mdirearr_is_allzero(mdirearr) == FALSE) {
 		return TRUE;
 	}
-
+	
+	// 清空页目录项对应的物理内存
 	if (mmu_del_mdirearr(mmulocked, mdirearr, msa) == FALSE) {
 		return FALSE;
 	}
 
+	// 页目录指针项置0
 	idirearr->ide_arr[iindex].i_entry = 0;
 	
 	return TRUE; 
@@ -609,7 +621,7 @@ adr_t mmu_find_msaadr(mdirearr_t* mdirearr, adr_t vadrs)
 	return mmumsa_ret_padr(&dire);
 }
 
-
+// 通过 idirearr 查找 mdirearr(页目录项)
 mdirearr_t* mmu_find_mdirearr(idirearr_t* idirearr, adr_t vadrs)
 {
 	uint_t iindex;
@@ -618,6 +630,7 @@ mdirearr_t* mmu_find_mdirearr(idirearr_t* idirearr, adr_t vadrs)
 		return NULL;
 	}
 
+	// vadrs右移21位(vadrs除以2的21次方)，得到页目录项列表中的页目录项
 	iindex = mmu_idire_index(vadrs);
 
 	dire = idirearr->ide_arr[iindex];
@@ -626,10 +639,11 @@ mdirearr_t* mmu_find_mdirearr(idirearr_t* idirearr, adr_t vadrs)
 		return NULL;
 	}
 
+	// 返回页目录项
 	return idire_ret_mdirearr(&dire);
 }
 
-
+// 通过 sdirearr 查找 idirearr(页目录指针项)
 idirearr_t* mmu_find_idirearr(sdirearr_t* sdirearr, adr_t vadrs)
 {
 	uint_t sindex;
@@ -638,6 +652,7 @@ idirearr_t* mmu_find_idirearr(sdirearr_t* sdirearr, adr_t vadrs)
 		return NULL;
 	}
 
+	// vadrs右移30位获取页目录指针项位置
 	sindex = mmu_sdire_index(vadrs);
 
 	dire = sdirearr->sde_arr[sindex];
@@ -646,10 +661,11 @@ idirearr_t* mmu_find_idirearr(sdirearr_t* sdirearr, adr_t vadrs)
 		return NULL;
 	}
 
+	// 返回页目录指针项
 	return sdire_ret_idirearr(&dire);
 }
 
-// 查找mmu中的sdirearr
+// 通过 mmu 查找 sdirearr(顶级页目录项)
 sdirearr_t* mmu_find_sdirearr(tdirearr_t* tdirearr, adr_t vadrs)
 {
 	uint_t tindex;
@@ -660,16 +676,18 @@ sdirearr_t* mmu_find_sdirearr(tdirearr_t* tdirearr, adr_t vadrs)
 
 	// 通过 vadrs地址获取 tdire 下标
 	tindex = mmu_tdire_index(vadrs);
-	// 通过虚拟的地址的高39位，往cr3中获取页表的物理地址
+	// 通过虚拟的地址的高39位作为页表项索引，往cr3中获取页表的物理地址.然后得到某个顶级页目录项
 	dire = tdirearr->tde_arr[tindex];
 
 	if (sdire_is_have(&dire) == FALSE) {
 		return NULL;
 	}
 
+	// 顶级页目录项
 	return tdire_ret_sdirearr(&dire);
 }
 
+// 清除对应地址的顶级页目录项、页目录指针项、页目录项
 adr_t hal_mmu_untransform_core(mmudsc_t* mmu, adr_t vadrs)
 {
 	adr_t retadr;
@@ -678,29 +696,31 @@ adr_t hal_mmu_untransform_core(mmudsc_t* mmu, adr_t vadrs)
 	mdirearr_t* mdirearr;
 	knl_spinlock(&mmu->mud_lock);
 
-	// 通过 mmu 查找 sdirearr
+	// 通过 mmu 查找 sdirearr(顶级页目录项)
 	sdirearr = mmu_find_sdirearr(mmu->mud_tdirearr, vadrs);
 	if (NULL == sdirearr) {
 		retadr = NULL;
 		goto out;
 	}
 
-	// 通过 sdirearr 查找 idirearr
+	// 通过 sdirearr 查找 idirearr(页目录指针项)
 	idirearr = mmu_find_idirearr(sdirearr, vadrs);
 	if (NULL == idirearr) {
 		retadr = NULL;
 		goto untf_sdirearr;
 	}
 
-	// 通过 idirearr 查找 mdirearr
+	// 通过 idirearr 查找 mdirearr(页目录项)
 	mdirearr = mmu_find_mdirearr(idirearr, vadrs);
 	if (NULL == mdirearr) {
 		retadr = NULL;
 		goto untf_idirearr; 
 	}
 	
+	// 得到物理地址，并晴空页目录项
 	retadr = mmu_untransform_msa(mmu, mdirearr, vadrs);
 
+	// 清空vadrs的页目录指针项
 	mmu_untransform_mdire(mmu, idirearr, NULL, vadrs);
 
 untf_idirearr:
@@ -714,6 +734,7 @@ out:
 	return retadr;
 }
 
+// 清除对应地址的顶级页目录项、页目录指针项、页目录项
 adr_t hal_mmu_untransform(mmudsc_t* mmu, adr_t vadrs)
 {
 	if (NULL == mmu) {

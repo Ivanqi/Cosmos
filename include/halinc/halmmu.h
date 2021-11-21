@@ -99,14 +99,17 @@ KLINE bool_t sdire_is_presence(tdire_t* tdire) {
     return FALSE;
 }
 
+// 通过对页表项中的地址右移12位。得到真正的物理地址
 KLINE adr_t sdire_ret_padr(tdire_t* tdire) {
     return (adr_t)(tdire->t_flags.t_sdir << SDIRE_PADR_LSHTBIT);
 }
 
+// 把tdire_t高12位的物理地址转换为虚拟地址
 KLINE adr_t sdire_ret_vadr(tdire_t* tdire) {
     return phyadr_to_viradr(sdire_ret_padr(tdire));
 }
 
+// 返回顶级页目录项
 KLINE sdirearr_t* tdire_ret_sdirearr(tdire_t* tdire) {
     return (sdirearr_t*)(sdire_ret_vadr(tdire));
 }
@@ -142,10 +145,12 @@ KLINE adr_t idire_ret_vadr(sdire_t* sdire) {
     return phyadr_to_viradr(idire_ret_padr(sdire));
 }
 
+// 返回页目录指针项
 KLINE idirearr_t* sdire_ret_idirearr(sdire_t* sdire) {
     return (idirearr_t*)(idire_ret_vadr(sdire));
 }
 
+// 检测页目录项目不为空
 KLINE bool_t mdirearr_is_allzero(mdirearr_t* mdirearr) {
     for (uint_t i = 0; i < MDIRE_MAX; i++) {
         if (0 != mdirearr->mde_arr[i].m_entry) {
@@ -177,6 +182,7 @@ KLINE adr_t mdire_ret_vadr(idire_t* idire) {
     return phyadr_to_viradr(mdire_ret_padr(idire));
 }
 
+// 返回页目录项
 KLINE mdirearr_t* idire_ret_mdirearr(idire_t* idire) {
     return (mdirearr_t*)(mdire_ret_vadr(idire));
 }
@@ -195,6 +201,7 @@ KLINE bool_t mmumsa_is_presence(mdire_t* mdire) {
     return FALSE;
 }
 
+// 返回物理地址
 KLINE adr_t mmumsa_ret_padr(mdire_t* mdire) {
     return (adr_t)(mdire->m_flags.m_msa << MSA_PADR_LSHTBIT);
 }
