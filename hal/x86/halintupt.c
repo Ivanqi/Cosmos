@@ -190,14 +190,20 @@ void hal_do_hwint(uint_t intnumb, void *krnlsframp)
     return;
 }
 
-// 异常分发器
+/**
+ * 异常分发器
+ *  1. 缺页异常(异常号14)
+ *      1. 缺页异常是从 kernel.asm 文件中的 exc_page_fault 标号处开始，但它只是保存了 CPU 的上下文
+ *      2. 然后调用了内核的通用异常分发器函数，最后由异常分发器函数调用不同的异常处理函数
+ */
 void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
 {
     adr_t fairvadrs;
     kprint("faultnumb is :%d\n", faultnumb);
 
+    // 如果异常号等于14则是内存缺页异常
     if (faultnumb == 14) {
-        // 获取缺页的地址
+        // 获取缺页的地址。打印缺页地址，这地址保存在CPU的CR2寄存器中
         fairvadrs = (adr_t)read_cr2();
         kprint("异常地址:%x,此地址禁止访问\n", fairvadrs);
         if (krluserspace_accessfailed(fairvadrs) != 0) {
@@ -207,6 +213,7 @@ void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
         // 成功就返回
         return;
     }
+    // 死机，不让这个函数返回了
     die(0);
     return;
 }

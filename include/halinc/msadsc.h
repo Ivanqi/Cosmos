@@ -30,6 +30,7 @@ KLINE adr_t msadsc_ret_addr(msadsc_t *msa)
     if (NULL == msa) {
         return NULL;
     }
+    
     return (msa->md_phyadrs.paf_padrs << PAGPHYADR_SZLSHBIT);
 }
 

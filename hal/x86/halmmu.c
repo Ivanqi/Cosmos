@@ -321,6 +321,7 @@ adr_t mmu_untransform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs
 	return retadr; 
 }
 
+// 页表项映射
 bool_t mmu_transform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs, adr_t padrs, u64_t flags)
 {
 	uint_t mindex;	
@@ -541,6 +542,7 @@ sdirearr_t* mmu_transform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, adr_t
 	return sdirearr;
 }
 
+// 建立MMU页表完成虚拟地址到物理地址的映射
 bool_t hal_mmu_transform_core(mmudsc_t* mmu, adr_t vadrs, adr_t padrs, u64_t flags)
 {
 	bool_t rets = FALSE;
@@ -560,27 +562,32 @@ bool_t hal_mmu_transform_core(mmudsc_t* mmu, adr_t vadrs, adr_t padrs, u64_t fla
 		goto out;
 	}
 
+	// 顶级页目录项
 	sdirearr = mmu_transform_sdire(mmu, tdirearr, vadrs, flags, &smsa);
 	if (NULL == sdirearr) {
 		rets = FALSE;
 		goto untf_sdire;		
 	}
 
+	// 页目录指针项
 	idirearr = mmu_transform_idire(mmu, sdirearr, vadrs, flags, &imsa);
 	if (NULL == idirearr) {
 		rets = FALSE;
 		goto untf_idire;		
 	}
 
+	// 页目录项
 	mdirearr = mmu_transform_mdire(mmu, idirearr, vadrs, flags, &mmsa);
 	if (NULL == mdirearr) {
 		rets = FALSE;
 		goto untf_mdire;
 	}
 
+	// 页表项映射
 	rets = mmu_transform_msa(mmu, mdirearr, vadrs, padrs, flags);
 	if (TRUE == rets) {
 		rets = TRUE;
+		// cr3刷新
 		hal_mmu_refresh();
 		goto out;
 	}
@@ -603,6 +610,7 @@ out:
 	return rets;
 }
 
+// 建立MMU页表完成虚拟地址到物理地址的映射
 bool_t hal_mmu_transform(mmudsc_t* mmu, adr_t vadrs, adr_t padrs, u64_t flags)
 {
 	if (NULL == mmu) {
@@ -776,6 +784,7 @@ out:
 	return;
 }
 
+// cr3刷新
 void hal_mmu_refresh()
 {
 	cr3s_t cr3;

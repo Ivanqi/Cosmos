@@ -374,7 +374,7 @@ kmvarsdsc_t *vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr
 
 		// 由系统动态决定分配虚拟空间的开始地址
 		if (NULL == start) {
-			//如果curr的结束地址加上分配的大小小于等于下一个kmvarsdsc_t结构的开始地址就返回curr
+			// 如果curr的结束地址加上分配的大小小于等于下一个kmvarsdsc_t结构的开始地址就返回curr
 			if ((curr->kva_end + (adr_t)vassize) <= nextkmvd->kva_start) {
 				return curr;
 			}
@@ -402,7 +402,20 @@ kmvarsdsc_t *vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr
 	return NULL;
 }
 
-// 查找kmvarsdsc_t结构
+
+/**
+ * 根据分配的开始地址和大小，在 virmemadrs_t 结构中查找相应的 kmvarsdsc_t 结构
+ * 例子:
+ * 	比如 virmemadrs_t 结构中有两个 kmvarsdsc_t 结构，A_kmvarsdsc_t 结构表示 0x1000～0x4000 的虚拟地址空间
+ * 	B_kmvarsdsc_t 结构表示 0x7000～0x9000 的虚拟地址空间
+ * 
+ * 	然后分配 2KB 的虚拟地址空间，vma_find_kmvarsdsc 函数查找发现 A_kmvarsdsc_t 结构和 B_kmvarsdsc_t 结构之间正好有 0x4000～0x7000 的空间
+ * 	刚好放得下 0x2000 大小的空间，于是这个函数就会返回 A_kmvarsdsc_t 结构，否则就会继续向后查找
+ * 
+ * 为了节约 kmvarsdsc_t 结构占用的内存空间，规定只要分配的虚拟地址空间上一个虚拟地址空间是连续且类型相同的就借用上一个 kmvarsdsc_t 结构
+ * 而不是重新分配一个 kmvarsdsc_t 结构表示新分配的虚拟地址空间. 目的：避免个应用每次分配一个页面的虚拟地址空间，不停地分配，导致物理内存耗尽
+ * 
+ */
 kmvarsdsc_t *vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize)
 {
 	kmvarsdsc_t *kmvdcurrent = NULL, *curr = vmalocked->vs_currkmvdsc;
@@ -519,7 +532,11 @@ adr_t vma_new_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimit
 	return vma_new_vadrs_core(mm, start, VADSZ_ALIGN(vassize), vaslimits, vastype);
 }
 
-// 查找要释放虚拟地址空间的kmvarsdsc_t结构
+
+/**
+ * 查找要释放虚拟地址空间的kmvarsdsc_t结构
+ * 	释放时，查找虚拟地址区间的函数非常简单，仅仅是检查释放的虚拟地址空间是否落在查找 kmvarsdsc_t 结构表示的虚拟地址区间中
+ */
 kmvarsdsc_t *vma_del_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize)
 {
 	kmvarsdsc_t *curr = vmalocked->vs_currkmvdsc;
@@ -613,7 +630,13 @@ bool_t vma_del_unmapping(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, size_t
 	return vma_del_unmapping_phyadrs(mm, kmvd, start, end);
 }
 
-// 释放虚拟地址空间的核心函数
+/**
+ * 释放虚拟地址空间的核心函数
+ * 	1. 首位都相等，砍掉kmvarsdsc_t结构
+ * 	2. 开始位相等，砍掉kmvarsdsc_t开始位
+ * 	3. 结尾位相等，砍掉kmvarsdsc_t结尾位
+ * 	4. 首尾都不相等，砍掉中间部分，两边拆分为两个kmvarsdsc_t结构
+ */
 bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 {
 	bool_t rets = FALSE;
@@ -1123,6 +1146,12 @@ msadsc_t *vma_new_usermsa(mmadrsdsc_t *mm, kvmemcbox_t *kmbox)
 	return msa;
 }
 
+/**
+ * 映射物理内存页面
+ * 	1. vma_new_usermsa 函数，分配一个物理内存页面并把对应的 msadsc_t 结构挂载到 kvmemcbox_t 结构上
+ * 	2. 接着获取 msadsc_t 结构对应内存页面的物理地址
+ * 	3. 最后是调用 hal_mmu_transform 函数完成虚拟地址到物理地址的映射工作，它主要是建立 MMU 页表
+ */
 adr_t vma_map_msa_fault(mmadrsdsc_t *mm, kvmemcbox_t *kmbox, adr_t vadrs, u64_t flags)
 {
 	msadsc_t *usermsa;
@@ -1136,13 +1165,16 @@ adr_t vma_map_msa_fault(mmadrsdsc_t *mm, kvmemcbox_t *kmbox, adr_t vadrs, u64_t 
 		// 没有物理内存页面返回NULL表示失败
 		return NULL;
 	}
+
 	// 获取msadsc_t对应的内存页面的物理地址
 	phyadrs = msadsc_ret_addr(usermsa);
+
 	// 建立MMU页表完成虚拟地址到物理地址的映射
 	if (hal_mmu_transform(&mm->msd_mmu, vadrs, phyadrs, flags) == TRUE) {
 		// 映射成功则返回物理地址
 		return phyadrs;
 	}
+
 	// 映射失败就要先释放分配的物理内存页面
 	vma_del_usermsa(mm, kmbox, usermsa, phyadrs);
 	return NULL;
@@ -1159,7 +1191,12 @@ adr_t vma_map_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t vadrs, u64_t fla
 	return vma_map_msa_fault(mm, kmbox, vadrs, flags);
 }
 
-// 缺页异常处理核心函数
+/**
+ *  缺页异常处理核心函数
+ *    1. 查找缺页地址对应的 kmvarsdsc_t 结构
+ * 	  2. 查找 kmvarsdsc_t 结构下面的对应 kvmemcbox_t 结构，它是用来挂载物理内存页面的
+ * 	  3. 分配物理内存页面并建立 MMU 页表映射关系
+ */
 sint_t vma_map_fairvadrs_core(mmadrsdsc_t *mm, adr_t vadrs)
 {
 	sint_t rets = FALSE;
@@ -1168,18 +1205,21 @@ sint_t vma_map_fairvadrs_core(mmadrsdsc_t *mm, adr_t vadrs)
 	kmvarsdsc_t *kmvd = NULL;
 	kvmemcbox_t *kmbox = NULL;
 	knl_spinlock(&vma->vs_lock);
-	// 查找对应的kmvarsdsc_t结构
+
+	// 查找对应的kmvarsdsc_t结构。 没找到说明没有分配该虚拟地址空间，那属于非法访问不予处理
 	kmvd = vma_map_find_kmvarsdsc(vma, vadrs);
 	if (NULL == kmvd) {
 		rets = -EFAULT;
 		goto out;
 	}
-	// 返回kmvarsdsc_t结构下对应kvmemcbox_t结构
+
+	// 返回kmvarsdsc_t结构下对应kvmemcbox_t结构，它是用来挂载物理内存页面的
 	kmbox = vma_map_retn_kvmemcbox(kmvd);
 	if (NULL == kmbox) {
 		rets = -ENOMEM;
 		goto out;
 	}
+
 	// 分配物理内存页面并建立MMU页表
 	phyadrs = vma_map_phyadrs(mm, kmvd, vadrs, (0 | PML4E_US | PML4E_RW | PML4E_P));
 	if (NULL == phyadrs) {
