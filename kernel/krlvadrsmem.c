@@ -549,10 +549,16 @@ kmvarsdsc_t *vma_del_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t
 	return NULL;
 }
 
+/**
+ * 删除 kmvarsdsc_t
+ */
 void vma_del_set_endcurrkmvd(virmemadrs_t *vmalocked, kmvarsdsc_t *del)
 {
 	kmvarsdsc_t *prevkmvd = NULL, *nextkmvd = NULL;
+
+	// del 为 vmalocked 链表的最后一个
 	if (list_is_last(&del->kva_list, &vmalocked->vs_list) == TRUE) {
+		// del 不是 vmalocked 链表的第一个。从链表中删除
 		if (list_is_first(&del->kva_list, &vmalocked->vs_list) == FALSE) {
 			prevkmvd = list_prev_entry(del, kmvarsdsc_t, kva_list);
 			vmalocked->vs_endkmvdsc = prevkmvd;
@@ -562,6 +568,7 @@ void vma_del_set_endcurrkmvd(virmemadrs_t *vmalocked, kmvarsdsc_t *del)
 			vmalocked->vs_currkmvdsc = NULL;
 		}
 	} else {
+		// 切换下一个要删除的kmvarsdsc_t
 		nextkmvd = list_next_entry(del, kmvarsdsc_t, kva_list);
 		vmalocked->vs_currkmvdsc = nextkmvd;
 	}
@@ -582,7 +589,7 @@ bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start
 		// 清除对应地址的顶级页目录项、页目录指针项、页目录项
 		phyadrs = hal_mmu_untransform(mmu, vadrs);
 		if (NULL != phyadrs && NULL != kmbox) {
-			// 清楚物理地址
+			// 清除物理地址
 			if (vma_del_usermsa(mm, kmbox, NULL, phyadrs) == FALSE) {
 				rets = FALSE;
 			}
@@ -623,9 +630,13 @@ bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 
 	// 第一种情况要释放的虚拟地址空间正好等于查找的kmvarsdsc_t结构
 	if ((delkmvd->kva_start == start) && (delkmvd->kva_end == (start + (adr_t)vassize))) {
+		// 删除页表
 		vma_del_unmapping(mm, delkmvd, start, vassize);
+		// 删除 kmvarsdsc_t
 		vma_del_set_endcurrkmvd(vma, delkmvd);
+		// 删除 kvmemcbox_t
 		knl_put_kvmemcbox(delkmvd->kva_kvmbox);
+
 		// 脱链
 		list_del(&delkmvd->kva_list);
 		// 删除kmvarsdsc_t结构
@@ -674,9 +685,11 @@ bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 		newkmvd->kva_kvmbox = delkmvd->kva_kvmbox;
 
 		vma_del_unmapping(mm, delkmvd, start, vassize);
+		
 		// 加入链表
 		list_add(&newkmvd->kva_list, &delkmvd->kva_list);
 		vma->vs_kmvdscnr++;
+
         // 是否为最后一个kmvarsdsc_t结构
 		if (list_is_last(&newkmvd->kva_list, &vma->vs_list) == TRUE) {
 			vma->vs_endkmvdsc = newkmvd;
@@ -1360,12 +1373,14 @@ bool_t del_kvmemcbox(kvmemcbox_t* del)
 	return kmsob_delete((void*)del, sizeof(kvmemcbox_t));
 }
 
+// 增加 kvmemcbox 数量
 void knl_count_kvmemcbox(kvmemcbox_t* kmbox)
 {
 	if(NULL == kmbox) {
 		return;
 	}
 
+	// 增加 kvmemcbox 数量
 	refcount_inc(&kmbox->kmb_cont);
 	return;
 }
@@ -1417,6 +1432,7 @@ out:
 	return kmb;
 }
 
+// 删除 kvmemcbox_t
 bool_t knl_put_kvmemcbox(kvmemcbox_t* kmbox)
 {
 	kvmemcboxmgr_t* kmbmgr = &krlvirmemadrs.kvs_kvmemcboxmgr;
@@ -1434,8 +1450,9 @@ bool_t knl_put_kvmemcbox(kvmemcbox_t* kmbox)
 		goto out;
 	}
 	
+	// 空闲kvmemcbox_t结构的个数 大于等于 最大缓存个数
 	if (kmbmgr->kbm_cachenr >= kmbmgr->kbm_cachemax) {
-		list_del(&kmbox->kmb_list);
+		list_del(&kmbox->kmb_list);	// 从链表中删除
 		if (del_kvmemcbox(kmbox) == FALSE) {
 			rets = FALSE;
 			goto out;

@@ -201,7 +201,7 @@ typedef struct MMUDSC {
     spinlock_t mud_lock;
     u64_t mud_stus;
     u64_t mud_flag;
-    tdirearr_t *mud_tdirearr;   // cr3的虚拟地址
+    tdirearr_t *mud_tdirearr;   // cr3的虚拟地址，页表项
     cr3s_t mud_cr3;             // cr3寄存器    
     list_h_t mud_tdirhead;
     list_h_t mud_sdirhead;

@@ -76,6 +76,7 @@ KLINE void cr3s_t_init(cr3s_t* init) {
     return;
 }
 
+// 判断顶级页目录项为空
 KLINE bool_t sdirearr_is_allzero(sdirearr_t* sdirearr) {
     for (uint_t i = 0; i < SDIRE_MAX; i++) {
         if (0 != sdirearr->sde_arr[i].s_entry) {
@@ -114,6 +115,7 @@ KLINE sdirearr_t* tdire_ret_sdirearr(tdire_t* tdire) {
     return (sdirearr_t*)(sdire_ret_vadr(tdire));
 }
 
+// 页目录指针项 不为空
 KLINE bool_t idirearr_is_allzero(idirearr_t* idirearr) {
     for (uint_t i = 0; i < IDIRE_MAX; i++) {
         if (0 != idirearr->ide_arr[i].i_entry) {

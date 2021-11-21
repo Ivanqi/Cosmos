@@ -123,6 +123,7 @@ msadsc_t* mmu_new_sdirearr(mmudsc_t* mmulocked)
     return msa;
 }
 
+// 删除顶级页目录项
 bool_t mmu_del_sdirearr(mmudsc_t* mmulocked, sdirearr_t* sdirearr, msadsc_t* msa)
 {
 	list_h_t* pos;
@@ -188,6 +189,7 @@ msadsc_t* mmu_new_idirearr(mmudsc_t* mmulocked)
     return msa;
 }
 
+// 删除页目录指针项
 bool_t mmu_del_idirearr(mmudsc_t* mmulocked, idirearr_t* idirearr, msadsc_t* msa)
 {
 	list_h_t* pos;
@@ -401,6 +403,7 @@ mdirearr_t* mmu_transform_mdire(mmudsc_t* mmulocked, idirearr_t* idirearr, adr_t
 	return mdirearr;
 }
 
+// 清空顶级页目录项
 bool_t mmu_untransform_idire(mmudsc_t* mmulocked, sdirearr_t* sdirearr, msadsc_t* msa, adr_t vadrs)
 {
 	uint_t sindex;
@@ -417,11 +420,14 @@ bool_t mmu_untransform_idire(mmudsc_t* mmulocked, sdirearr_t* sdirearr, msadsc_t
 		return TRUE;
 	}
 
+	// 页目录指针项
 	idirearr = sdire_ret_idirearr(&sdire);
+	// 页目录指针项不为空
 	if (idirearr_is_allzero(idirearr) == FALSE) {
 		return TRUE;
 	}
-
+	
+	// 删除页目录指针项
 	if (mmu_del_idirearr(mmulocked, idirearr, msa) == FALSE) {
 		return FALSE;
 	}
@@ -466,6 +472,7 @@ idirearr_t* mmu_transform_idire(mmudsc_t* mmulocked, sdirearr_t* sdirearr, adr_t
 	return idirearr;
 }
 
+// 清空页表项
 bool_t mmu_untransform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, msadsc_t* msa, adr_t vadrs)
 {
 	uint_t tindex;
@@ -482,11 +489,14 @@ bool_t mmu_untransform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, msadsc_t
 		return TRUE;
 	}
 
+	// 得到顶级页目录项
 	sdirearr = tdire_ret_sdirearr(&tdire);
+	// 判断顶级页目录项为空
 	if (sdirearr_is_allzero(sdirearr) == FALSE) {
 		return TRUE;
 	}
 
+	// 删除顶级页目录项
 	if (mmu_del_sdirearr(mmulocked, sdirearr, msa) == FALSE) {
 		return FALSE;
 	}
@@ -724,9 +734,11 @@ adr_t hal_mmu_untransform_core(mmudsc_t* mmu, adr_t vadrs)
 	mmu_untransform_mdire(mmu, idirearr, NULL, vadrs);
 
 untf_idirearr:
+	// 清空顶级页目录项
 	mmu_untransform_idire(mmu, sdirearr, NULL, vadrs);
 
 untf_sdirearr:
+	// 删除顶级页目录项
 	mmu_untransform_sdire(mmu, mmu->mud_tdirearr, NULL, vadrs);
 
 out:	
