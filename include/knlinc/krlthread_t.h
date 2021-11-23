@@ -49,7 +49,7 @@ typedef struct s_MICRSTK {
 } micrstk_t;
 
 
-
+// 进程的机器上下文
 typedef struct s_CONTEXT {
 #if((defined CFG_X86_PLATFORM))     
     reg_t       ctx_usrsp;
@@ -58,11 +58,11 @@ typedef struct s_CONTEXT {
     reg_t       ctx_cpsr;
     reg_t       ctx_lr;
 #ifdef CFG_X86_PLATFORM
-    reg_t       ctx_nxteip;
-    reg_t       ctx_nxtesp;
+    reg_t       ctx_nxteip;     // 保存下一次运行的地址
+    reg_t       ctx_nxtesp;     // 保存下一次运行时内核栈的地址
     reg_t       ctx_nxtss;
     reg_t       ctx_nxtcs;
-    x64tss_t*      ctx_nxttss;
+    x64tss_t*   ctx_nxttss;     // 指向tss结构
 #endif
 #endif
 #if((defined CFG_STM32F0XX_PLATFORM))
@@ -71,29 +71,30 @@ typedef struct s_CONTEXT {
 #endif     
 } context_t;
 
+// 进程结构体
 typedef struct s_THREAD {
-    spinlock_t  td_lock;
-    list_h_t    td_list;
-    uint_t      td_flgs;
-    uint_t      td_stus;
-    uint_t      td_cpuid;
-    uint_t      td_id;
-    uint_t      td_tick;
-    uint_t      td_privilege;
-    uint_t      td_priority;
-    uint_t      td_runmode;
-    adr_t       td_krlstktop;
-    adr_t       td_krlstkstart;
+    spinlock_t  td_lock;                // 进程的自旋锁
+    list_h_t    td_list;                // 进程链表
+    uint_t      td_flgs;                // 进程的标志
+    uint_t      td_stus;                // 进程的状态
+    uint_t      td_cpuid;               // 进程所在的CPU的id
+    uint_t      td_id;                  // 进程id
+    uint_t      td_tick;                // 进程运行了多少tick
+    uint_t      td_privilege;           // 进程的权限
+    uint_t      td_priority;            // 进程的优先级，数值越小优先级越高
+    uint_t      td_runmode;             // 进程的运行模式
+    adr_t       td_krlstktop;           // 应用程序内核栈顶地址
+    adr_t       td_krlstkstart;         // 应用程序内核栈开始地址
 #if((defined CFG_X86_PLATFORM))     
-    adr_t       td_usrstktop;
-    adr_t       td_usrstkstart;
-    void*       td_mmdsc;
+    adr_t       td_usrstktop;           // 应用程序栈顶地址
+    adr_t       td_usrstkstart;         // 应用程序栈开始地址
+    void*       td_mmdsc;               // 地址空间结构，指向mmadrsdsc_t 结构
     void*       td_resdsc;
     void*       td_privtep;
     void*       td_extdatap;
 #endif
-    context_t   td_context;
-    objnode_t*  td_handtbl[TD_HAND_MAX];
+    context_t   td_context;             // 机器上下文结构
+    objnode_t*  td_handtbl[TD_HAND_MAX];    // 打开的对象数组，进程打开的资源的描述符
 } thread_t;
 
 #endif // KRLTHREAD_T_H

@@ -133,16 +133,21 @@ typedef struct s_IDTPTR {
 	u64_t idtbass;
 } __attribute__((packed)) iidtr_t;
 
+/**
+ * x64tss_t 结构的指针，这个结构是 CPU 要求的一个结构
+ * 这个结构它本身的地址放在一个 GDT 表项中，由 CPU 的 tr 寄存器指向
+ * tr 寄存器中的值是 GDT 中 x64tss_t 结构项对应的索引
+ */
 typedef struct s_X64TSS {
-    u32_t reserv0;
-	u64_t rsp0;
-	u64_t rsp1;
-	u64_t rsp2;
-	u64_t reserv28;
-	u64_t ist[7];
-	u64_t reserv92;
-	u16_t reserv100;
-	u16_t iobase;
+    u32_t reserv0;		// 保留
+	u64_t rsp0;			// R0特权级的栈地址
+	u64_t rsp1;			// R1特权级的栈地址，未使用
+	u64_t rsp2;			// R2特权级的栈地址，未使用
+	u64_t reserv28;		// 保留
+	u64_t ist[7];		// 未使用
+	u64_t reserv92;		// 保留
+	u16_t reserv100;	// 保留
+	u16_t iobase;		// 未使用
 } __attribute__((packed)) x64tss_t;
 
 #endif
