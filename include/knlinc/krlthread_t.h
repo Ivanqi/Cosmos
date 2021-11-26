@@ -3,11 +3,12 @@
 ***********************************************************/
 #ifndef _KRLTHREAD_T_H
 #define _KRLTHREAD_T_H
-#define TDSTUS_RUN 0
-#define TDSTUS_SLEEP 3
-#define TDSTUS_WAIT 4
-#define TDSTUS_NEW 5
-#define TDSTUS_ZOMB 6
+
+#define TDSTUS_RUN 0        // 进程运行状态
+#define TDSTUS_SLEEP 3      // 进程睡眠状态
+#define TDSTUS_WAIT 4       // 进程等待状态
+#define TDSTUS_NEW 5        // 进程新建状态
+#define TDSTUS_ZOMB 6       // 进程僵死状态
 
 #define TDFLAG_FREE (1)
 #define TDFLAG_BUSY (2)

@@ -15,9 +15,9 @@ typedef struct s_ATOMIC {
 } atomic_t;
 
 typedef struct s_KWLST {
-    spinlock_t wl_lock;
-    uint_t   wl_tdnr;
-    list_h_t wl_list;
+    spinlock_t wl_lock;		// 自旋锁
+    uint_t   wl_tdnr;		// 等待进程的个数
+    list_h_t wl_list;		// 挂载等待进程的链表头
 } kwlst_t;
 
 typedef struct s_SEM {

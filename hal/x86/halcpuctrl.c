@@ -198,6 +198,7 @@ void system_error(char_t *errmsg)
     return;
 }
 
+// 获取CPU id
 uint_t hal_retn_cpuid()
 {
     return 0;

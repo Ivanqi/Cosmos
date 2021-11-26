@@ -9,11 +9,11 @@ void init_krl()
     init_krlmm();
 	// init_krldevice();
     // init_krldriver();
-	// init_krlsched();
+	init_krlsched();
     // init_ktime();
     // init_thread();
     // init_task();
-    // init_krlcpuidle();
+    init_krlcpuidle();
 
     // hal_enable_irqfiq();
    
