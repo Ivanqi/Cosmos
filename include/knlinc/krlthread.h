@@ -14,8 +14,14 @@ hand_t krlthd_retn_nullhand(thread_t* thdp);
 hand_t krlthd_add_objnode(thread_t* thdp,objnode_t* ondp);
 hand_t krlthd_del_objnode(thread_t *thdp, hand_t hand);
 objnode_t* krlthd_retn_objnode(thread_t *thdp, hand_t hand);
+// ---
 void krlthreadkrlsatck_init(thread_t* thdp,void* runadr,reg_t cpsr,reg_t spsr);
 thread_t* krlnew_thread_core(void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
-thread_t* krlnew_thread(void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
+// -- thread_t* krlnew_thread(void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
 
+void krlthread_userstack_init(thread_t *thdp, void *runadr, uint_t cpuflags);
+void krlthread_kernstack_init(thread_t *thdp, void *runadr, uint_t cpuflags);
+thread_t* krlnew_user_thread_core(void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
+thread_t* krlnew_kern_thread_core(void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
+thread_t* krlnew_thread(void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
 #endif // KRLTHREAD_H

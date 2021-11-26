@@ -24,6 +24,11 @@
 
 #define THREAD_MAX (4)
 
+// 内核态
+#define KERNTHREAD_FLG 0
+// 用户态
+#define USERTHREAD_FLG 3
+
 #if((defined CFG_X86_PLATFORM)) 
 #define DAFT_TDUSRSTKSZ 0x8000
 #define DAFT_TDKRLSTKSZ 0x8000
@@ -37,12 +42,13 @@
 #define DAFT_CIDLESPSR 0x13   
 #endif
 
-#define K_CS_IDX    0x08
-#define K_DS_IDX    0x10
+#define K_CS_IDX    0x08        // 选择子
+#define K_DS_IDX    0x10        // 选择子
 #define U_CS_IDX    0x1b
 #define U_DS_IDX    0x23
 #define K_TAR_IDX   0x28
 #define UMOD_EFLAGS 0x1202
+#define KMOD_EFLAGS	0x202
 
 typedef struct s_MICRSTK {
     uint_t msk_val[MICRSTK_MAX];
@@ -93,7 +99,7 @@ typedef struct s_THREAD {
     void*       td_privtep;
     void*       td_extdatap;
 #endif
-    context_t   td_context;             // 机器上下文结构
+    context_t   td_context;                 // 机器上下文结构
     objnode_t*  td_handtbl[TD_HAND_MAX];    // 打开的对象数组，进程打开的资源的描述符
 } thread_t;
 

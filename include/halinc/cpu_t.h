@@ -6,6 +6,10 @@
 
 #ifdef CFG_X86_PLATFORM
 
+/**
+ * intstkregs_t 结构中，每个字段都是 8 字节 64 位的，因为 x86 CPU 在长模式下 rsp 栈指针寄存器始终 8 字节对齐
+ * 栈是向下伸长的（从高地址向低地址）所以这个结构是反向定义（相对于栈）
+ */
 typedef struct s_INTSTKREGS {
 	uint_t r_gs;
 	uint_t r_fs;
