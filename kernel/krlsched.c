@@ -81,11 +81,16 @@ uint_t krlsched_retn_schedflgs()
     return schdap->sda_schdflgs;
 }
 
+/**
+ * 进程等待
+ *  这个函数会设置进程状态为等待状态，让进程从调度系统数据结构中脱离，最后让进程加入到 kwlst_t 等待结构中
+ */
 void krlsched_wait(kwlst_t *wlst)
 {
     cpuflg_t cufg, tcufg;
     uint_t cpuid = hal_retn_cpuid();
     schdata_t *schdap = &osschedcls.scls_schda[cpuid];
+    // 获取当前正在运行的进程
     thread_t *tdp = krlsched_retn_currthread();
     uint_t pity = tdp->td_priority;
 
@@ -100,8 +105,8 @@ void krlsched_wait(kwlst_t *wlst)
     krlspinlock_cli(&schdap->sda_lock, &cufg);
 
     krlspinlock_cli(&tdp->td_lock, &tcufg);
-    tdp->td_stus = TDSTUS_WAIT;
-    list_del(&tdp->td_list);
+    tdp->td_stus = TDSTUS_WAIT; // 设置进程状态为等待状态
+    list_del(&tdp->td_list);    // 脱链
     krlspinunlock_sti(&tdp->td_lock, &tcufg);
 
     if (schdap->sda_thdlst[pity].tdl_curruntd == tdp) {
@@ -111,7 +116,7 @@ void krlsched_wait(kwlst_t *wlst)
     schdap->sda_thdlst[pity].tdl_nr--;
 
     krlspinunlock_sti(&schdap->sda_lock, &cufg);
-    krlwlst_add_thread(wlst, tdp);
+    krlwlst_add_thread(wlst, tdp);  // 将进程加入等待结构中
 
     return;
 
@@ -120,6 +125,11 @@ err_step:
     return;
 }
 
+/**
+ * 进程唤醒
+ *  进程的唤醒则是进程等待的反向操作行为
+ *  即从等待数据结构中获取进程，然后设置进程的状态为运行状态，最后将这个进程加入到进程调度系统数据结构中
+ */
 void krlsched_up(kwlst_t *wlst)
 {
     cpuflg_t cufg, tcufg;
@@ -132,19 +142,20 @@ void krlsched_up(kwlst_t *wlst)
         goto err_step;
     }
 
+    // 取出等待数据结构第一个进程并从等待数据结构中删除
     tdp = krlwlst_del_thread(wlst);
     if (tdp == NULL) {
         goto err_step;
     }
 
-    pity = tdp->td_priority;
+    pity = tdp->td_priority;    // 获取进程的优先级
     if (pity >= PRITY_MAX) {
         goto err_step;
     }
 
     krlspinlock_cli(&schdap->sda_lock, &cufg);
     krlspinlock_cli(&tdp->td_lock, &tcufg);
-    tdp->td_stus = TDSTUS_RUN;
+    tdp->td_stus = TDSTUS_RUN;  // 设置进程的状态为运行状态
     krlspinunlock_sti(&tdp->td_lock, &tcufg);
     list_add_tail(&tdp->td_list, &(schdap->sda_thdlst[pity].tdl_lsth));
     schdap->sda_thdlst[pity].tdl_nr++;

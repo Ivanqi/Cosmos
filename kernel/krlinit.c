@@ -9,14 +9,16 @@ void init_krl()
     init_krlmm();
 	// init_krldevice();
     // init_krldriver();
+    // 初始化进程调度器
 	init_krlsched();
     // init_ktime();
     // init_thread();
     // init_task();
+    // 初始化空转进程
     init_krlcpuidle();
 
     // hal_enable_irqfiq();
-   
+    // 防止init_krl函数返回
     die(0);
     return;
 }

@@ -4,30 +4,72 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
-void init_krlcpuidle()
+// 进程A主函数
+void thread_a_main()
 {
-    new_cpuidle();
-    krlcpuidle_start();
+    uint_t i = 0;
+    for (;; i++) {
+        kprint("进程A运行:%x\n", i);
+        krlschedul();
+    }
     return;
 }
 
+// 进程B主函数
+void thread_b_main()
+{
+    uint_t i = 0;
+    for (;; i++) {
+        kprint("进程B运行:%x\n", i);
+        krlschedul();
+    }
+    return;
+}
+
+void init_ab_thread()
+{
+    krlnew_thread((void*)thread_a_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    krlnew_thread((void*)thread_b_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    return;
+}
+
+// 初始化空转进程
+void init_krlcpuidle()
+{
+    new_cpuidle();      // 建立空转进程
+    init_ab_thread();   // 初始化建立A、B进程
+    krlcpuidle_start(); // 启动空转进程运行
+    return;
+}
+
+/**
+ * 空转进程运行
+ *  首先就是取出空转进程
+ *  然后设置一下机器上下文结构和运行状态
+ *  最后调用 retnfrom_first_sched 函数，恢复进程内核栈中的内容，让进程启动运行
+ */
 void krlcpuidle_start()
 {
 
     uint_t cpuid = hal_retn_cpuid();
     schdata_t *schdap = &osschedcls.scls_schda[cpuid];
 
+    // 取得空转进程
     thread_t *tdp = schdap->sda_cpuidle;
     kprint("schdap->sda_cpuidle:%x\n\r", schdap->sda_cpuidle);
 
+    // 设置空转进程的tss和R0特权级的栈
     tdp->td_context.ctx_nexttss = &x64tss[cpuid];
     tdp->td_context.ctx_nexttss->rsp0 = tdp->td_krlstktop;
+    // 设置空转进程的状态为运行状态
     tdp->td_stus = TDSTUS_RUN;
+    // 启动进程运行
     retnfrom_first_sched(tdp);
 
     return;
 }
 
+// 建立空转进程
 thread_t *new_cpuidle_thread()
 {
 
@@ -36,11 +78,13 @@ thread_t *new_cpuidle_thread()
     size_t usrstksz = DAFT_TDUSRSTKSZ, krlstksz = DAFT_TDKRLSTKSZ;
     adr_t usrstkadr = NULL, krlstkadr = NULL;
 
+    // 分配进程的内核栈
     usrstkadr = krlnew(usrstksz);
     if (usrstkadr == NULL) {
         return NULL;
     }
 
+    // 分配进程的内核栈
     krlstkadr = krlnew(krlstksz);
     if (krlstkadr == NULL) {
         if (krldelete(usrstkadr, usrstksz) == FALSE) {
@@ -49,6 +93,7 @@ thread_t *new_cpuidle_thread()
         return NULL;
     }
 
+    // 分配thread_t结构体变量
     ret_td = krlnew_thread_dsc();
     if (ret_td == NULL) {
         acs = krldelete(usrstkadr, usrstksz);
@@ -59,26 +104,33 @@ thread_t *new_cpuidle_thread()
         return NULL;
     }
 
+    // 设置进程具有系统权限
     ret_td->td_privilege = PRILG_USR;
     ret_td->td_priority = PRITY_MAX;
 
+    // 设置进程的内核栈顶和内核栈开始地址
     ret_td->td_krlstktop = krlstkadr + (adr_t)(krlstksz - 1);
     ret_td->td_krlstkstart = krlstkadr;
     ret_td->td_usrstktop = usrstkadr + (adr_t)(usrstksz - 1);
     ret_td->td_usrstkstart = usrstkadr;
 
+    // 初始化进程的内核栈
     krlthread_kernstack_init(ret_td, (void *)krlcpuidle_main, KMOD_EFLAGS);
     uint_t cpuid = hal_retn_cpuid();
     schdata_t *schdap = &osschedcls.scls_schda[cpuid];
+    // 设置调度系统数据结构的空转进程和当前进程为ret_td
     schdap->sda_cpuidle = ret_td;
     schdap->sda_currtd = ret_td;
 
     return ret_td;
 }
 
+// 新建空转进程
 void new_cpuidle()
 {
+    // 建立空转进程
     thread_t *thp = new_cpuidle_thread();
+    // 失败则主动死机
     if (thp == NULL) {
         hal_sysdie("newcpuilde err");
     }
@@ -93,7 +145,7 @@ void krlcpuidle_main()
     for (;; i++) {
         //hal_sysdie("cpuidle DIE\n");
         kprint("cpuidle is run:%x\n", i);
-        krlschedul();
+        krlschedul();   // 调度进程
     }
     return;
 }
