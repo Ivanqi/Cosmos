@@ -75,29 +75,20 @@ thread_t *new_cpuidle_thread()
 
     thread_t *ret_td = NULL;
     bool_t acs = FALSE;
-    size_t usrstksz = DAFT_TDUSRSTKSZ, krlstksz = DAFT_TDKRLSTKSZ;
-    adr_t usrstkadr = NULL, krlstkadr = NULL;
+    adr_t krlstkadr = NULL;
+    uint_t cpuid = hal_retn_cpuid();
+    schdata_t *schdap = &osschedcls.scls_schda[cpuid];
 
     // 分配进程的内核栈
-    usrstkadr = krlnew(usrstksz);
-    if (usrstkadr == NULL) {
-        return NULL;
-    }
-
-    // 分配进程的内核栈
-    krlstkadr = krlnew(krlstksz);
+    krlstkadr = krlnew(DAFT_TDKRLSTKSZ);
     if (krlstkadr == NULL) {
-        if (krldelete(usrstkadr, usrstksz) == FALSE) {
-            return NULL;
-        }
         return NULL;
     }
 
     // 分配thread_t结构体变量
     ret_td = krlnew_thread_dsc();
     if (ret_td == NULL) {
-        acs = krldelete(usrstkadr, usrstksz);
-        acs = krldelete(krlstkadr, krlstksz);
+        acs = krldelete(krlstkadr, DAFT_TDKRLSTKSZ);
         if (acs == FALSE) {
             return NULL;
         }
@@ -105,19 +96,16 @@ thread_t *new_cpuidle_thread()
     }
 
     // 设置进程具有系统权限
-    ret_td->td_privilege = PRILG_USR;
-    ret_td->td_priority = PRITY_MAX;
+    ret_td->td_privilege = PRILG_SYS;
+    ret_td->td_priority = PRITY_MIN;
 
     // 设置进程的内核栈顶和内核栈开始地址
-    ret_td->td_krlstktop = krlstkadr + (adr_t)(krlstksz - 1);
+    ret_td->td_krlstktop = krlstkadr + (adr_t)(DAFT_TDKRLSTKSZ - 1);
     ret_td->td_krlstkstart = krlstkadr;
-    ret_td->td_usrstktop = usrstkadr + (adr_t)(usrstksz - 1);
-    ret_td->td_usrstkstart = usrstkadr;
 
     // 初始化进程的内核栈
     krlthread_kernstack_init(ret_td, (void *)krlcpuidle_main, KMOD_EFLAGS);
-    uint_t cpuid = hal_retn_cpuid();
-    schdata_t *schdap = &osschedcls.scls_schda[cpuid];
+   
     // 设置调度系统数据结构的空转进程和当前进程为ret_td
     schdap->sda_cpuidle = ret_td;
     schdap->sda_currtd = ret_td;

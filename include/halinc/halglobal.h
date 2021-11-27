@@ -80,6 +80,9 @@ HAL_DEFGLOB_VARIABLE(descriptor_t, x64_gdt)[CPUCORE_MAX][GDTMAX];
 // 在 x86 CPU 上，最多支持 256 个中断
 HAL_DEFGLOB_VARIABLE(gate_t, x64_idt)[IDTMAX];
 
+// 每个CPU核心一个tss
+HAL_DEFGLOB_VARIABLE(x64tss_t,x64tss)[CPUCORE_MAX]; 
+
 // 任务状态段
 HAL_DEFGLOB_VARIABLE(x64tss_t, x64tss)[CPUCORE_MAX]; 
 
