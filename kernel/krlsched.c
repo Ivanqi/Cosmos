@@ -90,8 +90,10 @@ void krlsched_wait(kwlst_t *wlst)
     cpuflg_t cufg, tcufg;
     uint_t cpuid = hal_retn_cpuid();
     schdata_t *schdap = &osschedcls.scls_schda[cpuid];
+
     // 获取当前正在运行的进程
     thread_t *tdp = krlsched_retn_currthread();
+    // 获取进程优先级
     uint_t pity = tdp->td_priority;
 
     if (pity >= PRITY_MAX || wlst == NULL) {
@@ -155,7 +157,9 @@ void krlsched_up(kwlst_t *wlst)
 
     krlspinlock_cli(&schdap->sda_lock, &cufg);
     krlspinlock_cli(&tdp->td_lock, &tcufg);
+
     tdp->td_stus = TDSTUS_RUN;  // 设置进程的状态为运行状态
+
     krlspinunlock_sti(&tdp->td_lock, &tcufg);
     list_add_tail(&tdp->td_list, &(schdap->sda_thdlst[pity].tdl_lsth));
     schdap->sda_thdlst[pity].tdl_nr++;
@@ -340,9 +344,11 @@ void krlschdclass_add_thread(thread_t *thdp)
 }
 
 /**
- * 1. 设置当前运行的进程，处理 CPU 发生中断时需要切换栈的问题
- * 2. 切换了一个进程的 MMU 页表（即使用新进程的地址空间）
- * 3. 最后如果是新建进程第一次运行，就调用 retnfrom_first_sched 函数进行处理
+ * 上下文切换
+ *  1. 设置当前运行的进程，处理 CPU 发生中断时需要切换栈的问题
+ *  2. tss切换
+ *  3. 切换了一个进程的 MMU 页表（即使用新进程的地址空间）
+ *  4. 最后如果是新建进程第一次运行，就调用 retnfrom_first_sched 函数进行处理
  */
 void __to_new_context(thread_t *next, thread_t *prev)
 {
@@ -359,6 +365,7 @@ void __to_new_context(thread_t *next, thread_t *prev)
 
     // 装载下一个运行进程的MMU页表
     hal_mmu_load(&next->td_mmdsc->msd_mmu);
+
     // 如果是新建进程第一次运行就要进行处理
     if (next->td_stus == TDSTUS_NEW) {
         next->td_stus = TDSTUS_RUN;

@@ -3,8 +3,8 @@
 ***********************************************************/
 #ifndef _KRLSCHED_T_H
 #define _KRLSCHED_T_H
-#define NOTS_SCHED_FLGS (0)
-#define NEED_SCHED_FLGS (1)
+#define NOTS_SCHED_FLGS (0)                 // 不需要调度
+#define NEED_SCHED_FLGS (1)                 // 需要调度
 #define NEED_START_CPUILDE_SCHED_FLGS (2)   // 需要运行空转进程
 #define PMPT_FLGS 0
 

@@ -14,7 +14,7 @@ void kwlst_t_init(kwlst_t* initp)
 
 void krlwlst_wait(kwlst_t* wlst)
 {
-    //krlsched_wait(wlst);
+    krlsched_wait(wlst);
     return;
 }
 
@@ -23,7 +23,7 @@ void krlwlst_up(kwlst_t* wlst)
     if (list_is_empty_careful(&wlst->wl_list) == TRUE) {
         return;
     }
-    //krlsched_up(wlst);
+    krlsched_up(wlst);
     
     return;
 }
@@ -31,7 +31,7 @@ void krlwlst_up(kwlst_t* wlst)
 void krlwlst_allup(kwlst_t* wlst)
 {
     while (list_is_empty_careful(&wlst->wl_list) == FALSE) {
-        ;//krlsched_up(wlst);
+        krlsched_up(wlst);
 
     }
 
@@ -49,12 +49,13 @@ void krlwlst_add_thread(kwlst_t* wlst,thread_t* tdp)
     return;
 }
 
+// 取出等待数据结构第一个进程并从等待数据结构中删除
 thread_t* krlwlst_del_thread(kwlst_t *wlst)
 {
     thread_t* tdp=NULL;
     cpuflg_t cufg;
     list_h_t* list;
-    krlspinlock_cli(&wlst->wl_lock,&cufg);
+    krlspinlock_cli(&wlst->wl_lock, &cufg);
     list_for_each(list,&wlst->wl_list) {
         tdp = list_entry(list,thread_t,td_list);
 
