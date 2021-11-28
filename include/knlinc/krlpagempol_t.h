@@ -42,12 +42,15 @@ typedef struct s_MPLHEAD {
     pglmap_t*       mh_pmap;
 } mplhead_t;
 
+// 用于存储msadsc_t
 typedef struct s_MSAHEAD {
     uint_t mlh_nr;
-    list_h_t mlh_msalst;
+    list_h_t mlh_msalst;    // 存储msadsc_t
 } msahead_t;
 
-
+/**
+ * 内核内存池
+ */
 typedef struct s_KMEMPOOL {
     spinlock_t      mp_lock;
     list_h_t        mp_list;
@@ -62,7 +65,7 @@ typedef struct s_KMEMPOOL {
     mplhead_t*      mp_pgmplmhcach;
     mplhead_t*      mp_obmplmhcach;
 #ifdef CFG_X86_PLATFORM
-    msahead_t       mp_msalsthead[PHYMSA_MAX]; 
+    msahead_t       mp_msalsthead[PHYMSA_MAX];  // 用来存储msadsc_t
 #endif
 } kmempool_t;
 

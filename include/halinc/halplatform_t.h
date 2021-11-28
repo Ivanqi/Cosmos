@@ -7,6 +7,7 @@
 #include "bdvideo_t.h"
 
 #ifdef CFG_X86_PLATFORM
+// CPU最大个数
 #define CPUCORE_MAX 1
 #define SDRAM_MAPVECTPHY_ADDR 0x30000000
 

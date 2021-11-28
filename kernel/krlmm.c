@@ -10,6 +10,7 @@ void init_krlmm() {
     return;
 }
 
+// 内核申请内存
 adr_t krlnew(size_t mmsize) 
 {
     if (mmsize == MALCSZ_MIN || mmsize > MALCSZ_MAX) {
@@ -19,6 +20,7 @@ adr_t krlnew(size_t mmsize)
     return kmempool_new(mmsize);
 }
 
+// 内核内存删除
 bool_t krldelete(adr_t fradr, size_t frsz)
 {
     if (fradr == NULL || frsz == MALCSZ_MIN || frsz > MALCSZ_MAX) {

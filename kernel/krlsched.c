@@ -7,8 +7,8 @@
 void thrdlst_t_init(thrdlst_t *initp)
 {
     list_init(&initp->tdl_lsth);    // 初始化挂载进程的链表
-    initp->tdl_curruntd = NULL;     // 开始没有运行进程
-    initp->tdl_nr = 0;              // 开始没有进程
+    initp->tdl_curruntd = NULL;     // 该链表上正在运行的进程。开始没有运行进程
+    initp->tdl_nr = 0;              // 该链表上进程个数。开始没有进程
     return;
 }
 
@@ -17,11 +17,11 @@ void schdata_t_init(schdata_t *initp)
     krlspinlock_init(&initp->sda_lock);
     initp->sda_cpuid = hal_retn_cpuid();    // 获取CPU id
     initp->sda_schdflgs = NOTS_SCHED_FLGS;
-    initp->sda_premptidx = 0;
-    initp->sda_threadnr = 0;
-    initp->sda_prityidx = 0;
-    initp->sda_cpuidle = NULL;              // 开始没有空转进程和运行进程
-    initp->sda_currtd = NULL;
+    initp->sda_premptidx = 0;               // 进程抢占计数
+    initp->sda_threadnr = 0;                // 进程数
+    initp->sda_prityidx = 0;                // 当前优先级
+    initp->sda_cpuidle = NULL;              // 当前CPU的空转进程。开始没有空转进程和运行进程
+    initp->sda_currtd = NULL;               // 当前正在运行的进程
 
     // 初始化schdata_t结构中的每个thrdlst_t结构
     for (uint_t ti = 0; ti < PRITY_MAX; ti++) {
@@ -34,10 +34,10 @@ void schedclass_t_init(schedclass_t *initp)
 {
     krlspinlock_init(&initp->scls_lock);
     initp->scls_cpunr = CPUCORE_MAX;        // CPU最大个数
-    initp->scls_threadnr = 0;               // 开始没有进程
-    initp->scls_threadid_inc = 0;
+    initp->scls_threadnr = 0;               // 系统中所有的进程数，开始没有进程
+    initp->scls_threadid_inc = 0;           // 分配进程id所用
 
-    // 初始化osschedcls变量中的每个schdata_t
+    // 初始化osschedcls变量中的每个schdata_t。 每个CPU调度数据结构
     for (uint_t si = 0; si < CPUCORE_MAX; si++) {
         schdata_t_init(&initp->scls_schda[si]);
     }

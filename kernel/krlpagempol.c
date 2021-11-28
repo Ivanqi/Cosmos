@@ -52,6 +52,10 @@ void kmempool_t_init(kmempool_t *initp)
 #endif
 
 #ifdef CFG_X86_PLATFORM
+/**
+ * 内核层的msadsc内存池
+ *  用kmempool_t存放 msadsc_t内存
+ */
 void msadsc_add_kmempool(kmempool_t *kmplp, msadsc_t *msa, uint_t relpnr)
 {
     if (NULL == kmplp || NULL == msa || 1 > relpnr) {
@@ -73,6 +77,9 @@ void msadsc_add_kmempool(kmempool_t *kmplp, msadsc_t *msa, uint_t relpnr)
     return;
 }
 
+/**
+ * kmempool 的链表中脱链
+ */
 msadsc_t *msadsc_del_kmempool(kmempool_t *kmplp, uint_t relpnr, adr_t fradr)
 {
     if (NULL == kmplp || 1 > relpnr || NULL == fradr) {
@@ -113,7 +120,12 @@ ret_step:
 }
 
 #endif
+
 #if ((defined CFG_X86_PLATFORM) || (defined CFG_S3C2440A_PLATFORM))
+/**
+ * 大份内存申请
+ *  kmsob无法申请足够内存，直接从msadsc_t中进行内存申请
+ */
 adr_t kmempool_pages_core_new(size_t msize)
 {
 
@@ -131,6 +143,11 @@ adr_t kmempool_pages_core_new(size_t msize)
 #endif
 }
 
+/**
+ * 大份内存删除
+ *  先从kmempool的链表中脱链
+ *  调用msadsc接口删除内存
+ */
 bool_t kmempool_pages_core_delete(adr_t fradr, size_t frsz)
 {
 
@@ -147,6 +164,10 @@ bool_t kmempool_pages_core_delete(adr_t fradr, size_t frsz)
 #endif
 }
 
+/**
+ * 内核内存申请
+ *  从kmsob结构中进行申请
+ */
 adr_t kmempool_objsz_core_new(size_t msize)
 {
 
@@ -155,6 +176,9 @@ adr_t kmempool_objsz_core_new(size_t msize)
 #endif
 }
 
+/**
+ * 调用kmsob接口，归还内存
+ */
 bool_t kmempool_objsz_core_delete(adr_t fradr, size_t frsz)
 {
 
@@ -163,6 +187,7 @@ bool_t kmempool_objsz_core_delete(adr_t fradr, size_t frsz)
 #endif
 }
 
+// 小内存申请
 adr_t kmempool_objsz_new(size_t msize)
 {
     size_t sz = OBJS_ALIGN(msize);
@@ -173,6 +198,7 @@ adr_t kmempool_objsz_new(size_t msize)
     return kmempool_objsz_core_new(sz);
 }
 
+// 小内存删除
 bool_t kmempool_objsz_delete(adr_t fradr, size_t frsz)
 {
     size_t fsz = OBJS_ALIGN(frsz);
@@ -183,6 +209,7 @@ bool_t kmempool_objsz_delete(adr_t fradr, size_t frsz)
     return kmempool_objsz_core_delete(fradr, fsz);
 }
 
+// 内存申请
 adr_t kmempool_pages_new(size_t msize)
 {
     size_t sz = PAGE_ALIGN(msize);
@@ -190,6 +217,7 @@ adr_t kmempool_pages_new(size_t msize)
     return kmempool_pages_core_new(sz);
 }
 
+// 大份内存删除
 bool_t kmempool_pages_delete(adr_t fradr, size_t frsz)
 {
     size_t sz = PAGE_ALIGN(frsz);
@@ -201,39 +229,51 @@ bool_t kmempool_pages_delete(adr_t fradr, size_t frsz)
 
 #endif
 
+/**
+ * 内核申请内存
+ *  申请的内存大于2048，执行kmempool_pages_new
+ *  否则执行，kmempool_objsz_new
+ */
 adr_t kmempool_onsize_new(size_t msize)
 {
 #if ((defined CFG_X86_PLATFORM))
+    // 大份内存申请
     if (msize > OBJSORPAGE) {
         return kmempool_pages_new(msize);
     }
-
+    // 小内存申请
     return kmempool_objsz_new(msize);
 #endif
 }
 
+// 内存删除
 bool_t kmempool_onsize_delete(adr_t fradr, size_t frsz)
 {
 #if ((defined CFG_X86_PLATFORM))
+    // 大份内存删除
     if (frsz > OBJSORPAGE) {
         return kmempool_pages_delete(fradr, frsz);
     }
-
+    // 小内存删除
     return kmempool_objsz_delete(fradr, frsz);
 #endif
 }
 
+// 内核申请内存
 adr_t kmempool_new(size_t msize)
 {
+    // 判断内存申请的范围
     if (msize < KMEMPALCSZ_MIN || msize > KMEMPALCSZ_MAX) {
         return NULL;
     }
-
+    // 内核申请内存
     return kmempool_onsize_new(msize);
 }
 
+// 内核内存删除
 bool_t kmempool_delete(adr_t fradr, size_t frsz)
 {
+    // 内存地址范围检测
     if (fradr == NULL || frsz < KMEMPALCSZ_MIN || frsz > KMEMPALCSZ_MAX) {
         return FALSE;
     }
