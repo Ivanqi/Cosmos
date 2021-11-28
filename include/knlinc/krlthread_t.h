@@ -16,10 +16,10 @@
 
 #define TDRUN_TICK 20
 
-#define PRITY_MAX 64
-#define PRITY_MIN 0
-#define PRILG_SYS 0
-#define PRILG_USR 5
+#define PRITY_MAX 64   // 最大优先级
+#define PRITY_MIN 0    // 最小优先级
+#define PRILG_SYS 0    // 内核级
+#define PRILG_USR 5    // 用户级
 
 #define MICRSTK_MAX 4
 
@@ -32,7 +32,7 @@
 
 #if((defined CFG_X86_PLATFORM)) 
 #define DAFT_TDUSRSTKSZ 0x8000
-#define DAFT_TDKRLSTKSZ 0x8000
+#define DAFT_TDKRLSTKSZ 0x8000  // 3kb
 #endif
 
 
@@ -48,6 +48,7 @@
 #define U_CS_IDX    0x1b
 #define U_DS_IDX    0x23
 #define K_TAR_IDX   0x28
+// 标志寄存器
 #define UMOD_EFLAGS 0x1202
 #define KMOD_EFLAGS	0x202
 

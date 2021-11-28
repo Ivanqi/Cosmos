@@ -180,7 +180,7 @@ void krlthread_kernstack_init(thread_t *thdp, void *runadr, uint_t cpuflags)
 
     // 内核栈顶减去intstkregs_t结构的大小。因为地址是从下往上，减去了正好在栈底
     intstkregs_t *arp = (intstkregs_t *)(thdp->td_krlstktop - sizeof(intstkregs_t));
-    // /把intstkregs_t结构的空间初始化为0
+    // 把intstkregs_t结构的空间初始化为0
     hal_memset((void*)arp, 0, sizeof(intstkregs_t));
     
     // rip寄存器的值设为程序运行首地址
@@ -188,6 +188,7 @@ void krlthread_kernstack_init(thread_t *thdp, void *runadr, uint_t cpuflags)
     // cs寄存器的值设为内核代码段选择子
     arp->r_cs_old = K_CS_IDX;
     arp->r_rflgs = cpuflags;
+    
     // 返回进程的内核栈
     arp->r_rsp_old = thdp->td_krlstktop;
     arp->r_ss_old = 0;

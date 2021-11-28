@@ -69,7 +69,10 @@ void krlcpuidle_start()
     return;
 }
 
-// 建立空转进程
+/**
+ * 建立空转进程
+ *  并把这个空进程CPU下的schdata中
+ */
 thread_t *new_cpuidle_thread()
 {
 

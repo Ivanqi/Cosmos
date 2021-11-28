@@ -199,6 +199,7 @@ void krlsched_set_schedflgs()
     return;
 }
 
+// 设置CPU进程管理状态
 void krlsched_set_schedflgs_ex(uint_t flags)
 {
     cpuflg_t cpuflg;
@@ -295,9 +296,13 @@ return_step:
  */
 void krlschedul()
 {
-
+    // 运行空转进程
     if (krlsched_retn_schedflgs() == NEED_START_CPUILDE_SCHED_FLGS) {
+        // 设置CPU进程管理状态
         krlsched_set_schedflgs_ex(NOTS_SCHED_FLGS);
+        /**
+         * krlsched_retn_idlethread: 获取空转进程
+         */
         retnfrom_first_sched(krlsched_retn_idlethread());
         return;
     }
@@ -312,18 +317,21 @@ void krlschedul()
     return;
 }
 
+// 把进程加入调度系统(原子操作)
 void krlschdclass_add_thread(thread_t *thdp)
 {
     uint_t cpuid = hal_retn_cpuid();
     schdata_t *schdap = &osschedcls.scls_schda[cpuid];
     cpuflg_t cufg;
 
+    // 按进程的优先级进行下标存储
     krlspinlock_cli(&schdap->sda_lock, &cufg);
     list_add(&thdp->td_list, &schdap->sda_thdlst[thdp->td_priority].tdl_lsth);
     schdap->sda_thdlst[thdp->td_priority].tdl_nr++;
     schdap->sda_threadnr++;
     krlspinunlock_sti(&schdap->sda_lock, &cufg);
 
+    // 增减运行中的进程的数量
     krlspinlock_cli(&osschedcls.scls_lock, &cufg);
     osschedcls.scls_threadnr++;
     krlspinunlock_sti(&osschedcls.scls_lock, &cufg);
@@ -421,6 +429,12 @@ void save_to_new_context(thread_t *next, thread_t *prev)
     return;
 }
 
+/**
+ * 新进程第一次运行
+ *  把要运行的地址，复制到rsp栈寄存器中
+ *  恢复进程保存在内核栈中的段寄存器
+ *  通过iretd返回原来进程的上下文
+ */
 void retnfrom_first_sched(thread_t *thrdp)
 {
 
