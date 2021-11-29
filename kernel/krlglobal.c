@@ -10,9 +10,10 @@
 KRL_DEFGLOB_VARIABLE(kvirmemadrs_t, krlvirmemadrs);
 // 虚拟内存
 KRL_DEFGLOB_VARIABLE(mmadrsdsc_t, initmmadrsdsc);
+
 KRL_DEFGLOB_VARIABLE(kmempool_t,oskmempool);
 
-// KRL_DEFGLOB_VARIABLE(schedclass_t,osschedcls);
+KRL_DEFGLOB_VARIABLE(schedclass_t,osschedcls);
 // KRL_DEFGLOB_VARIABLE(ktime_t,osktime);
 // KRL_DEFGLOB_VARIABLE(syscall_t,osscalltab)[SWINR_MAX]={
 // NULL,krlsvetabl_mallocblk,
@@ -25,7 +26,7 @@ KRL_DEFGLOB_VARIABLE(kmempool_t,oskmempool);
 // krlsvetabl_read,krlsvetabl_write,
 // krlsvetabl_ioctrl,krlsvetabl_lseek,
 // krlsvetabl_time};
-// KRL_DEFGLOB_VARIABLE(devtable_t,osdevtable);
+KRL_DEFGLOB_VARIABLE(devtable_t, osdevtable);
 // KRL_DEFGLOB_VARIABLE(iocheblkdsc_t,osiocheblk);
 // KRL_DEFGLOB_VARIABLE(drventyexit_t,osdrvetytabl)[]={
 // systick_entry,/*uart_entry,rtc_entry,rfs_entry,*/

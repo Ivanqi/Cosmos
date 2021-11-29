@@ -19,7 +19,8 @@ KRL_DEFGLOB_VARIABLE(kmempool_t, oskmempool);
 KRL_DEFGLOB_VARIABLE(schedclass_t,osschedcls);
 // KRL_DEFGLOB_VARIABLE(ktime_t,osktime);
 // KRL_DEFGLOB_VARIABLE(syscall_t,osscalltab)[SWINR_MAX];
-// KRL_DEFGLOB_VARIABLE(devtable_t,osdevtable);
+// 管理设备
+KRL_DEFGLOB_VARIABLE(devtable_t,osdevtable);
 // KRL_DEFGLOB_VARIABLE(iocheblkdsc_t,osiocheblk);
 // KRL_DEFGLOB_VARIABLE(drventyexit_t,osdrvetytabl)[];
 #endif
