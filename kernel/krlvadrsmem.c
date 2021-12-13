@@ -358,6 +358,8 @@ void init_kvirmemadrs()
 	hal_mmu_load(&initmmadrsdsc.msd_mmu);
 
 	test_vadr();
+	kprint("虚拟内存初始化成功\n");
+    die(0x400);
 	return;
 }
 
@@ -746,13 +748,12 @@ bool_t vma_del_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 
 int imrand()
 {
-
 	krlvirmemadrs.kvs_randnext = krlvirmemadrs.kvs_randnext * 1103515245 + 12345;
 	return ((unsigned)(krlvirmemadrs.kvs_randnext / 65536) % 32768);
 }
 
 
-int kvma_rand(int s,int e)
+int kvma_rand(int s, int e)
 {
 	return s + imrand() % e;
 }
