@@ -16,13 +16,15 @@ KRL_DEFGLOB_VARIABLE(mmadrsdsc_t, initmmadrsdsc);
 KRL_DEFGLOB_VARIABLE(kmempool_t, oskmempool);
 
 // 管理进程的初始化
-KRL_DEFGLOB_VARIABLE(schedclass_t,osschedcls);
-// KRL_DEFGLOB_VARIABLE(ktime_t,osktime);
-// KRL_DEFGLOB_VARIABLE(syscall_t,osscalltab)[SWINR_MAX];
+KRL_DEFGLOB_VARIABLE(schedclass_t, osschedcls);
+KRL_DEFGLOB_VARIABLE(ktime_t, osktime);
+// 系统服务表
+KRL_DEFGLOB_VARIABLE(syscall_t, osservicetab)[INR_MAX];
 // 管理设备
-KRL_DEFGLOB_VARIABLE(devtable_t,osdevtable);
+KRL_DEFGLOB_VARIABLE(devtable_t, osdevtable);
 // KRL_DEFGLOB_VARIABLE(iocheblkdsc_t,osiocheblk);
-// KRL_DEFGLOB_VARIABLE(drventyexit_t,osdrvetytabl)[];
+// 驱动程序表，然后再init_krldriver中运行
+KRL_DEFGLOB_VARIABLE(drventyexit_t, osdrvetytabl)[];
 #endif
 
 #endif // KRLGLOBAL_H

@@ -5,6 +5,19 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+void printfk(const char_t *fmt, ...)
+{
+	char_t buf[512];
+	va_list ap;
+	va_start(ap, fmt);
+
+	vsprintfk(buf, fmt, ap);
+	gstr_write(&kdftgh, buf);
+	va_end(ap);
+	return;
+}
+
+
 void kprint(const char_t *fmt, ...)
 {
 	char_t buf[512];

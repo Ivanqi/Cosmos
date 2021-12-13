@@ -63,6 +63,7 @@ PUBLIC intfltdsc_t *hal_retn_intfltdsc(uint_t irqnr)
     return &machintflt[irqnr];
 }
 
+// 初始化intserdsc_t结构体实例变量，并把设备指针和回调函数放入其中
 void intserdsc_t_init(intserdsc_t *initp, u32_t flg, intfltdsc_t *intfltp, void *device, intflthandle_t handle)
 {
 
@@ -78,6 +79,7 @@ void intserdsc_t_init(intserdsc_t *initp, u32_t flg, intfltdsc_t *intfltp, void 
     return;
 }
 
+// 把intserdsc_t结构体实例变量挂载到中断异常描述符结构中
 bool_t hal_add_ihandle(intfltdsc_t *intdscp, intserdsc_t *serdscp)
 {
     if (intdscp == NULL || serdscp == NULL) {
@@ -205,7 +207,7 @@ void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
     if (faultnumb == 14) {
         // 获取缺页的地址。打印缺页地址，这地址保存在CPU的CR2寄存器中
         fairvadrs = (adr_t)read_cr2();
-        kprint("异常地址:%x,此地址禁止访问\n", fairvadrs);
+        kprint("异常地址:%x, 此地址禁止访问\n", fairvadrs);
         if (krluserspace_accessfailed(fairvadrs) != 0) {
             // 处理缺页失败就死机
             system_error("缺页处理失败\n");
@@ -219,9 +221,14 @@ void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
 }
 
 // 中断分发器
-sysstus_t hal_syscl_allocator(uint_t sys_nr,void* msgp)
+sysstus_t hal_syscl_allocator(uint_t inr, void* krnlsframp)
 {
-	return 0; 
+	// cpuflg_t cpuflg;
+    sysstus_t ret;
+    // hal_cpuflag_sti(&cpuflg);
+	ret = krlservice(inr, krnlsframp);
+    // hal_cpuflag_cli(&cpuflg);
+    return ret;
 }
 
 
@@ -235,5 +242,7 @@ void hal_hwint_allocator(uint_t intnumb, void *krnlsframp)
 {
     i8259_send_eoi();
     hal_do_hwint(intnumb, krnlsframp);
+    krlsched_chkneed_pmptsched();
+    //kprint("暂时无法向任何服务进程发送中断消息,直接丢弃......\n");
     return;
 }

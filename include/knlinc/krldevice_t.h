@@ -55,10 +55,13 @@
 #define IOIF_CODE_SHUTDOWN 11       // 对应于shutdown操作
 #define IOIF_CODE_MAX 12            // 最大功能码
 
-#define DEVFLG_EXCLU (1<<0)
-#define DEVFLG_SHARE (1<<1)
-#define DEVSTS_NORML (1<<0)
-#define DEVSTS_FAILU (1<<1)
+// 设备标志
+#define DEVFLG_EXCLU (1 << 0)
+#define DEVFLG_SHARE (1 << 1)
+
+// 设备状态
+#define DEVSTS_NORML (1 << 0)       // 正常
+#define DEVSTS_FAILU (1 << 1)       // 错误
 #define DIDFIL_IDN 1
 #define DIDFIL_FLN 2
 
@@ -67,6 +70,7 @@
 #define FSDEV_OPENFLG_OPEFILE 2
 
 
+// 设备ID结构体
 typedef struct s_DEVID {
     uint_t  dev_mtype;  // 设备类型号
     uint_t  dev_stype;  // 设备子类型号
@@ -82,6 +86,11 @@ typedef struct s_DEVTLS {
     list_h_t dtl_list;  // 挂载设备device_t结构的链表
 } devtlst_t;
 
+/**
+ * 用于管理全部驱动程序及设备，其中包括
+ *  1. 全局驱动程序链表,保存全部驱动[driver_t结构]
+ *  2. 全局设备链表，包括各种设备类型的链表[devtlist_t结构]，每个devtlst_t中包括了某一类型的全部设备链表[device_t结构]
+ */
 typedef struct s_DEVTABLE {
     list_h_t devt_list;                     // 设备表自身的链表
     spinlock_t devt_lock;                   // 设备表自旋锁
@@ -92,6 +101,11 @@ typedef struct s_DEVTABLE {
     devtlst_t devt_devclsl[DEVICE_MAX];     // 分类存放设备数据结构的devtlst_t结构数组
 } devtable_t;
 
+/**
+ * device_t 用于描述一个设备，其中包括
+ *  1. devid_t用于描述符设备ID[包括设备类型、设备子类型、设备序列号]
+ *  2. driver_t指针用于指向设备驱动程序，从设备可以找到驱动
+ */
 typedef struct s_DEVICE {   
     list_h_t    dev_list;       // 设备链表
     list_h_t    dev_indrvlst;   // 设备在驱动程序数据结构中对应的挂载链表
@@ -120,6 +134,11 @@ typedef drvstus_t (*drivcallfun_t)(device_t*, void*);
 // 驱动程序入口、退出函数指针类型
 typedef drvstus_t (*drventyexit_t)(struct s_DRIVER*, uint_t, void*);
 
+/**
+ * driver_t 用于描述一个驱动程序
+ *  1. 驱动功能函数指针数组drivcallfun_t[]
+ *  2. 包括使用该驱动程序的全部设备的列表，从驱动可以找到设备
+ */
 typedef struct s_DRIVER {
     spinlock_t drv_lock;                        // 保护驱动程序数据结构的自旋锁
     list_h_t drv_list;                          // 挂载驱动程序数据结构的链表

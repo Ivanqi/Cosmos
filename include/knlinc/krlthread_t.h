@@ -57,27 +57,35 @@ typedef struct s_MICRSTK {
 } micrstk_t;
 
 
+// // 进程的机器上下文old
+// typedef struct s_CONTEXT {
+// #if((defined CFG_X86_PLATFORM))     
+//     reg_t       ctx_usrsp;
+//     reg_t       ctx_svcsp;
+//     reg_t       ctx_svcspsr;
+//     reg_t       ctx_cpsr;
+//     reg_t       ctx_lr;
+// #ifdef CFG_X86_PLATFORM
+//     reg_t       ctx_nxteip;     // 保存下一次运行的地址
+//     reg_t       ctx_nxtesp;     // 保存下一次运行时内核栈的地址
+//     reg_t       ctx_nxtss;
+//     reg_t       ctx_nxtcs;
+//     x64tss_t*   ctx_nexttss;     // 指向tss结构
+// #endif
+// #endif
+// #if((defined CFG_STM32F0XX_PLATFORM))
+//     reg_t       ctx_svcsp;
+//     reg_t       ctx_cpsr;
+// #endif     
+// } context_t;
+
 // 进程的机器上下文
-typedef struct s_CONTEXT {
-#if((defined CFG_X86_PLATFORM))     
-    reg_t       ctx_usrsp;
-    reg_t       ctx_svcsp;
-    reg_t       ctx_svcspsr;
-    reg_t       ctx_cpsr;
-    reg_t       ctx_lr;
-#ifdef CFG_X86_PLATFORM
-    reg_t       ctx_nxteip;     // 保存下一次运行的地址
-    reg_t       ctx_nxtesp;     // 保存下一次运行时内核栈的地址
-    reg_t       ctx_nxtss;
-    reg_t       ctx_nxtcs;
-    x64tss_t*   ctx_nxttss;     // 指向tss结构
-#endif
-#endif
-#if((defined CFG_STM32F0XX_PLATFORM))
-    reg_t       ctx_svcsp;
-    reg_t       ctx_cpsr;
-#endif     
-} context_t;
+typedef struct s_CONTEXT
+{  
+    uint_t       ctx_nextrip;   // 保存下一次运行的地址
+    uint_t       ctx_nextrsp;   // 保存下一次运行时内核栈的地址
+    x64tss_t*    ctx_nexttss;   // 指向tss结构
+}context_t;
 
 // 进程结构体
 typedef struct s_THREAD {
@@ -96,7 +104,7 @@ typedef struct s_THREAD {
 #if((defined CFG_X86_PLATFORM))     
     adr_t       td_usrstktop;           // 应用程序栈顶地址
     adr_t       td_usrstkstart;         // 应用程序栈开始地址
-    void*       td_mmdsc;               // 地址空间结构，指向mmadrsdsc_t 结构
+    mmadrsdsc_t* td_mmdsc;       // 地址空间结构，指向mmadrsdsc_t 结构
     void*       td_resdsc;
     void*       td_privtep;
     void*       td_extdatap;

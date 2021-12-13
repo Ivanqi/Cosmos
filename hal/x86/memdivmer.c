@@ -62,6 +62,20 @@ KLINE sint_t retn_divoder(uint_t pages)
 	return pbits;
 }
 
+u64_t onfrmsa_retn_fpagenr(msadsc_t* freemsa)
+{
+	if (NULL == freemsa || NULL == freemsa->md_odlink) {
+		return 0;
+	}
+
+	msadsc_t* fmend = (msadsc_t*)freemsa->md_odlink;
+	if (fmend<freemsa) {
+		return 0;
+	}
+
+	return ((u64_t)(fmend - freemsa) + 1);
+}
+
 // 获取要释放msadsc_t结构所在的内存区
 memarea_t *onfrmsa_retn_marea(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t freepgs)
 {

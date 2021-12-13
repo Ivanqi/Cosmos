@@ -223,14 +223,14 @@ global  asm_ret_from_user_mode
 %macro	SRFTFAULT 1
 	push	  _NOERRO_CODE
 	SAVEALLFAULT
-	mov r14w,0x10
-	mov ds,r14w
-	mov es,r14w
-	mov fs,r14w
-	mov gs,r14w
+	mov r14w, 0x10
+	mov ds, r14w
+	mov es, r14w
+	mov fs, r14w
+	mov gs, r14w
 
-	mov 	rdi,%1 ;rdi, rsi
-	mov 	rsi,rsp
+	mov 	rdi, %1 ;rdi, rsi
+	mov 	rsi, rsp
 	call 	hal_fault_allocator
 	RESTOREALLFAULT
 %endmacro
@@ -239,13 +239,13 @@ global  asm_ret_from_user_mode
 %macro	SRFTFAULT_ECODE 1
 	SAVEALLFAULT
 	mov r14w,0x10
-	mov ds,r14w
-	mov es,r14w
-	mov fs,r14w
-	mov gs,r14w
+	mov ds, r14w
+	mov es, r14w
+	mov fs, r14w
+	mov gs, r14w
 
-	mov 	rdi,%1
-	mov 	rsi,rsp
+	mov 	rdi, %1
+	mov 	rsi, rsp
 	call 	hal_fault_allocator
 	RESTOREALLFAULT
 %endmacro
@@ -254,25 +254,25 @@ global  asm_ret_from_user_mode
 %macro	HARWINT	1
 	SAVEALL
 	
-	mov r14w,0x10
-	mov ds,r14w
-	mov es,r14w
-	mov fs,r14w
-	mov gs,r14w
+	mov r14w, 0x10
+	mov ds, r14w
+	mov es, r14w
+	mov fs, r14w
+	mov gs, r14w
 
 	mov	rdi, %1
-	mov 	rsi,rsp
-	call    hal_hwint_allocator
+	mov rsi, rsp
+	call hal_hwint_allocator
 
 	RESTOREALL
 %endmacro
 
 
-
+; 软中断
 %macro  EXI_SCALL  0
 	
 	;push rax
-	push rbx
+	push rbx	; 保存通用寄存器到内核栈
 	push rcx
 	push rdx
 	push rbp
@@ -288,33 +288,35 @@ global  asm_ret_from_user_mode
 	push r14
 	push r15
 	
-	xor r14,r14
+	xor r14, r14
 	
-	mov r14w,ds
+	mov r14w, ds
 	push r14
-	mov r14w,es
+	mov r14w, es
 	push r14
-	mov r14w,fs
+	mov r14w, fs
 	push r14
-	mov r14w,gs
+	mov r14w, gs
 	push r14
 	
-	mov r14w,0x10
-	mov ds,r14w
-	mov es,r14w
-	mov fs,r14w
-	mov gs,r14w
+	mov r14w, 0x10
+	mov ds, r14w
+	mov es, r14w
+	mov fs, r14w
+	mov gs, r14w
 
-	call   	hal_syscl_allocator
+	mov	rdi, rax	; 处理hal_syscl_allocator函数第一个参数inr
+	mov rsi, rsp	; 处理hal_syscl_allocator函数第二个参数krnlsframp
+	call hal_syscl_allocator	; call hal_syscl_allocator 
 	
 	pop r14
-	mov gs,r14w
+	mov gs, r14w
 	pop r14 
-	mov fs,r14w
+	mov fs, r14w
 	pop r14
-	mov es,r14w
+	mov es, r14w
 	pop r14
-	mov ds,r14w
+	mov ds, r14w
 	 
 	
 	pop r15
@@ -331,8 +333,8 @@ global  asm_ret_from_user_mode
 	pop rbp
 	pop rdx
 	pop rcx
-	pop rbx
+	pop rbx	; 从内核栈中恢复通用寄存器
 	;pop rax
 	
-	iretq
+	iretq	; 中断返回
 %endmacro

@@ -10,6 +10,7 @@
 #include "krlobjsmpol_t.h"
 #include "krlmm_t.h"
 #include "krlinit_t.h"
+#include "krlvadrsmem_t.h"
 #include "krltime_t.h"
 #include "krlglobal_t.h"
 #include "krlobjnode_t.h"
@@ -19,6 +20,7 @@
 #include "krlcpuidle_t.h"
 #include "krldevice_t.h"
 #include "krlspinlock_t.h"
+#include "krliocache_t.h"
 #include "krlservice_t.h"
 #include "krlsvemm_t.h"
 #include "krlsvethread_t.h"
@@ -29,4 +31,5 @@
 #include "krlsveioctrl_t.h"
 #include "krlsvelseek_t.h"
 
-#endif // KRLTYPES_H
+
+#endif

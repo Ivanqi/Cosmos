@@ -26,5 +26,14 @@ typedef struct s_TIME {
     uint_t      sec;
 } time_t;
 
+#define CMOS_PROT_ADR 0x70
+#define CMOS_PROT_DATE 0x71
+#define CMOS_SEC_ADR 0x00
+#define CMOS_MIN_ADR 0x02
+#define CMOS_HOUR_ADR 0x04
+#define CMOS_DAY_ADR 0x07
+#define CMOS_MON_ADR 0x08
+#define CMOS_YEAR_ADR 0x09
+#define CMOS_READ(val,adr) ({out_u8(CMOS_PROT_ADR,adr);val=in_u8(CMOS_PROT_DATE);}) 
 
 #endif // KRLTIME_T_H

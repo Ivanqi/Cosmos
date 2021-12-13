@@ -9,7 +9,6 @@ HEADFILE_PATH = -I ../include -I ../include/bastypeinc \
  -I ../include/halinc -I ../include/knlinc \
  -I ../include/libinc -I ../include/drvinc
 
-
 CCBUILDPATH	= $(KERNELCE_PATH)
 include krnlbuidcmd.mk
 include krnlobjs.mk

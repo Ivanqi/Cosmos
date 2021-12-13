@@ -39,6 +39,7 @@ typedef u32_t reg_t;
 typedef void (*inthandler_t)();
 typedef drv_t (*i_handle_t)(uint_t int_nr);
 typedef drv_t (*f_handle_t)(uint_t int_nr,void *sframe);
+// 中断回调函数类型
 typedef drvstus_t(*intflthandle_t)(uint_t ift_nr, void *device, void *sframe);
 typedef u64_t mmstus_t;
 
@@ -53,8 +54,8 @@ typedef u64_t mmstus_t;
 #define TRUE    1
 #define	FALSE	0
 
-#define DFCERRSTUS (-1)
-#define DFCOKSTUS (0)
+#define DFCERRSTUS (-1) // 失败
+#define DFCOKSTUS (0)   // 成功
 #define NO_HAND (-1)
 // 对齐
 #define ALIGN(x, a)     (((x) + (a) - 1) & ~((a) - 1))

@@ -70,6 +70,18 @@ void hal_spinlock_saveflg_cli(spinlock_t *lock, cpuflg_t *cpuflg)
     return;
 }
 
+void knl_spinlock(spinlock_t * lock)
+{
+	hal_spinlock_lock(lock);
+	return;
+}
+
+void knl_spinunlock(spinlock_t * lock)
+{
+	hal_spinlock_unlock(lock);
+	return;
+}
+
 void hal_spinunlock_restflg_sti(spinlock_t *lock, cpuflg_t *cpuflg)
 {
     __asm__ __volatile__(
@@ -163,7 +175,7 @@ void knl_spinunlock_sti(spinlock_t *lock, cpuflg_t *cpuflg)
 }
 
 // 内存设置
-void hal_memset(void *setp, size_t n, u8_t setval)
+void hal_memset(void *setp, u8_t setval, size_t n)
 {
     u8_t *_p = (u8_t *)setp;
     for (uint_t i = 0; i < n; i++) {

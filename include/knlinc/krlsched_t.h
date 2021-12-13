@@ -8,6 +8,10 @@
 #define NEED_START_CPUILDE_SCHED_FLGS (2)   // 需要运行空转进程
 #define PMPT_FLGS 0
 
+/**
+ * regparm: x86-32体系结构下，编译器会把0到number个参数顺次写入eax, edx, ecx和栈，就是说number取值范围是0-3，再多的参数就放进栈来传递了
+ *  number为0的时候全放栈里
+ */
 #ifdef CFG_X86_PLATFORM
 #define TNCCALL __attribute__((regparm(2)))         
 #endif

@@ -6,5 +6,6 @@
 #include "config.h"
 #include "halheads.h"
 #include "krlheads.h"
+#include "drvheads.h"
 
 #endif

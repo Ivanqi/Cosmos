@@ -18,6 +18,7 @@
 #ifdef CFG_X86_PLATFORM
 #include "io.h"
 #include "halgdtidt.h"
+#include "i8254.h"
 #include "i8259.h"
 #include "bdvideo.h"
 #include "memmgrmctrl.h"

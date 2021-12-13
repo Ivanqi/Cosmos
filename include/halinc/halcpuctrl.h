@@ -42,6 +42,8 @@ void hal_spinlock_init(spinlock_t* lock);
 void hal_spinlock_lock(spinlock_t* lock);
 void hal_spinlock_unlock(spinlock_t* lock);
 void hal_spinlock_saveflg_cli(spinlock_t* lock, cpuflg_t* cpuflg);
+void knl_spinlock(spinlock_t * lock);
+void knl_spinunlock(spinlock_t * lock);
 void hal_spinunlock_restflg_sti(spinlock_t* lock, cpuflg_t* cpuflg);
 void knl_spinlock_init(spinlock_t* lock);
 void knl_spinlock_lock(spinlock_t* lock);
@@ -49,7 +51,7 @@ void knl_spinlock_unlock(spinlock_t* lock);
 void knl_spinlock_cli(spinlock_t* lock, cpuflg_t* cpuflg);
 void knl_spinunlock_sti(spinlock_t* lock, cpuflg_t* cpuflg);
 
-void hal_memset(void* setp,size_t n,u8_t setval);
+void hal_memset(void* setp, u8_t setval, size_t n);
 void hal_memcpy(void* src,void* dst,size_t n);
 void hal_sysdie(char_t* errmsg);
 void system_error(char_t* errmsg);

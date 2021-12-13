@@ -29,6 +29,11 @@
 #define KPDE_G (1 << 8)
 #define KPDE_PAT (1 << 12)
 
+#define KPML4_SHIFT 39
+#define KPDPTTE_SHIFT 30
+#define KPDP_SHIFT 21
+#define PGENTY_SIZE 512
+
 #define PAGEMAPBASS 0x100000
 #define PSHRSIZE 12
 #define PDENSHL  22

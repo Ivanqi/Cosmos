@@ -10,6 +10,8 @@ void mm_update_memarea(memarea_t* malokp,uint_t pgnr,uint_t flgs);
 
 memarea_t* onfrmsa_retn_marea(memmgrob_t* mmobjp,msadsc_t* freemsa,uint_t freepgs);
 
+u64_t onfrmsa_retn_fpagenr(msadsc_t* freemsa);
+
 memarea_t* onmrtype_retn_marea(memmgrob_t* mmobjp,uint_t mrtype);
 
 bafhlst_t* onma_retn_maxbafhlst(memarea_t* malckp);

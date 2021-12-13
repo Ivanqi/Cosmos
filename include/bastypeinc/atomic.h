@@ -31,7 +31,7 @@ KLINE void atomic_sub(int i, atomic_t *v) {
     );
 }
 
-KLINE void atomic_sub_and_test(int i, atomic_t *v) {
+KLINE int atomic_sub_and_test(int i, atomic_t *v) {
     unsigned char c;
     __asm__ __volatile__(
         "lock;"
@@ -60,7 +60,7 @@ KLINE void atomic_dec(atomic_t *v) {
     );
 }
 
-KLINE void atomic_dec_and_test(atomic_t *v) {
+KLINE int atomic_dec_and_test(atomic_t *v) {
     unsigned char c;
 
     __asm__ __volatile__(
@@ -70,6 +70,8 @@ KLINE void atomic_dec_and_test(atomic_t *v) {
         :
         : "memory"
     );
+
+    return c != 0;
 }
 
 KLINE int atomic_inc_and_test(atomic_t *v) {
@@ -82,10 +84,12 @@ KLINE int atomic_inc_and_test(atomic_t *v) {
         :
         : "memory"
     );
+
+    return c != 0;
 }
 
 KLINE void refcount_init(refcount_t *initp) {
-    atomic_set(&refc->ref_count);
+    atomic_set(&initp->ref_count, 0);
 }
 
 KLINE void refcount_inc(refcount_t *refc) {
@@ -94,7 +98,7 @@ KLINE void refcount_inc(refcount_t *refc) {
 }
 
 KLINE void refcount_dec(refcount_t *refc) {
-    atomic_dec(&ref->ref_count);
+    atomic_dec(&refc->ref_count);
 }
 
 KLINE s32_t refcount_read(refcount_t *refc) {

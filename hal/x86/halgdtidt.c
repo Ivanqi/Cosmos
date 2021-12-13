@@ -226,6 +226,7 @@ PUBLIC LKINIT void init_idt_descriptor()
 
     set_idt_desc(INT_VECTOR_SIMD_FAULT, DA_386IGate, exc_simd_fault, PRIVILEGE_KRNL);
 
+    // 中断向量表，绑定中断编号32和hxi_hwint00，特权级别设置为PRIVILEGE_KRNL
     set_idt_desc(INT_VECTOR_IRQ0 + 0, DA_386IGate, hxi_hwint00, PRIVILEGE_KRNL);
 
     set_idt_desc(INT_VECTOR_IRQ0 + 1, DA_386IGate, hxi_hwint01, PRIVILEGE_KRNL);
@@ -290,6 +291,7 @@ PUBLIC LKINIT void init_idt_descriptor()
 
     set_idt_desc(INT_VECTOR_APIC_ERROR, DA_386IGate, hxi_apic_error, PRIVILEGE_KRNL);
 
+    // 中断向量表，绑定中断编号255和exi_sys_call，特权级别设置为PRIVILEGE_USER
     set_idt_desc(INT_VECTOR_SYSCALL, DA_386IGate, exi_sys_call, PRIVILEGE_USER);
 
     set_iidtr(x64_idt);

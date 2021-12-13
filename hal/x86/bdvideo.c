@@ -217,7 +217,7 @@ PUBLIC LKINIT void init_bdvideo()
     init_vbe();
     // 清空屏幕，为黑色
     fill_graph(kghp, BGRA(0, 0, 0));
-    /// 显示背景图片
+    // 显示背景图片
     set_charsdxwflush(0, 0);
     hal_background();
     

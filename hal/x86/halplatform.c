@@ -6,7 +6,7 @@
 #include "cosmosmctrl.h"
 
 // 虚拟地址转物理地址
-adr_t virtadr_to_phyadr(adr_t kviradr)
+adr_t viradr_to_phyadr(adr_t kviradr)
 {
     if (kviradr < KRNL_MAP_VIRTADDRESS_START || kviradr > KRNL_MAP_VIRTADDRESS_END) {
         system_error("virtadr_to_phyadr err\n");
