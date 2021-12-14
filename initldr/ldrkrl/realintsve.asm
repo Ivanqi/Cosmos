@@ -72,7 +72,7 @@ _getmmap:
 	push es
 	push ss
 	mov esi, 0
-	mov dword[E80MAP_NR], esi				; 把esi的机器码赋予给内存地址 E80MAP_NR
+	mov dword[E80MAP_NR], esi				; 把esi的机器码赋予给内存地址 E80MAP_NR。用于计算内存页个数
 	mov dword[E80MAP_ADRADR], E80MAP_ADR
 
 	xor ebx, ebx							; ebx设为0
@@ -89,7 +89,7 @@ loop:
 	cmp edi, E80MAP_ADR + 0x1000
 	jg .1
 
-	inc esi
+	inc esi									; 计算内存页个数
 
 	cmp ebx, 0								; 如ebx为0，则表示循环迭代结束
 	jne loop								; 还有结果项，继续迭代

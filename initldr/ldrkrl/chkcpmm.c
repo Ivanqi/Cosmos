@@ -4,7 +4,12 @@
 
 #include "cmctl.h"
 
-// acpi地址
+/**
+ * acpi地址
+ *  1. BIOS在开机过程中会把包在BIOS ROM中的Acpi Table 载入到RAM中，然后留下一些信息给OS来找到他们
+ *  2. 最简单的例子就是RSDP Structure会放在1M以下的某个位置（一般是E0000h~FFFFh，也有可能在0x40e~(0x40e+1KB))
+ *  3. 然后OS就可以透过搜寻Signature(某个标记字）的方式来找到其他的Acpi Table entry point
+ */
 unsigned int acpi_get_bios_ebda()
 {
     unsigned int address = *(unsigned short *)0x40E;
@@ -128,7 +133,7 @@ void init_mem(machbstart_t *mbsp)
     mbsp->mb_e820nr = (u64_t)retemnr;                   // 把e820map_t数据数组元素个数传给mbsp->mb_e820nr
     mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));    // 把e820map_t结构数据大小传给mbsp->mb_e820sz
     mbsp->mb_memsz = get_memsize(retemp, retemnr);      // 根据e820map_t结构数据计算内存大小
-    init_acpi(mbsp);
+    init_acpi(mbsp);                                    // 初始化acpi
 
     return;
 }
