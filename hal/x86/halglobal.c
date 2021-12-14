@@ -12,6 +12,7 @@ HAL_DEFGLOB_VARIABLE(gate_t,x64_idt)[IDTMAX];
 HAL_DEFGLOB_VARIABLE(x64tss_t,x64tss)[CPUCORE_MAX]; 
 HAL_DEFGLOB_VARIABLE(igdtr_t,x64_igdt_reg)[CPUCORE_MAX];
 HAL_DEFGLOB_VARIABLE(iidtr_t,x64_iidt_reg);
+// 全局phymmarge_t的内存
 HAL_DEFGLOB_VARIABLE(machbstart_t, kmachbsp);
 HAL_DEFGLOB_VARIABLE(dftgraph_t, kdftgh);
 

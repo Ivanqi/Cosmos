@@ -4,7 +4,7 @@
 
 #include "cmctl.h"
 
-// acpi内存
+// acpi地址
 unsigned int acpi_get_bios_ebda()
 {
     unsigned int address = *(unsigned short *)0x40E;
@@ -124,7 +124,7 @@ void init_mem(machbstart_t *mbsp)
         kerror("Your computer is low on memory, the memory cannot be less than 128MB!");
     }
 
-    mbsp->mb_e820padr = (u64_t)((u32_t)(retemp));     // 把e820map_t结构数组的首地址传给mbsp->mb_e820padr
+    mbsp->mb_e820padr = (u64_t)((u32_t)(retemp));       // 把e820map_t结构数组的首地址传给mbsp->mb_e820padr
     mbsp->mb_e820nr = (u64_t)retemnr;                   // 把e820map_t数据数组元素个数传给mbsp->mb_e820nr
     mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));    // 把e820map_t结构数据大小传给mbsp->mb_e820sz
     mbsp->mb_memsz = get_memsize(retemp, retemnr);      // 根据e820map_t结构数据计算内存大小

@@ -428,7 +428,7 @@ typedef struct s_MACHBSTART
     u64_t   mb_pml4padr;        // 机器页表数据地址
     u64_t   mb_subpageslen;     // 机器页表个数
     u64_t   mb_kpmapphymemsz;   // 操作系统映射空间大小
-    u64_t   mb_ebdaphyadr;
+    u64_t   mb_ebdaphyadr;      // ACPI地址
     mrsdp_t mb_mrsdp;
     graph_t mb_ghparm;          // 图形信息
 }__attribute__((packed)) machbstart_t;

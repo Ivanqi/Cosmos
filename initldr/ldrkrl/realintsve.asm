@@ -65,7 +65,7 @@ cleardisp:
 	ret
 
 ; 获取内存布局试图的函数
-; _getmmap和loop在迭代执行中断，每次中中断都要输出一个20字节大小数据项
+; _getmmap和loop在迭代执行中断，每次中断都要输出一个20字节大小数据项
 ; 最后会形成一个s_e820的的结构体
 _getmmap:
 	push ds
@@ -79,7 +79,7 @@ _getmmap:
 	mov edi, E80MAP_ADR
 
 loop:
-	mov eax, 0e820h							; eax必须为0e820h
+	mov eax, 0e820h							; eax必须为0e820h。遍历主机上全部内存
 	mov ecx, 20								; 输出结果数据项的大小为20字节：8字节内存基地址，8字节内存长度，4字节内存类型
 	mov edx, 0534d4150h						; edx必须为0534d4150h
 	int 15h									; 执行中断
