@@ -179,29 +179,30 @@ typedef struct s_e820 {
 
 // VBE信息
 typedef struct s_VBEINFO {
-    char vbesignature[4];
-    u16_t vbeversion;
-    u32_t oemstringptr;
-    u32_t capabilities;
-    u32_t videomodeptr;
-    u16_t totalmemory;
-    u16_t oemsoftwarerev;
-    u32_t oemvendornameptr;
-    u32_t oemproductnameptr;
-    u32_t oemproductrevptr;
-    u8_t reserved[222];
-    u8_t oemdata[256];
+    char vbesignature[4];       // 必须是“VESA”以指示有效的 VBE 支持
+    u16_t vbeversion;           // VBE版本；高字节是主要版本，低字节是次要版本
+    u32_t oemstringptr;         // OEM的段:偏移地址
+    u32_t capabilities;         // 描述cap功能的位域
+    u32_t videomodeptr;         // 指向支持的视频模式列表的指针
+    u16_t totalmemory;          // 以 64KB 块为单位的视频内存量
+    u16_t oemsoftwarerev;       // 软件版本
+    u32_t oemvendornameptr;     // 段:偏移到供应商字符串
+    u32_t oemproductnameptr;    // 段:偏移到型号名称
+    u32_t oemproductrevptr;     // 指向产品版本的段:偏移指针
+    u8_t reserved[222];         // 为未来扩展预留
+    u8_t oemdata[256];          // OEM BIOS 将其字符串存储在此区域
 } __attribute__((packed)) vbeinfo_t;
 
+// 获取 VESA 模式信息
 typedef struct s_VBEOMINFO {
-    u16_t ModeAttributes;
-    u8_t  WinAAttributes;
-    u8_t  WinBAttributes;
-    u16_t WinGranularity;
+    u16_t ModeAttributes;           // 已弃用，您应该只对第 7 位感兴趣，它表示该模式支持线性帧缓冲区
+    u8_t  WinAAttributes;           // 已弃用
+    u8_t  WinBAttributes;           // 已弃用
+    u16_t WinGranularity;           // 已弃用; 在计算bank号码时使用
     u16_t WinSize;
     u16_t WinASegment;
     u16_t WinBSegment;
-    u32_t WinFuncPtr;
+    u32_t WinFuncPtr;               // 已弃用; 用于在不返回实模式的情况下从保护模式切换组
     u16_t BytesPerScanLine;
     u16_t XResolution;
     u16_t YResolution;
@@ -281,10 +282,11 @@ typedef struct s_GRAPH {
     u32_t gh_nxtcharsx;         // 下一字符显示的x坐标
     u32_t gh_nxtcharsy;         // 下一字符显示的y坐标
     u32_t gh_linesz;            // 字符行高
-    vbeinfo_t gh_vbeinfo;
-    vbeominfo_t gh_vminfo;
+    vbeinfo_t gh_vbeinfo;       // vbe数据结构
+    vbeominfo_t gh_vminfo;      // VESA数据结构
 } __attribute__((packed)) graph_t;
 
+// 图像头结构体
 typedef struct s_BMFHEAD {
     u16_t bf_tag;   // 0x4d42
     u32_t bf_size;
@@ -306,8 +308,9 @@ typedef struct s_BITMINFO {
     s32_t bi_ypelsper;
     u32_t bi_clruserd;
     u32_t bi_clrimport;
-}__attribute__((packed)) bitminfo_t; // 40
+} __attribute__((packed)) bitminfo_t; // 40
 
+// 图像结构体
 typedef struct s_BMDBGR {
     u8_t bmd_b;
     u8_t bmd_g;

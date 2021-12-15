@@ -20,6 +20,7 @@ void write_pixcolor(machbstart_t *mbsp, u32_t x, u32_t y, pixl_t pix)
     return;
 }
 
+// 背景图片写入
 void bmp_print(void *bmfile, machbstart_t *mbsp)
 {
     if (NULL == bmfile) {
@@ -112,6 +113,7 @@ void graph_t_init(graph_t *initp)
     return;
 }
 
+// 初始化机器显存地址
 void init_kinitfvram(machbstart_t *mbsp)
 {
     mbsp->mb_fvrmphyadr = KINITFRVM_PHYADR;
@@ -132,6 +134,8 @@ u32_t vfartolineadr(u32_t vfar)
 
 /**
  * 从BIOS获取数据
+ *  1. Input: ES:DI=段:偏移,指向存储 VESA BIOS 信息结构的位置
+ *  2. AX = 0x004F 成功，其他值表示不支持 VESA BIOS
  */
 void get_vbemode(machbstart_t *mbsp)
 {
@@ -146,6 +150,7 @@ void get_vbemode(machbstart_t *mbsp)
 
     kprint("vbe vbever: %x\n", vbeinfoptr->vbeversion);
 
+    // 0x100 为 1.0，0x101 为 1.1，0x102 为 1.2，0x200 为 2.0，0x300 为 3.0
     if (vbeinfoptr->vbeversion < 0x0200) {
         kerror("vbe version not vbe3");
     }
@@ -330,6 +335,11 @@ void test_bga()
     return;
 }
 
+/**
+ * 获取VESA模式信息
+ *  1. input: AX = 0x4F01, CX = 视频模式数组中的 VESA 模式编号, ES:DI = Segment:Offset 存储 VESA 模式信息结构的位置的指针
+ *  2. output: AX = 0x004F 成功，其他值表示 BIOS 错误或模式不支持的错误
+ */
 void get_vbemodeinfo(machbstart_t* mbsp)
 {
     realadr_call_entry(RLINTNR(3), 0, 0);
@@ -360,6 +370,15 @@ void get_vbemodeinfo(machbstart_t* mbsp)
     return;
 }
 
+/**
+ * 设置 VBE 模式
+ *  1. input: AX = 0x4F02
+ *     BX = 位 0-13 模式号；
+ *        位 14 是 LFB 位：设置时，它启用线性帧缓冲区，清除时，软件必须使用组切换。
+ *        位 15 是 DM 位：设置后，BIOS 不会清除屏幕。位 15 通常被忽略，应始终清除
+ *     ES:DI = Segment:Offset 存储 VESA 模式信息结构的位置的指针
+ *  2. AX = 0x004F 成功，其他值表示错误
+ */
 void set_vbemodeinfo()
 {
     realadr_call_entry(RLINTNR(4), 0, 0);
@@ -369,17 +388,17 @@ void set_vbemodeinfo()
 u32_t utf8_to_unicode(utf8_t *utfp,int *retuib)
 {
     u8_t uhd = utfp->utf_b1,ubyt = 0;
-    u32_t ucode=0,tmpuc=0;
+    u32_t ucode = 0,tmpuc = 0;
 
     // 0xbf&&uhd<=0xbf
-    if(0x80 > uhd) {
-        ucode=utfp->utf_b1&0x7f;
-        *retuib=1;
+    if (0x80 > uhd) {
+        ucode = utfp->utf_b1 & 0x7f;
+        *retuib = 1;
         return ucode;
     }
 
     // 0xdf
-    if(0xc0 <= uhd&&uhd <= 0xdf) {
+    if (0xc0 <= uhd&&uhd <= 0xdf) {
         ubyt = utfp->utf_b1 & 0x1f;
         tmpuc |= ubyt;
         ubyt = utfp->utf_b2 & 0x3f;
@@ -389,7 +408,7 @@ u32_t utf8_to_unicode(utf8_t *utfp,int *retuib)
     }
 
     // 0xef
-    if(0xe0 <= uhd&&uhd <= 0xef) {
+    if (0xe0 <= uhd&&uhd <= 0xef) {
         ubyt = utfp->utf_b1 & 0x0f;
         tmpuc |= ubyt;
         ubyt = utfp->utf_b2 & 0x3f;
@@ -402,7 +421,7 @@ u32_t utf8_to_unicode(utf8_t *utfp,int *retuib)
     }
 
     //0xf7
-    if(0xf0 <= uhd && uhd <= 0xf7) {
+    if (0xf0 <= uhd && uhd <= 0xf7) {
         ubyt = utfp->utf_b1 & 0x7;
         tmpuc |= ubyt;
         ubyt = utfp->utf_b2 & 0x3f;
@@ -418,7 +437,7 @@ u32_t utf8_to_unicode(utf8_t *utfp,int *retuib)
     }
 
     //0xfb
-    if(0xf8 <= uhd && uhd <= 0xfb) {
+    if (0xf8 <= uhd && uhd <= 0xfb) {
         ubyt = utfp->utf_b1 & 0x3;
         tmpuc |= ubyt;
         ubyt = utfp->utf_b2 & 0x3f;
@@ -437,7 +456,7 @@ u32_t utf8_to_unicode(utf8_t *utfp,int *retuib)
     }
 
     //0xfd
-    if(0xfc <= uhd && uhd <= 0xfd) {
+    if (0xfc <= uhd && uhd <= 0xfd) {
         ubyt = utfp->utf_b1 & 0x1;
         tmpuc |= ubyt;
         ubyt = utfp->utf_b2 & 0x3f;
