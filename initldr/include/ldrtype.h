@@ -145,16 +145,15 @@ typedef struct s_IDTR
     u32_t idtbas;
 } idtr_t;
 
-typedef struct s_RWHDPACK
-{
-    //hd_addr_packet:		db	0x10		; [ 0] Packet size in bytes.
-      //          db	0		; [ 1] Reserved, must be 0.
-    //hd_sect_nr:		db	0		; [ 2] Nr of blocks to transfer.
-   //             db	0		; [ 3] Reserved, must be 0.
-   //o_ffset:		dw	0		; [ 4] Addr of transfer - Offset
-    //s_eg:			dw	0		; [ 6] buffer.          - Seg
-    //lba_l:			dd	0		; [ 8] LBA. Low  32-bits.
-    //lba_h:			dd	0		; [12] LBA. High 32-bits.
+typedef struct s_RWHDPACK {
+    // hd_addr_packet:		db	0x10		; [ 0] Packet size in bytes.
+    //          db	0		; [ 1] Reserved, must be 0.
+    // hd_sect_nr:		db	0		; [ 2] Nr of blocks to transfer.
+    //             db	0		; [ 3] Reserved, must be 0.
+    // o_ffset:		dw	0		; [ 4] Addr of transfer - Offset
+    // s_eg:			dw	0		; [ 6] buffer.          - Seg
+    // lba_l:			dd	0		; [ 8] LBA. Low  32-bits.
+    // lba_h:			dd	0		; [12] LBA. High 32-bits.
     u8_t rwhpk_sz;
     u8_t rwhpk_rv;
     u8_t rwhpk_sn;
@@ -178,8 +177,8 @@ typedef struct s_e820 {
     u32_t type;             /* type of memory segment 4， 内存类型*/
 } __attribute__((packed)) e820map_t;
 
-typedef struct s_VBEINFO
-{
+// VBE信息
+typedef struct s_VBEINFO {
     char vbesignature[4];
     u16_t vbeversion;
     u32_t oemstringptr;
@@ -194,8 +193,7 @@ typedef struct s_VBEINFO
     u8_t oemdata[256];
 } __attribute__((packed)) vbeinfo_t;
 
-typedef struct s_VBEOMINFO
-{
+typedef struct s_VBEOMINFO {
     u16_t ModeAttributes;
     u8_t  WinAAttributes;
     u8_t  WinBAttributes;
@@ -243,8 +241,7 @@ typedef struct s_VBEOMINFO
     u8_t  Reserved3[189];
 } __attribute__((packed)) vbeominfo_t; 
 
-typedef struct s_PIXCL
-{
+typedef struct s_PIXCL {
     u8_t cl_b;  // 蓝
     u8_t cl_g;  // 绿
     u8_t cl_r;  // 红
@@ -262,8 +259,7 @@ typedef u32_t pixl_t;
 /**
  * 图形模式结构体
  */
-typedef struct s_GRAPH
-{
+typedef struct s_GRAPH {
     u32_t gh_mode;              // 图形模式
     u32_t gh_x;                 // 水平像素点
     u32_t gh_y;                 // 垂直像素点
@@ -287,20 +283,18 @@ typedef struct s_GRAPH
     u32_t gh_linesz;            // 字符行高
     vbeinfo_t gh_vbeinfo;
     vbeominfo_t gh_vminfo;
-}__attribute__((packed)) graph_t;
+} __attribute__((packed)) graph_t;
 
-typedef struct s_BMFHEAD
-{
+typedef struct s_BMFHEAD {
     u16_t bf_tag;   // 0x4d42
     u32_t bf_size;
     u16_t bf_resd1;
     u16_t bf_resd2;
     u32_t bf_off;
-}__attribute__((packed)) bmfhead_t; // 14
+} __attribute__((packed)) bmfhead_t; // 14
 
 
-typedef struct s_BITMINFO
-{
+typedef struct s_BITMINFO {
     u32_t bi_size;
     s32_t bi_w;
     s32_t bi_h;
@@ -314,25 +308,22 @@ typedef struct s_BITMINFO
     u32_t bi_clrimport;
 }__attribute__((packed)) bitminfo_t; // 40
 
-typedef struct s_BMDBGR
-{
+typedef struct s_BMDBGR {
     u8_t bmd_b;
     u8_t bmd_g;
     u8_t bmd_r;
-}__attribute__((packed)) bmdbgr_t;
+} __attribute__((packed)) bmdbgr_t;
 
-typedef struct s_UTF8
-{
+typedef struct s_UTF8 {
     u8_t utf_b1;
     u8_t utf_b2;
     u8_t utf_b3;
     u8_t utf_b4;
     u8_t utf_b5;
     u8_t utf_b6;
-}__attribute__((packed)) utf8_t;
+} __attribute__((packed)) utf8_t;
 
-typedef struct s_FONTFHDER
-{
+typedef struct s_FONTFHDER {
     u8_t  fh_mgic[4];
     u32_t fh_fsize;
     u8_t  fh_sectnr;
@@ -340,41 +331,36 @@ typedef struct s_FONTFHDER
     u16_t fh_wcpflg;
     u16_t fh_nchars;
     u8_t  fh_rev[2];
-}__attribute__((packed)) fontfhder_t;
+} __attribute__((packed)) fontfhder_t;
 
-typedef struct s_FTSECTIF
-{
+typedef struct s_FTSECTIF {
     u16_t fsf_fistuc;
     u16_t fsf_lastuc;
     u32_t fsf_off;
 } __attribute__((packed)) ftsectif_t;
 
-typedef struct s_UFTINDX
-{
+typedef struct s_UFTINDX {
     u32_t ui_choff:26;
     u32_t ui_chwith:6;
 } __attribute__((packed)) uftindx_t;
 
 #define MAX_CHARBITBY 32
 
-typedef struct s_FNTDATA
-{
+typedef struct s_FNTDATA {
     u8_t fntwxbyte;
     u8_t fnthx;
     u8_t fntwx;
     u8_t fntchmap[MAX_CHARBITBY];
 } __attribute__((packed)) fntdata_t;
 
-typedef struct s_KLFOCPYMBLK
-{
+typedef struct s_KLFOCPYMBLK {
     u64_t sphyadr;
     u64_t ocymsz;
 } __attribute__((packed)) klfocpymblk_t;
 
 #define MBS_MIGC (u64_t)((((u64_t)'L') << 56) | (((u64_t)'M') << 48) | (((u64_t)'O') << 40) | (((u64_t)'S') << 32) | (((u64_t)'M') << 24) | (((u64_t)'B') << 16) | (((u64_t)'S') << 8) | ((u64_t)'P'))
 
-typedef struct s_MRSDP
-{
+typedef struct s_MRSDP {
     u64_t rp_sign;
     u8_t rp_chksum;
     u8_t rp_oemid[6];
@@ -387,8 +373,7 @@ typedef struct s_MRSDP
 } __attribute__((packed)) mrsdp_t;
 
 // 二级引导器收集的信息
-typedef struct s_MACHBSTART
-{
+typedef struct s_MACHBSTART {
     u64_t   mb_migc;            // LMOSMBSP//0
     u64_t   mb_chksum;          // 8
     u64_t   mb_krlinitstack;    // 16, 内核栈地址
@@ -435,18 +420,25 @@ typedef struct s_MACHBSTART
 
 #define MBSPADR ((machbstart_t*)(0x100000)) // 1048576，1M
 
-#define VBE_DISPI_IOPORT_INDEX (0x01CE) // 462
-#define VBE_DISPI_IOPORT_DATA (0x01CF)  // 462
+/**
+ * 写寄存器
+ *  1. 要将索引/数据对写入 BGA 寄存器之一，首先将其索引值写入 16 位 IO 端口 VBE_DISPI_IOPORT_INDEX (0x01CE)
+ *  2. 然后将数据值写入 16 位 IO 端口 VBE_DISPI_IOPORT_DATA (0x01CF)
+ */
+#define VBE_DISPI_IOPORT_INDEX (0x01CE) // 索引地址
+#define VBE_DISPI_IOPORT_DATA (0x01CF)  // 数据地址
+
+// BGA 支持 10 个不同的索引值（0 到 9）
 #define VBE_DISPI_INDEX_ID (0)
 #define VBE_DISPI_INDEX_XRES (1)
 #define VBE_DISPI_INDEX_YRES (2)
 #define VBE_DISPI_INDEX_BPP (3)
 #define VBE_DISPI_INDEX_ENABLE (4)
-#define VBE_DISPI_INDEX_BANK (5)
-#define VBE_DISPI_INDEX_VIRT_WIDTH (6)
-#define VBE_DISPI_INDEX_VIRT_HEIGHT (7)
-#define VBE_DISPI_INDEX_X_OFFSET (8)
-#define VBE_DISPI_INDEX_Y_OFFSET (9)
+#define VBE_DISPI_INDEX_BANK (5)        // 库寄存器
+#define VBE_DISPI_INDEX_VIRT_WIDTH (6)  // 虚拟宽度
+#define VBE_DISPI_INDEX_VIRT_HEIGHT (7) // 虚拟高度
+#define VBE_DISPI_INDEX_X_OFFSET (8)    // 显示的 X 偏移量
+#define VBE_DISPI_INDEX_Y_OFFSET (9)    // 显示的 Y 偏移量
 
 #define BGA_DEV_ID0 (0xB0C0) // 设置X和Y分辨率和位深度（仅8 BPP），倾斜模式
 #define BGA_DEV_ID1 (0xB0C1) // 虚拟宽度和高度，X和Y偏移0
@@ -455,15 +447,18 @@ typedef struct s_MACHBSTART
 #define BGA_DEV_ID4 (0xB0C4) // VRAM增加到8MB
 #define BGA_DEV_ID5 (0xB0C5) // VRAM增加到16MB[TODO:验证并检查其他更改]
 
-#define VBE_DISPI_BPP_4 (0x04)  // 4
-#define VBE_DISPI_BPP_8 (0x08)  // 8
-#define VBE_DISPI_BPP_15 (0x0F) // 15
-#define VBE_DISPI_BPP_16 (0x10) // 16
-#define VBE_DISPI_BPP_24 (0x18) // 24
-#define VBE_DISPI_BPP_32 (0x20) // 32
-#define VBE_DISPI_DISABLED (0x00)   // 0
-#define VBE_DISPI_ENABLED (0x01)    // 1
-#define VBE_DISPI_LFB_ENABLED (0x40)    // 64
+// 位深度
+#define VBE_DISPI_BPP_4 (0x04)
+#define VBE_DISPI_BPP_8 (0x08)
+#define VBE_DISPI_BPP_15 (0x0F)
+#define VBE_DISPI_BPP_16 (0x10)
+#define VBE_DISPI_BPP_24 (0x18)
+#define VBE_DISPI_BPP_32 (0x20)
+
+#define VBE_DISPI_DISABLED (0x00)       // 禁止 VBE 扩展
+#define VBE_DISPI_ENABLED (0x01)        // 开启 VBE 扩展
+// 启用线性帧缓冲区，请在启用 BGA 和 VBE_DISPI_ENABLED 标志时使用 VBE_DISPI_LFB_ENABLED
+#define VBE_DISPI_LFB_ENABLED (0x40)
 
 void REGCALL realadr_call_entry(u16_t callint,u16_t val1,u16_t val2);
 

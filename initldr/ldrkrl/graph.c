@@ -265,10 +265,12 @@ void init_bgadevice(machbstart_t* mbsp)
     }
 
     // 往vbe相关端口写入数据
-    bga_write_reg(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_DISABLED);
+    bga_write_reg(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_DISABLED);  // 禁止VBE扩展
+    // 修改寄存器
     bga_write_reg(VBE_DISPI_INDEX_XRES, 1024);
     bga_write_reg(VBE_DISPI_INDEX_YRES, 768);
     bga_write_reg(VBE_DISPI_INDEX_BPP, 0x20);
+    //  开启VBE扩展
     bga_write_reg(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_ENABLED | (VBE_DISPI_LFB_ENABLED)); 
 
     mbsp->mb_ghparm.gh_mode = BGAMODE;
@@ -304,6 +306,7 @@ void test_bga()
     }
 
     for(;;) {
+        // 设置X,Y偏移为0且虚拟宽度为1024，虚拟高度为768
         bga_write_reg(VBE_DISPI_INDEX_X_OFFSET, 0);
         bga_write_reg(VBE_DISPI_INDEX_Y_OFFSET, 0);
         bga_write_reg(VBE_DISPI_INDEX_VIRT_WIDTH, 1024);
@@ -330,7 +333,7 @@ void test_bga()
 void get_vbemodeinfo(machbstart_t* mbsp)
 {
     realadr_call_entry(RLINTNR(3), 0, 0);
-    vbeominfo_t *vomif=(vbeominfo_t*)VBEMINFO_ADR;
+    vbeominfo_t *vomif = (vbeominfo_t*)VBEMINFO_ADR;
 
     u32_t x = vomif->XResolution, y = vomif->YResolution;
     u32_t* phybass = (u32_t*)(vomif->PhysBasePtr);
