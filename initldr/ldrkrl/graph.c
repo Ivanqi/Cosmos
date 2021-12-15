@@ -285,7 +285,7 @@ void init_bgadevice(machbstart_t* mbsp)
     return;
 }
 
-void  test_bga()
+void test_bga()
 {
     int *p = (int*)(0xe0000000);
     int *p2 = (int*)(0xe0000000 + (1024 * 768 * 4));

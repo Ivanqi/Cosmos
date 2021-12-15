@@ -369,7 +369,7 @@ typedef struct s_KLFOCPYMBLK
 {
     u64_t sphyadr;
     u64_t ocymsz;
-}__attribute__((packed)) klfocpymblk_t;
+} __attribute__((packed)) klfocpymblk_t;
 
 #define MBS_MIGC (u64_t)((((u64_t)'L') << 56) | (((u64_t)'M') << 48) | (((u64_t)'O') << 40) | (((u64_t)'S') << 32) | (((u64_t)'M') << 24) | (((u64_t)'B') << 16) | (((u64_t)'S') << 8) | ((u64_t)'P'))
 
@@ -384,7 +384,7 @@ typedef struct s_MRSDP
     u64_t rp_xsdtphyadr;
     u8_t rp_echksum;
     u8_t rp_resv[3];
-}__attribute__((packed)) mrsdp_t;
+} __attribute__((packed)) mrsdp_t;
 
 // 二级引导器收集的信息
 typedef struct s_MACHBSTART
@@ -395,11 +395,11 @@ typedef struct s_MACHBSTART
     u64_t   mb_krlitstacksz;    // 24, 内核栈大小
     u64_t   mb_imgpadr;         // 操作系统映像
     u64_t   mb_imgsz;           // 操作系统映像大小
-    u64_t   mb_krlimgpadr;      // 内核文件地址
+    u64_t   mb_krlimgpadr;      // 内核文件地址。内核区地址
     u64_t   mb_krlsz;
     u64_t   mb_krlvec;
     u64_t   mb_krlrunmode;
-    u64_t   mb_kalldendpadr;
+    u64_t   mb_kalldendpadr;    // e820内存长度
     u64_t   mb_ksepadrs;
     u64_t   mb_ksepadre;
     u64_t   mb_kservadrs;
@@ -425,7 +425,7 @@ typedef struct s_MACHBSTART
     u64_t   mb_memmapnr;
     u64_t   mb_memmapsz;
     u64_t   mb_memmapchksum;
-    u64_t   mb_pml4padr;        // 机器页表数据地址
+    u64_t   mb_pml4padr;        // 机器页表数据地址。页表地址
     u64_t   mb_subpageslen;     // 机器页表个数
     u64_t   mb_kpmapphymemsz;   // 操作系统映射空间大小
     u64_t   mb_ebdaphyadr;      // ACPI地址
@@ -448,12 +448,12 @@ typedef struct s_MACHBSTART
 #define VBE_DISPI_INDEX_X_OFFSET (8)
 #define VBE_DISPI_INDEX_Y_OFFSET (9)
 
-#define BGA_DEV_ID0 (0xB0C0) //- 45248, 设置X和Y分辨率和位深度（仅8 BPP），倾斜模式
-#define BGA_DEV_ID1 (0xB0C1) //- 45249, 虚拟宽度和高度，X和Y偏移0
-#define BGA_DEV_ID2 (0xB0C2) //- 45250, 15, 16, 24 和32 BPP模式，支持线性帧缓冲，支持在模式切换时保留内存内容
-#define BGA_DEV_ID3 (0xB0C3) //- 45251, 支持获取功能，支持使用8位DAC
-#define BGA_DEV_ID4 (0xB0C4) //- 45252, VRAM增加到8MB
-#define BGA_DEV_ID5 (0xB0C5) //- 45253, VRAM增加到16MB[TODO:验证并检查其他更改]
+#define BGA_DEV_ID0 (0xB0C0) // 设置X和Y分辨率和位深度（仅8 BPP），倾斜模式
+#define BGA_DEV_ID1 (0xB0C1) // 虚拟宽度和高度，X和Y偏移0
+#define BGA_DEV_ID2 (0xB0C2) // 15, 16, 24 和32 BPP模式，支持线性帧缓冲，支持在模式切换时保留内存内容
+#define BGA_DEV_ID3 (0xB0C3) // 支持获取功能，支持使用8位DAC
+#define BGA_DEV_ID4 (0xB0C4) // VRAM增加到8MB
+#define BGA_DEV_ID5 (0xB0C5) // VRAM增加到16MB[TODO:验证并检查其他更改]
 
 #define VBE_DISPI_BPP_4 (0x04)  // 4
 #define VBE_DISPI_BPP_8 (0x08)  // 8

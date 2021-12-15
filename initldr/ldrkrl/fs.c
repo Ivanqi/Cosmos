@@ -79,7 +79,7 @@ void init_krlfile(machbstart_t *mbsp)
     mbsp->mb_krlsz = sz;
 
     // mbsp->mb_nextwtpadr始终要保持指向下一段空闲内存的首地址
-    mbsp->mb_nextwtpadr = P4K_ALIGN(mbsp->mb_krlimgpadr + mbsp->mb_krlsz);
+    mbsp->mb_nextwtpadr = P4K_ALIGN(mbsp->mb_krlimgpadr + mbsp->mb_krlsz);  // 内核文件后的空闲内存
     mbsp->mb_kalldendpadr = mbsp->mb_krlimgpadr + mbsp->mb_krlsz;
     return;
 }
