@@ -71,35 +71,10 @@ typedef struct s_VBEOMINFO {
 #define BGRA(r, g, b) ((0 | (r << 16) | (g << 8) | b))
 typedef u32_t pixl_t;
 
-#define VBEMODE 1
-#define GPUMODE 2
-#define BGAMODE 3
-
-// typedef struct s_GRAPH {
-//     u32_t gh_mode;
-//     u32_t gh_x;
-//     u32_t gh_y;
-//     u32_t gh_framphyadr;
-//     u32_t gh_onepixbits;
-//     u32_t gh_vbemodenr;
-//     u32_t gh_vifphyadr;
-//     u32_t gh_vmifphyadr;
-//     u32_t gh_bank;
-//     u32_t gh_curdipbnk;
-//     u32_t gh_nextbnk;
-//     u32_t gh_banksz;
-//     u32_t gh_logophyadrs;
-//     u32_t gh_logophyadre;
-//     u32_t gh_fontadr;
-//     u32_t gh_ftsectadr;
-//     u32_t gh_ftsectnr;
-//     u32_t gh_fnthight;
-//     u32_t gh_nxtcharsx;
-//     u32_t gh_nxtcharsy;
-//     u32_t gh_linesz;
-//     vbeinfo_t gh_vbeinfo;
-//     vbeominfo_t gh_vminfo;
-// } __attribute__((packed)) graph_t;
+// 图像模式
+#define VBEMODE 1   // VBE
+#define GPUMODE 2   // GPU
+#define BGAMODE 3   // BGA
 
 /**
  * 图形模式结构体
@@ -153,6 +128,7 @@ typedef struct s_BITMINFO {
     u32_t bi_clrimport;
 } __attribute__((packed)) bitminfo_t;
 
+// 图片结构体
 typedef struct s_BMDBGR {
     u8_t bmd_b;
     u8_t bmd_g;
@@ -198,6 +174,7 @@ typedef struct s_FNTDATA {
     u8_t fntchmap[MAX_CHARBITBY];
 } __attribute__((packed)) fntdata_t;
 
+// 图像结构体回调函数
 typedef struct s_DFTGHOPS {
     // 读写显存数据
     size_t (*dgo_read)(void* ghpdev,void* outp,size_t rdsz);
@@ -222,6 +199,7 @@ typedef struct s_DFTGHOPS {
     sint_t (*dgo_get_xyoffset)(void* ghpdev,uint_t* rxoff,uint_t* ryoff);
 } dftghops_t;
 
+// 图像结构体
 typedef struct s_DFTGRAPH {
     u64_t gh_mode;              // 图形模式
     u64_t gh_x;                 // 水平像素点

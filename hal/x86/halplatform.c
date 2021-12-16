@@ -207,7 +207,12 @@ void move_img2maxpadr(machbstart_t *mbsp)
     return;
 }
 
-//函数:move_lmosimg2maxpadr中检查相应的地址有问题
+/**
+ * 内存监测
+ *  1. kadr 大于等于 sadr 且 kadr 小于 (sadr + slen)。意思是kadr 在 (sadr + slen) 之内返回-1
+ *  2. kadr 小于等于 sadr 且 (kadr + klen) 大于等于 sadr. kadr 小于但 kadr + klen 大于 sadr 返回-2
+ *  3. kadr 大于 sadr 或者 kadr 小于 sadr 返回 0。意味这两个内存区不交集
+ */
 int adrzone_is_ok(u64_t sadr, u64_t slen, u64_t kadr, u64_t klen)
 {
     if (kadr >= sadr && kadr <= (sadr + slen)) {
@@ -256,6 +261,7 @@ int initchkadr_is_ok(machbstart_t *mbsp, u64_t chkadr, u64_t cksz)
         return -8;
     }
 
+    // chkadr地址大于 操作系统映射空间
     if ((chkadr + cksz) >= mbsp->mb_kpmapphymemsz) {
         return -9;
     }

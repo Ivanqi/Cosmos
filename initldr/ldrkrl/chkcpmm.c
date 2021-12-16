@@ -238,7 +238,7 @@ void init_bstartpages(machbstart_t *mbsp)
  * e820内存初始化
  *  1. 判断 mb_e820padr 和 mb_nextwtpadr 那个内存大。因为内存分为硬件区、内核区、应用区。之前的内核文件是放在内核区的
  *  2. 如果之前mb_nextwtpadr设置过了内核区，需要重新调整mb_nextwtpadr指向的地址
- *  3. 需要把mb_nextwtpadr的地址转回内核区
+ *  3. 需要把mb_nextwtpadr的地址转回硬件区
  */
 void init_meme820(machbstart_t *mbsp)
 {
