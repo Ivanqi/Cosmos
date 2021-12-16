@@ -226,6 +226,7 @@ int adrzone_is_ok(u64_t sadr, u64_t slen, u64_t kadr, u64_t klen)
     return 0;
 }
 
+// 两个内存区不交集
 int initchkadr_is_ok(machbstart_t *mbsp, u64_t chkadr, u64_t cksz)
 {
     //u64_t len=chkadr+cksz;
@@ -261,7 +262,7 @@ int initchkadr_is_ok(machbstart_t *mbsp, u64_t chkadr, u64_t cksz)
         return -8;
     }
 
-    // chkadr地址大于 操作系统映射空间
+    // chkadr地址大于 操作系统映射空间返回-9
     if ((chkadr + cksz) >= mbsp->mb_kpmapphymemsz) {
         return -9;
     }

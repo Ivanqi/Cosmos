@@ -99,6 +99,7 @@ void memmgrob_t_init(memmgrob_t *initp)
 	return;
 }
 
+// 页表设置
 bool_t copy_pages_data(machbstart_t *mbsp)
 {
 
