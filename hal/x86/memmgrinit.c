@@ -142,6 +142,7 @@ bool_t copy_pages_data(machbstart_t *mbsp)
 	return TRUE;
 }
 
+// 把显存虚拟地址复制到mb_nextwtpadr中
 bool_t copy_fvm_data(machbstart_t *mbsp, dftgraph_t *dgp)
 {
 	u64_t tofvadr = mbsp->mb_nextwtpadr;

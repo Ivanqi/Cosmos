@@ -51,6 +51,7 @@ void bafhlst_t_init(bafhlst_t *initp, u32_t stus, uint_t oder, uint_t oderpnr)
 	initp->af_mobjnr = 0;
 	initp->af_alcindx = 0;
 	initp->af_freindx = 0;
+	
 	list_init(&initp->af_frelst);
 	list_init(&initp->af_alclst);
 	list_init(&initp->af_ovelst);
@@ -453,7 +454,7 @@ bool_t merlove_scan_continumsadsc(memarea_t *mareap, msadsc_t *fmstat, uint_t *f
 	return FALSE;
 }
 
-// 给msadsc_t结构打上标签
+// 给msadsc_t结构打上内存区标签
 uint_t merlove_setallmarflgs_onmemarea(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 {
 	if (NULL == mareap || NULL == mstat || 0 == msanr) {
@@ -571,8 +572,9 @@ uint_t test_setflgs(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 	for (uint_t mix = 0; mix < msanr; mix++) {
 		phyadr = mstat[mix].md_phyadrs.paf_padrs << PSHRSIZE;
 		if (phyadr >= mareap->ma_logicstart && ((phyadr + PAGESIZE) - 1) <= mareap->ma_logicend) {
-			if (mstat[mix].md_indxflgs.mf_marty == mdfp->mf_marty)
+			if (mstat[mix].md_indxflgs.mf_marty == mdfp->mf_marty) {
 				retnr++;
+			}		
 		}
 	}
 	return retnr;
@@ -825,7 +827,7 @@ bool_t merlove_mem_core(machbstart_t *mbsp)
 
 	// 遍历每个memarea_t结构
 	for (uint_t mi = 0; mi < (uint_t)mbsp->mb_memznnr; mi++) {
-		// 针对其中一个memarea_t结构给msadsc_t结构打上标签
+		// 针对其中一个memarea_t结构给msadsc_t结构打上内存区标签
 		sretf = merlove_setallmarflgs_onmemarea(&marea[mi], mstatp, msanr);
 		if ((~0UL) == sretf) {
 			return FALSE;
