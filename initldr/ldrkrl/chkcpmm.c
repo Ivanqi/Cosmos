@@ -133,7 +133,7 @@ void init_mem(machbstart_t *mbsp)
     mbsp->mb_e820nr = (u64_t)retemnr;                   // 把e820map_t数据数组元素个数传给mbsp->mb_e820nr
     mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));    // 把e820map_t结构数据大小传给mbsp->mb_e820sz
     mbsp->mb_memsz = get_memsize(retemp, retemnr);      // 根据e820map_t结构数据计算内存大小
-    init_acpi(mbsp);                                    // 初始化acpi
+    // init_acpi(mbsp);                                    // 初始化acpi
 
     return;
 }

@@ -22,7 +22,7 @@ ASMBFLAGS	= -I $(HEADFILE_PATH) -f elf
 ASMKFLAGS	= -I $(HEADFILE_PATH) -f elf64  #-mregparm=0-finline-functions-mcmodel=medium -mcmodel=large 
 
 BTCFLAGS	= -I $(HEADFILE_PATH) -c -Os -std=c99 -m32 -Wall -Wshadow -W -Wconversion -Wno-sign-conversion  -fno-stack-protector -fomit-frame-pointer -fno-builtin -fno-common  -fno-ident -ffreestanding  -fno-stack-protector -fomit-frame-pointer -Wno-unused-parameter -Wunused-variable
-CFLAGS	= -I $(HEADFILE_PATH) -c -O2 -m64  -mcmodel=large -mno-red-zone -std=c99 -Wall -Wshadow -W -Wconversion -Wno-sign-conversion -fno-stack-protector  -fomit-frame-pointer -fno-builtin -fno-common  -fno-ident -ffreestanding  -Wno-unused-parameter -Wunused-variable #-fdata-sections -gstabs+
+CFLAGS	= -I $(HEADFILE_PATH) -c -O0 -g -m64  -mcmodel=large -mno-red-zone -std=c99 -Wall -Wshadow -W -Wconversion -Wno-sign-conversion -fno-stack-protector  -fomit-frame-pointer -fno-builtin -fno-common  -fno-ident -ffreestanding  -Wno-unused-parameter -Wunused-variable #-fdata-sections -gstabs+
 
 CPPFLGSLDS	= $(HEADFILE_PATH) -E -P 
 
@@ -30,7 +30,7 @@ CSCFLAGS = -I $(HEADFILE_PATH) -c -fno-builtin -fno-common -fno-stack-protector 
 SCFLAGS	= -I $(HEADFILE_PATH) -S  -std=c99 -fno-ident -Wall -fno-builtin -fno-common -fno-stack-protector
 
 # ld flag
-LDFLAGS		= -s -static -T boot.lds -n  -Map boot.map 
+LDFLAGS		= -static -T boot.lds -n  -Map boot.map 
 FDLDRLDFLG	= -s -Ttext 0 -n  -Map fdldr.map 
 LOADERLDFLAGS	= -s -T ldrld.lds -n  -Map hdldr.map
 LDRIMHLDFLAGS = -s -T initldrimh.lds -n  -Map initldrimh.map

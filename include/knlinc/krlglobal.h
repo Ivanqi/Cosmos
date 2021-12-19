@@ -24,7 +24,7 @@ KRL_DEFGLOB_VARIABLE(syscall_t, osservicetab)[INR_MAX];
 KRL_DEFGLOB_VARIABLE(devtable_t, osdevtable);
 // KRL_DEFGLOB_VARIABLE(iocheblkdsc_t,osiocheblk);
 // 驱动程序表，然后再init_krldriver中运行
-KRL_DEFGLOB_VARIABLE(drventyexit_t, osdrvetytabl)[];
+KRL_DEFGLOB_VARIABLE(drventyexit_t,osdrvetytabl)[];
 #endif
 
 #endif // KRLGLOBAL_H
