@@ -35,7 +35,7 @@ FDLDRLDFLG	= -s -Ttext 0 -n  -Map fdldr.map
 LOADERLDFLAGS	= -s -T ldrld.lds -n  -Map hdldr.map
 LDRIMHLDFLAGS = -s -T initldrimh.lds -n  -Map initldrimh.map
 LDRKRLLDFLAGS = -s -T initldrkrl.lds -n  -Map initldrkrl.map  
-LDRSVELDFLAGS = -s -T initldrsve.lds -n  -Map initldrsve.map 
+LDRSVELDFLAGS = -s -T initldrsve.lds -n  -Map initldrsve.map
 
 LDRIMGFLAGS = -m k
 KERNELLDFLAGS	= -s -static -T kernelld.lds -n  -Map kernel.map #--entry=_start#-Ttext 0x500 target remote localhost:1234
