@@ -31,16 +31,16 @@ SCFLAGS	= -I $(HEADFILE_PATH) -S  -std=c99 -fno-ident -Wall -fno-builtin -fno-co
 
 # ld flag
 LDFLAGS		= -static -T boot.lds -n  -Map boot.map 
-FDLDRLDFLG	= -s -Ttext 0 -n  -Map fdldr.map 
-LOADERLDFLAGS	= -s -T ldrld.lds -n  -Map hdldr.map
-LDRIMHLDFLAGS = -s -T initldrimh.lds -n  -Map initldrimh.map
-LDRKRLLDFLAGS = -s -T initldrkrl.lds -n  -Map initldrkrl.map  
-LDRSVELDFLAGS = -s -T initldrsve.lds -n  -Map initldrsve.map
+FDLDRLDFLG	= -Ttext 0 -n  -Map fdldr.map 
+LOADERLDFLAGS	= -T ldrld.lds -n  -Map hdldr.map
+LDRIMHLDFLAGS = -T initldrimh.lds -n  -Map initldrimh.map
+LDRKRLLDFLAGS = -T initldrkrl.lds -n  -Map initldrkrl.map  
+LDRSVELDFLAGS = -T initldrsve.lds -n  -Map initldrsve.map
 
 LDRIMGFLAGS = -m k
-KERNELLDFLAGS	= -s -static -T kernelld.lds -n  -Map kernel.map #--entry=_start#-Ttext 0x500 target remote localhost:1234
+KERNELLDFLAGS	= -static -T kernelld.lds -n  -Map kernel.map #--entry=_start#-Ttext 0x500 target remote localhost:1234
 
 DBGKERNELLDFLAGS	= -static -T kernelld.lds -n  -Map kernel.map #--entry=_start#-Ttext 0x500 target remote localhost:1234
 
-INITSHELLLDFLAGS = -s -static -T app.lds -n  -Map initshellldr.map
+INITSHELLLDFLAGS = -static -T app.lds -n -Map initshellldr.map
 
