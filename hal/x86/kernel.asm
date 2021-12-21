@@ -2,7 +2,7 @@
 ;*		底层核心文件Kernel.asm				                                   *
 ;*****************************************************************************
 
-%include "kernel.inc"
+%include "/kernel.inc"
 [section .hwint.text]
 [BITS 64]
 
