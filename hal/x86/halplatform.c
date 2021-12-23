@@ -190,6 +190,7 @@ void move_img2maxpadr(machbstart_t *mbsp)
         system_error("move_img2maxpadr1 emp not ok");
     }
 
+    // 新的操作系统映像地址[在操作系统映射空间中]
     u64_t imgtoadr = (emp->saddr + (emp->lsize - mbsp->mb_imgsz));
     imgtoadr &= ~(0xfffUL);
     if (initchkadr_is_ok(mbsp, imgtoadr, mbsp->mb_imgsz) != 0) {
@@ -199,6 +200,7 @@ void move_img2maxpadr(machbstart_t *mbsp)
     void *sadr = (void *)phyadr_to_viradr((adr_t)mbsp->mb_imgpadr);
     void *dadr = (void *)phyadr_to_viradr((adr_t)imgtoadr);
     
+    // 复制内容到新的操作系统映像地址
     if (m2mcopy(sadr, dadr, (sint_t)(mbsp->mb_imgsz)) != ((sint_t)(mbsp->mb_imgsz))) {
         system_error("move_img2maxpadr1 m2mcopy not ok");
     }

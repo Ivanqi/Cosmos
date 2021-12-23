@@ -61,6 +61,7 @@ void set_ncharsxy(u64_t x, u64_t y)
     return;
 }
 
+// 设置光标
 void set_charsdxwflush(u64_t chardxw, u64_t flush)
 {
     kdftgh.gh_chardxw = chardxw;
@@ -233,6 +234,7 @@ void init_bga()
         return;
     }
 
+    // BGA回调函数
     kghp->gh_opfun.dgo_read = bga_read;
     kghp->gh_opfun.dgo_write = bga_write;
     kghp->gh_opfun.dgo_ioctrl = bga_ioctrl;
