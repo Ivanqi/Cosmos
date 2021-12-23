@@ -89,8 +89,8 @@
 #define PMR_T_HWUSERRAM 8
 #define PMR_T_ARACONRAM 0xf
 #define PMR_T_BUGRAM 0xff
-#define PMR_F_X86_32 (1 << 0)
-#define PMR_F_X86_64 (1 << 1)
+#define PMR_F_X86_32 (1 << 0)   // x86 32位
+#define PMR_F_X86_64 (1 << 1)   // x86 64位
 #define PMR_F_ARM_32 (1 << 2)
 #define PMR_F_ARM_64 (1 << 3)
 #define PMR_F_HAL_MASK 0xff
