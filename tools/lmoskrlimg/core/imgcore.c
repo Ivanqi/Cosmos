@@ -20,11 +20,15 @@ void limg_boot_mode_run()
     return;
 }
 
+// 运行内核模式
 void limg_krnl_mode_run()
 {
     sint_t sz = 0, retsz = -1, ldrsz = -1;
+    // 对imgzone_t进行配置
     limg_config_fzone();
+    // 创建输出文件的结构体
     new_outimg_file();
+
     if (limg_write_imginitblk() == -1) {
         limg_error("write initblk");
     }
@@ -63,6 +67,7 @@ void limg_undo_mode_run()
     return;
 }
 
+// 选择何种模式运行
 void limg_core_in_mode_run(uint_t mode)
 {
 
@@ -151,6 +156,7 @@ sint_t limg_write_ldrheadfile()
 
 int limg_write_imginitblk()
 {
+    // 返回输入文件的数量
     uint_t fnr = limg_ret_infilenr();
     if (fnr == 0) {
         limg_error("no file");
@@ -158,12 +164,16 @@ int limg_write_imginitblk()
 
     uint_t pfhblkn = BLK_ALIGN(fnr * 256) >> 12;
     pfhblkn += 0x2;
+    
+    // 申请一块内存
     void *buf = img_mem(BFH_BUF_SZ, NULL, MFLG_ALLOC);
     if (buf == NULL) {
         return -1;
     }
 
+    // 设置为0
     limg_memclr(buf, 0, BFH_BUF_SZ);
+    
     binfhead_t *bfhdp = ret_outfhead();
     for (uint_t bi = 0; bi < pfhblkn; bi++) {
         ssize_t sz = limg_writefile((int)bfhdp->bfh_fd, buf, (size_t)BFH_BUF_SZ);
@@ -192,11 +202,13 @@ void limg_config_subzn(fzone_t *fznp, uint_t fstartpos, uint_t fcurrepos, uint_t
     return;
 }
 
+// 对imgzone_t进行配置
 void limg_config_fzone()
 {
     imgzone_t *imgzp = ret_imgzone();
     limg_config_subzn(&imgzp->bldrzn, 0, 0, 0xfff);
     limg_config_subzn(&imgzp->mftlzn, 0x1000, 0x1000, 0x1fff);
+    // 返回输入文件的数量
     uint_t fnr = limg_ret_infilenr();
 
     if (fnr == 0) {
@@ -490,20 +502,26 @@ void del_outimg_file()
 
     return;
 }
+
+// 创建输出文件的结构体
 void new_outimg_file()
 {
+    // 返回输出参数的路径名称
     char *outfna = limg_retnext_opathname();
+    // 输出文件的结构体
     binfhead_t *bfhdp = ret_outfhead();
 
     if (bfhdp == NULL || outfna == NULL) {
         limg_error("not outfile binfhead or not outfile");
     }
 
+    // 返回输出文件的文件描述符
     int fd = open_newoutimgfile(outfna);
     if (fd == -1) {
         limg_error("not open outfile");
     }
 
+    // 申请一块内存
     void *binbuf = img_mem(BFH_BUF_SZ, NULL, MFLG_ALLOC);
     if (binbuf == NULL) {
         if (limg_closefile(fd) == -1) {
@@ -514,14 +532,14 @@ void new_outimg_file()
         return;
     }
 
-    bfhdp->bfh_rw = BFH_RW_W;
-    bfhdp->bfh_fd = fd;
-    bfhdp->bfh_fname = outfna;
+    bfhdp->bfh_rw = BFH_RW_W;               // 文件权限位
+    bfhdp->bfh_fd = fd;                     // 保存输出文件的描述符
+    bfhdp->bfh_fname = outfna;              // 输出文件的路径
     bfhdp->bfh_fonerwbyte = BFH_ONERW_SZ;
     bfhdp->bfh_fsum = 0;
-    bfhdp->bfh_buf = binbuf;
-    bfhdp->bfh_bufsz = BFH_BUF_SZ;
-    bfhdp->bfh_rbcurrp = binbuf;
+    bfhdp->bfh_buf = binbuf;                // 对应单独申请的内存
+    bfhdp->bfh_bufsz = BFH_BUF_SZ;          // 申请内存的大小
+    bfhdp->bfh_rbcurrp = binbuf;            // 对应单独申请的内存
 
     return;
 }
@@ -644,7 +662,9 @@ void write_imgfile_fr_buf(binfhead_t *bfhdp)
     return;
 }
 
+// 创建和打开文件
 int open_newoutimgfile(char *pathname)
 {
+    // 创建和打开文件
     return limg_newfile(pathname, O_RDWR | O_CREAT | O_TRUNC, 0777);
 }

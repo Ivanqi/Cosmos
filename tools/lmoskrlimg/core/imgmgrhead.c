@@ -1,8 +1,9 @@
 #include "imgmctrl.h"
 mfh_t mfhead;
-binfhead_t outfhead;
+binfhead_t outfhead;    // 输出文件结构体
 binfhead_t inpfhead;
 imgzone_t imgzone;
+
 void init_imgmgrhead()
 {
     imgzone_t_init(&imgzone);
@@ -40,10 +41,10 @@ void fhdsc_t_init(fhdsc_t* initp)
 void mfh_init(mfh_t* initp)
 {
     list_init(&initp->mfh_list);
-    initp->mfh_nr=0;
-    initp->mfh_bfhstart=NULL;
-    initp->mfh_bfhnr=0;
-    initp->mfh_curprocbfhnr=0;
+    initp->mfh_nr = 0;
+    initp->mfh_bfhstart = NULL;
+    initp->mfh_bfhnr = 0;
+    initp->mfh_curprocbfhnr = 0;
     return;
 }
 void fzone_t_init(fzone_t* initp)

@@ -16,20 +16,20 @@
 
 typedef struct s_binfhead {
     list_h_t bfh_list;
-    uint_t bfh_rw;
+    uint_t bfh_rw;              // 文件权限位
     uint_t bfh_rwretstus;
     void *bfh_sfadr;
     uint_t bfh_sfsz;
-    sint_t bfh_fd;
-    char *bfh_fname;
+    sint_t bfh_fd;              // 保存输出文件的描述符
+    char *bfh_fname;            // 输出文件的路径
     uint_t bfh_fsz;
     uint_t bfh_rwfcurrbyte;
     uint_t bfh_fonerwbyte;
     uint_t bfh_rwcount;
     uint_t bfh_fsum;
-    void *bfh_buf;
-    uint_t bfh_bufsz;
-    void *bfh_rbcurrp;
+    void *bfh_buf;              // 对应单独申请的内存
+    uint_t bfh_bufsz;           // 申请内存的大小
+    void *bfh_rbcurrp;          // 对应单独申请的内存
 } binfhead_t;
 
 typedef struct s_fhdsc {

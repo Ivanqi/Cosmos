@@ -1,6 +1,6 @@
 #include "imgmctrl.h"
 
-mparam_t mparam;
+mparam_t mparam;    // 参数结构体
 void mparam_t_init(mparam_t* initp)
 {
     initp->mp_argc = 0;
@@ -27,24 +27,31 @@ void exit_param()
     return;
 }
 
+// 参数设置
 void limg_param(int argc, char *argv[])
 {
-    mparam.mp_argc=argc;
-    mparam.mp_argv=argv;
+    // 保存参数
+    mparam.mp_argc = argc;
+    mparam.mp_argv = argv;
 
+    // 设置模式
     limg_param_is_mode();
     if(limg_ret_imgmode() == UNDO_MODE) {
         limg_param_is_inputfile();
         return;
     }
 
+    // GRUB头文件
     limg_param_is_ldhfile();
+    // 输入文件
     limg_param_is_inputfile();
+    // 输出的映像文件名
     limg_param_is_outfile();
 
     return;
 }
 
+// 输入的文件
 void limg_param_is_inputfile()
 {
     uint_t sifi = 0,eifi = 0;
@@ -63,7 +70,7 @@ ok_t_lable:
 
     eifi = sifi;
     uint_t agii = eifi;
-    for(;agii < (uint_t)mparam.mp_argc; agii++) {
+    for (;agii < (uint_t)mparam.mp_argc; agii++) {
         if (mparam.mp_argv[agii][0] == '-') {
             eifi = agii - 1;
             goto ok_lable;
@@ -75,11 +82,13 @@ ok_lable:
     if (eifi < sifi) {
         limg_error("limg_param_is_inputfile not inputfilename");
     }
+
     mparam.mp_sifnr = sifi;
     mparam.mp_eifnr = eifi;
     return;
 }
 
+// 输出的映像文件名
 void limg_param_is_outfile()
 {
     uint_t ofi = 0;
@@ -105,6 +114,7 @@ ok_lable:
 }
 
 
+// GRUB头文件
 void limg_param_is_ldhfile()
 {
     uint_t ofi = 0;
@@ -129,13 +139,11 @@ ok_lable:
     return;
 }
 
-
-
-
+// 设置模式
 void limg_param_is_mode()
 {
     uint_t mi = 0;
-    for(uint_t agi = 1;agi < (uint_t)mparam.mp_argc; agi++) {
+    for (uint_t agi = 1; agi < (uint_t)mparam.mp_argc; agi++) {
         if ((strcmp(mparam.mp_argv[agi], "-m") == 0)|| (strcmp(mparam.mp_argv[agi], "-M") == 0)) {
             mi = agi + 1;
             goto ok_lable;
@@ -217,13 +225,14 @@ uint_t limg_ret_allinfilesz()
     return afz;
 }
 
+// 返回输入文件的数量
 uint_t limg_ret_infilenr()
 {
     if (mparam.mp_eifnr < mparam.mp_sifnr) {
         return 0;
     }
 
-    return ((mparam.mp_eifnr-mparam.mp_sifnr)+1);
+    return ((mparam.mp_eifnr - mparam.mp_sifnr) + 1);
 }
 
 uint_t limg_ret_fileinitblknr()
@@ -268,7 +277,7 @@ char* limg_ret_ldrhpathname()
     return mparam.mp_argv[nextifnr];
 }
 
-
+// 返回输出参数的路径名称
 char* limg_retnext_opathname()
 {
     if (mparam.mp_sofnr == 0) {

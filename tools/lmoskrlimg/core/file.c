@@ -10,6 +10,7 @@ void exit_file()
     return;
 }
 
+// 创建和打开文件
 int limg_newfile(const char *pathname, int flags, mode_t mode)
 {
     return open(pathname, flags, mode);

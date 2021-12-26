@@ -1,8 +1,9 @@
 #ifndef _MEM_H
 #define _MEM_H
 
-#define MFLG_ALLOC 1
-#define MFLG_FREE 2
+#define MFLG_ALLOC 1    // 内存申请
+#define MFLG_FREE 2     // 内存取消
+
 void init_mem();
 void exit_mem();
 void* img_mem(long msize,void* mfradr,uint_t mflg);

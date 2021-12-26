@@ -10,6 +10,7 @@ void exit_mem()
     return;
 }
 
+// 内存操作
 void* img_mem(long msize, void* mfradr, uint_t mflg)
 {
     if (mflg == MFLG_ALLOC) {
@@ -34,7 +35,8 @@ void limg_memcpy(void*dest,const void *src,size_t n)
     return;
 }
 
-void limg_memclr(void* p,int c,size_t n)
+// 内存设置
+void limg_memclr(void* p, int c, size_t n)
 {
     void *buf = memset(p, c, n);
     if (buf == NULL) {
