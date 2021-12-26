@@ -29,6 +29,7 @@ void limg_krnl_mode_run()
     // 创建输出文件的结构体
     new_outimg_file();
 
+    // 对输出文件写入默认值
     if (limg_write_imginitblk() == -1) {
         limg_error("write initblk");
     }
@@ -149,11 +150,13 @@ sint_t limg_write_mlosrddsc()
     return 1;
 }
 
+
 sint_t limg_write_ldrheadfile()
 {
     return run_rw_func_onldfile(limg_ret_ldrhpathname());
 }
 
+// 对输出文件写入默认值
 int limg_write_imginitblk()
 {
     // 返回输入文件的数量
@@ -162,6 +165,7 @@ int limg_write_imginitblk()
         limg_error("no file");
     }
 
+    // 内存不能小于4096
     uint_t pfhblkn = BLK_ALIGN(fnr * 256) >> 12;
     pfhblkn += 0x2;
     
@@ -434,10 +438,12 @@ sint_t run_rw_func_onldfile(char *pathname)
 {
     sint_t rets = -1;
     binfhead_t *inbhp = ret_inpfhead(), *oubhp = ret_outfhead();
+    // 返回文件大小不能大于4096 或 返回的大小不能等于0
     if (limg_retszfile(pathname) > BFH_BUF_SZ || limg_retszfile(pathname) == 0) {
         return -1;
     }
 
+    // 初始化输入文件结构体
     if (alloc_new_inputfile(pathname, inbhp) == -1) {
         limg_error("alloc_new_inputfile");
         return -1;
@@ -543,18 +549,22 @@ void new_outimg_file()
 
     return;
 }
+
+// 初始化输入文件结构体
 int alloc_new_inputfile(char *pathname, binfhead_t *inpbfhp)
 {
     if (pathname == NULL || inpbfhp == NULL) {
         return -1;
     }
 
+    // O_RDWR 以可读写方式打开文件
     int fd = limg_openfile(pathname, O_RDWR);
     if (fd == -1) {
         limg_error("open file error");
         return -1;
     }
 
+    // 返回文件大小
     uint_t fsz = limg_retszfile(pathname);
     if (fsz == 0) {
         if (limg_closefile(fd) == -1) {

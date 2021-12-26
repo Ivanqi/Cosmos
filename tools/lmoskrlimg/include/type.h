@@ -21,8 +21,15 @@ typedef u64_t dev_t;
 typedef const char *str_t;
 typedef char char_t;
 #define KLINE static inline
-#define ALIGN(x, a) (((x) + (a)-1) & ~((a)-1))
+// 对齐
+#define ALIGN(x, a) (((x) + (a) - 1) & ~((a) - 1))
+/**
+ * 内存分配
+ * 	1. 通过对0x1000取反(-0x1000)
+ * 	2. 然后 x & -0x1000 与运行得到应该分配的内存
+ */
 #define BLK_ALIGN(x) ALIGN(x, 0x1000)
+// 布尔值
 #define TRUE 1
 #define FALSE 0
 

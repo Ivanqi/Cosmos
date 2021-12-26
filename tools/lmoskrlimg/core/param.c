@@ -263,14 +263,15 @@ char* limg_retnext_ipathname()
     return mparam.mp_argv[nextifnr];
 }
 
+// 返回GRUB头文件路径
 char* limg_ret_ldrhpathname()
 {
     if (mparam.mp_ildrhnr == 0) {
         return NULL;
     }
 
-    uint_t nextifnr=mparam.mp_ildrhnr;
-    if (nextifnr>=(uint_t)mparam.mp_argc) {
+    uint_t nextifnr = mparam.mp_ildrhnr;
+    if (nextifnr >= (uint_t)mparam.mp_argc) {
         return NULL;
     }
 

@@ -15,6 +15,8 @@ int limg_newfile(const char *pathname, int flags, mode_t mode)
 {
     return open(pathname, flags, mode);
 }
+
+// 打开文件
 int limg_openfile(const char *pathname, int flags)
 {
     return open(pathname, flags);
@@ -30,6 +32,7 @@ ssize_t limg_readfile(int fd, void *buf, size_t count)
     return read(fd, buf, count);
 }
 
+// 写入内容
 ssize_t limg_writefile(int fd, const void *buf, size_t count)
 {
     return write(fd, buf, count);
@@ -40,6 +43,7 @@ off_t limg_lseekfile(int fd, off_t offset, int whence)
     return lseek(fd, offset, whence);
 }
 
+// 返回文件大小
 uint_t limg_retszfile(const char *pathname)
 {
     struct stat statbuf;

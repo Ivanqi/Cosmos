@@ -1,7 +1,7 @@
 #include "imgmctrl.h"
 mfh_t mfhead;
 binfhead_t outfhead;    // 输出文件结构体
-binfhead_t inpfhead;
+binfhead_t inpfhead;    // 输入文件结构体
 imgzone_t imgzone;
 
 void init_imgmgrhead()
@@ -160,11 +160,13 @@ void add_binfhead(binfhead_t* bfhp)
     return;
 }
 
+// 返回输出文件结构体
 binfhead_t* ret_outfhead()
 {
     return &outfhead;
 }
 
+// 返回输入文件结构体
 binfhead_t* ret_inpfhead()
 {
     return &inpfhead;
