@@ -23,9 +23,9 @@ typedef struct s_binfhead {
     sint_t bfh_fd;              // 保存输出文件的描述符
     char *bfh_fname;            // 输出文件的路径
     uint_t bfh_fsz;
-    uint_t bfh_rwfcurrbyte;
+    uint_t bfh_rwfcurrbyte;     // 累计读入的大小
     uint_t bfh_fonerwbyte;
-    uint_t bfh_rwcount;
+    uint_t bfh_rwcount;         // 操作次数
     uint_t bfh_fsum;
     void *bfh_buf;              // 对应单独申请的内存
     uint_t bfh_bufsz;           // 申请内存的大小

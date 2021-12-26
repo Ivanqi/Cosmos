@@ -264,10 +264,12 @@ void limg_upd_mlosrddsccurrpos(binfhead_t *bfhp)
     return;
 }
 
+// imgzone_t bldrzn.fcurrepos 的位置内容写入文件中
 void limg_set_ldrfilecurrpos(binfhead_t *bfhp)
 {
     imgzone_t *imgzp = ret_imgzone();
     uint_t pos = imgzp->bldrzn.fcurrepos;
+    //  SEEK_SET 参数offset 即为新的读写位置.
     off_t off = limg_lseekfile((int)bfhp->bfh_fd, pos, SEEK_SET);
     if (off == -1) {
         limg_error("set leek");
@@ -383,6 +385,7 @@ int limg_write_onefhdsc(binfhead_t *bfhp, uint_t inimgoff, uint_t inimgend, uint
 int limg_rw_bldr_file(binfhead_t *ibfhp, binfhead_t *obfhp)
 {
     int rets = -1;
+    // imgzone_t bldrzn.fcurrepos 的位置内容写入文件中
     limg_set_ldrfilecurrpos(obfhp);
     for (; ibfhp->bfh_rwretstus != BFH_RWALL_OK;) {
         read_imgfile_to_buf(ibfhp);
@@ -629,9 +632,12 @@ uint_t computer_sum(void *buf, uint_t sz)
     return sum;
 }
 
+// 文件读入
 void read_imgfile_to_buf(binfhead_t *bfhdp)
 {
+    // 内存设置为0
     limg_memclr(bfhdp->bfh_buf, 0, bfhdp->bfh_fonerwbyte);
+    // 文件读入内存中
     ssize_t sz = limg_readfile((int)bfhdp->bfh_fd, bfhdp->bfh_buf, (size_t)bfhdp->bfh_fonerwbyte);
     if (sz == -1) {
         bfhdp->bfh_rwretstus = BFH_RWONE_ER;

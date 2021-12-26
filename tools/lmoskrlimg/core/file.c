@@ -27,6 +27,7 @@ int limg_closefile(int fd)
     return close(fd);
 }
 
+// 文件读入
 ssize_t limg_readfile(int fd, void *buf, size_t count)
 {
     return read(fd, buf, count);
@@ -38,6 +39,7 @@ ssize_t limg_writefile(int fd, const void *buf, size_t count)
     return write(fd, buf, count);
 }
 
+// 移动文件的读写位置
 off_t limg_lseekfile(int fd, off_t offset, int whence)
 {
     return lseek(fd, offset, whence);
