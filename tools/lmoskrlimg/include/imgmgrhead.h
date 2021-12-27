@@ -37,9 +37,9 @@ typedef struct s_fhdsc {
     uint_t fhd_subtype;
     uint_t fhd_stuts;
     uint_t fhd_id;
-    uint_t fhd_intsfsoff;
-    uint_t fhd_intsfend;
-    uint_t fhd_frealsz;
+    uint_t fhd_intsfsoff;       // 开始位置
+    uint_t fhd_intsfend;        // 结束位置
+    uint_t fhd_frealsz;         // 文件大小
     uint_t fhd_fsum;
     char fhd_name[FHDSC_NMAX];
 } fhdsc_t;

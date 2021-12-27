@@ -141,6 +141,7 @@ void binfhead_init(binfhead_t* initp)
     initp->bfh_rbcurrp = NULL;
     return;
 }
+
 binfhead_t* new_binfhead()
 {
     void* bfh = img_mem(sizeof(binfhead_t), NULL, MFLG_ALLOC);

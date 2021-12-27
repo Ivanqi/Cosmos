@@ -330,6 +330,7 @@ void limg_upd_infilecurrpos(binfhead_t *bfhp)
     return;
 }
 
+//  获取 imgzone_t fhedzn.fcurrepos 地址
 void limg_set_fheadcurrpos(binfhead_t *bfhp)
 {
     imgzone_t *imgzp = ret_imgzone();
@@ -353,6 +354,7 @@ void limg_upd_fheadcurrpos(binfhead_t *bfhp)
     return;
 }
 
+// 在
 int limg_write_onefhdsc(binfhead_t *bfhp, uint_t inimgoff, uint_t inimgend, uint_t frealsz, char *fname)
 {
     if (sizeof(fhdsc_t) != FHDSC_SZMAX) {
@@ -376,6 +378,7 @@ int limg_write_onefhdsc(binfhead_t *bfhp, uint_t inimgoff, uint_t inimgend, uint
     fdbuf->fhd_fsum = bfhp->bfh_fsum;
     strcpy(fdbuf->fhd_name, fname);
 
+    // 获取 imgzone_t fhedzn.fcurrepos 地址
     limg_set_fheadcurrpos(bfhp);
     ssize_t sz = limg_writefile((int)bfhp->bfh_fd, (void *)fdbuf, (size_t)sizeof(fhdsc_t));
     if (sz == -1) {
