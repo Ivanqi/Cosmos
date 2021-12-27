@@ -248,6 +248,7 @@ uint_t limg_ret_fileinitblknr()
 }
 
 
+// 获取输入文件列表
 char* limg_retnext_ipathname()
 {
     if (mparam.mp_sifnr == 0||mparam.mp_eifnr == 0|| (mparam.mp_sifnr+mparam.mp_ifcurrnr) > mparam.mp_eifnr) {

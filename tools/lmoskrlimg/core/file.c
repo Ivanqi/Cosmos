@@ -22,6 +22,7 @@ int limg_openfile(const char *pathname, int flags)
     return open(pathname, flags);
 }
 
+// 关闭文件
 int limg_closefile(int fd)
 {
     return close(fd);

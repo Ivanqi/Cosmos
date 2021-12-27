@@ -25,7 +25,8 @@ void* img_mem(long msize, void* mfradr, uint_t mflg)
     return NULL;
 }
 
-void limg_memcpy(void*dest,const void *src,size_t n)
+// 内存复制
+void limg_memcpy(void*dest, const void *src,size_t n)
 {
     void* buf = memcpy(dest, src, n);
     if (buf == dest) {

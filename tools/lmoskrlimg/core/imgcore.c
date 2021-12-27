@@ -34,11 +34,13 @@ void limg_krnl_mode_run()
         limg_error("write initblk");
     }
 
+    // 载入GRUB头文件并写到输出文件中
     ldrsz = limg_write_ldrheadfile();
     if (ldrsz == -1) {
         limg_error("write ldrheadfile");
     }
 
+    // 获取输入文件列表
     char *istr = limg_retnext_ipathname();
     while (istr != NULL) {
         retsz = run_rw_func_oninfile(istr);
@@ -151,6 +153,7 @@ sint_t limg_write_mlosrddsc()
 }
 
 
+// 载入GRUB头文件并写到输出文件中
 sint_t limg_write_ldrheadfile()
 {
     return run_rw_func_onldfile(limg_ret_ldrhpathname());
@@ -278,9 +281,11 @@ void limg_set_ldrfilecurrpos(binfhead_t *bfhp)
     return;
 }
 
+// 移动文件的读写位置
 void limg_upd_ldrfilecurrpos(binfhead_t *bfhp)
 {
     imgzone_t *imgzp = ret_imgzone();
+    // 移动文件的读写位置。SEEK_CUR 以目前的读写位置往后增加offset 个位移量
     off_t off = limg_lseekfile((int)bfhp->bfh_fd, 0, SEEK_CUR);
     if (off == -1) {
         limg_error("set leek");
@@ -289,6 +294,7 @@ void limg_upd_ldrfilecurrpos(binfhead_t *bfhp)
     return;
 }
 
+// 通过 imgzone_t filezn.fcurrepos 设置文件位置
 void limg_set_infilecurrpos(binfhead_t *bfhp)
 {
     imgzone_t *imgzp = ret_imgzone();
@@ -301,6 +307,8 @@ void limg_set_infilecurrpos(binfhead_t *bfhp)
 
     return;
 }
+
+// 获取 imgzone_t filezn.fcurrepos 地址
 uint_t limg_ret_infilecurrpos()
 {
     imgzone_t *imgzp = ret_imgzone();
@@ -309,9 +317,11 @@ uint_t limg_ret_infilecurrpos()
     return pos;
 }
 
+// 以目前的读写位置往后增加offset 个位移量
 void limg_upd_infilecurrpos(binfhead_t *bfhp)
 {
     imgzone_t *imgzp = ret_imgzone();
+    // SEEK_CUR 以目前的读写位置往后增加offset 个位移量
     off_t off = limg_lseekfile((int)bfhp->bfh_fd, 0, SEEK_CUR);
     if (off == -1) {
         limg_error("set leek");
@@ -382,20 +392,23 @@ int limg_write_onefhdsc(binfhead_t *bfhp, uint_t inimgoff, uint_t inimgend, uint
     return 1;
 }
 
+// 把输入文件写到输出文件
 int limg_rw_bldr_file(binfhead_t *ibfhp, binfhead_t *obfhp)
 {
     int rets = -1;
     // imgzone_t bldrzn.fcurrepos 的位置内容写入文件中
     limg_set_ldrfilecurrpos(obfhp);
     for (; ibfhp->bfh_rwretstus != BFH_RWALL_OK;) {
+        // 文件读入
         read_imgfile_to_buf(ibfhp);
         if (ibfhp->bfh_rwretstus == BFH_RWONE_ER) {
             rets = -1;
             limg_error("read_imgfile");
             goto err_ret;
         }
-
+        // 内存复制，把ibfhdp的内存复制到obfhdp中
         copy_infbuf_to_oufbuf(ibfhp, obfhp);
+        // 把 binfhead_t 中内存信息写入对应的文件描述符
         write_imgfile_fr_buf(obfhp);
         if (obfhp->bfh_rwretstus == BFH_RWONE_ER) {
             rets = -1;
@@ -403,18 +416,21 @@ int limg_rw_bldr_file(binfhead_t *ibfhp, binfhead_t *obfhp)
             goto err_ret;
         }
     }
-
+    // 移动文件的读写位置
     limg_upd_ldrfilecurrpos(obfhp);
     rets = 1;
 err_ret:
     return rets;
 }
 
+// 输入列表中单个文件写入输出文件
 int limg_rw_one_file(binfhead_t *ibfhp, binfhead_t *obfhp)
 {
     int rets = -1;
+    // 通过 imgzone_t filezn.fcurrepos 设置文件位置
     limg_set_infilecurrpos(obfhp);
     for (; ibfhp->bfh_rwretstus != BFH_RWALL_OK;) {
+        // 文件读入
         read_imgfile_to_buf(ibfhp);
         if (ibfhp->bfh_rwretstus == BFH_RWONE_ER) {
             rets = -1;
@@ -422,7 +438,9 @@ int limg_rw_one_file(binfhead_t *ibfhp, binfhead_t *obfhp)
             goto err_ret;
         }
 
+        // 内存复制，把ibfhdp的内存复制到obfhdp中
         copy_infbuf_to_oufbuf(ibfhp, obfhp);
+        //  binfhead_t 中内存信息写入对应的文件描述符
         write_imgfile_fr_buf(obfhp);
         if (obfhp->bfh_rwretstus == BFH_RWONE_ER) {
             rets = -1;
@@ -430,7 +448,7 @@ int limg_rw_one_file(binfhead_t *ibfhp, binfhead_t *obfhp)
             goto err_ret;
         }
     }
-
+    // 以目前的读写位置往后增加offset 个位移量
     limg_upd_infilecurrpos(obfhp);
     rets = 1;
 err_ret:
@@ -452,12 +470,14 @@ sint_t run_rw_func_onldfile(char *pathname)
         return -1;
     }
 
+    // 把输入文件写到输出文件
     if (limg_rw_bldr_file(inbhp, oubhp) == -1) {
         rets = -1;
         limg_error("limg_rw_one_file");
     }
 
     rets = inbhp->bfh_fsz;
+    // 初始化input文件
     if (free_new_inputfile(inbhp) == -1) {
         rets = -1;
         limg_error("free_new_inputfile");
@@ -472,16 +492,20 @@ sint_t run_rw_func_oninfile(char *pathname)
     sint_t rets = -1;
     binfhead_t *inbhp = ret_inpfhead(), *oubhp = ret_outfhead();
 
+    // 按pathname初始化输入文件结构体
     if (alloc_new_inputfile(pathname, inbhp) == -1) {
         limg_error("alloc_new_inputfile");
     }
 
+    //  获取 imgzone_t filezn.fcurrepos 地址
     uint_t soff = limg_ret_infilecurrpos();
+    // 输入列表中单个文件写入输出文件
     if (limg_rw_one_file(inbhp, oubhp) == -1) {
         rets = -1;
         limg_error("limg_rw_one_file");
     }
 
+    // 获取 imgzone_t filezn.fcurrepos 地址。文件写入后的地址
     uint_t eoff = limg_ret_infilecurrpos();
 
     if (limg_write_onefhdsc(oubhp, soff, eoff - 1, inbhp->bfh_fsz, inbhp->bfh_fname) == -1) {
@@ -553,7 +577,7 @@ void new_outimg_file()
     return;
 }
 
-// 初始化输入文件结构体
+// 按pathname初始化输入文件结构体
 int alloc_new_inputfile(char *pathname, binfhead_t *inpbfhp)
 {
     if (pathname == NULL || inpbfhp == NULL) {
@@ -599,24 +623,28 @@ int alloc_new_inputfile(char *pathname, binfhead_t *inpbfhp)
     return fd;
 }
 
+//  初始化input文件
 int free_new_inputfile(binfhead_t *inpbfhp)
 {
     if (inpbfhp == NULL) {
         return -1;
     }
 
+    // 文件关闭
     int fd = limg_closefile((int)inpbfhp->bfh_fd);
     if (fd == -1) {
         limg_error("close file error");
         return -1;
     }
 
+    // 内存注销
     void *binbuf = img_mem(0, inpbfhp->bfh_buf, MFLG_FREE);
     if (binbuf == NULL) {
         limg_error("freebinbuf error");
         return -1;
     }
 
+    // 初始化 binfhead_t 结构体
     binfhead_init(inpbfhp);
     return fd;
 }
@@ -656,15 +684,16 @@ void read_imgfile_to_buf(binfhead_t *bfhdp)
     return;
 }
 
+// 内存复制，把ibfhdp的内存复制到obfhdp中
 void copy_infbuf_to_oufbuf(binfhead_t *ibfhdp, binfhead_t *obfhdp)
 {
     limg_memcpy(obfhdp->bfh_buf, ibfhdp->bfh_buf, ibfhdp->bfh_fonerwbyte);
     return;
 }
 
+// 把 binfhead_t 中内存信息写入对应的文件描述符
 void write_imgfile_fr_buf(binfhead_t *bfhdp)
 {
-
     ssize_t sz = limg_writefile((int)bfhdp->bfh_fd, bfhdp->bfh_buf, (size_t)bfhdp->bfh_fonerwbyte);
     if (sz == -1) {
         bfhdp->bfh_rwretstus = BFH_RWONE_ER;
