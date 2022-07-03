@@ -16,7 +16,8 @@ all: build_kernel
 build_kernel:everything
 	
 everything :  $(BUILD_MK_LIMG_EBIN)
+
  
-$(BUILD_MK_LIMG_EBIN): $(BUILD_MK_LIMG_LINK)  
-	$(CC) -o $@ -static $(BUILD_MK_LIMG_LINK)
+$(BUILD_MK_LIMG_EBIN): $(BUILD_MK_LIMG_LINK)
+	$(CC) -o $@ $(BUILD_MK_LIMG_LINK)
 

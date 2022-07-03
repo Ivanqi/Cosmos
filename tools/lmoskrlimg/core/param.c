@@ -201,7 +201,7 @@ uint_t limg_ret_allifimglen()
             return 0;
         }
 
-        retlen+=BLK_ALIGN(fz);
+        retlen += BLK_ALIGN(fz);
     }
 
     return retlen;

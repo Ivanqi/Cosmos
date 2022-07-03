@@ -1,5 +1,15 @@
 #include "imgmctrl.h"
 
+int main(int argc, char *argv[])
+{
+    init_lmoskrlimg();
+    // 参数设置
+    limg_param(argc, argv);
+    limg_core();
+    exit_lmoskrlimg();
+	return 0;
+}
+
 void init_lmoskrlimg()
 {
     init_error();
@@ -63,15 +73,5 @@ void exit_lmoskrlimg()
     exit_param();
     exit_error();
     return;
-}
-
-int main(int argc, char *argv[])
-{
-    init_lmoskrlimg();
-    // 参数设置
-    limg_param(argc, argv);
-    limg_core();
-    exit_lmoskrlimg();
-	return 0;
 }
 

@@ -62,7 +62,7 @@ VMFLAGES = -smp 4 -hda $(VMDKFNAME) -m 256 -enable-kvm
 SRCFILE = $(BOOTEXCIMG) $(KRNLEXCIMG) $(LDEREXCIMG) $(SHELEXCIMG)
 RSRCFILE = $(BOOTEXCIMG) $(KRNLEXCIMG) $(LDEREXCIMG) $(SHELEXCIMG) #$(VDIFNAME) $(VMDKFNAME)
 
-INITLDRIMH = initldrimh.bin
+INITLDRIMH = initldrimh.bin		// GRUB 头文件
 INITLDRKRL = initldrkrl.bin
 INITLDRSVE = initldrsve.bin
 
