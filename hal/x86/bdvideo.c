@@ -6,7 +6,7 @@
 #include "cosmosmctrl.h"
 
 
-const char *cosmos_version = "Cosmos\n内核版本:00.01\n彭东 @ 构建于 "__DATE__
+const char *cosmos_version = "Cosmos\n内核版本:00.01\nIvanQI @ 构建于 "__DATE__
                            " "__TIME__
                            "\n";
 

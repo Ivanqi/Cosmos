@@ -71,6 +71,7 @@ ok_l:
 void write_ldrkrlfile()
 {
     fhdsc_t *fhdscstart = find_file("initldrkrl.bin");
+
     if (fhdscstart == NULL) {
         error("not file initldrkrl.bin");
     }

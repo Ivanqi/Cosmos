@@ -16,15 +16,15 @@
 #define MDC_ENDGIC 0xaaffaaffaaffaaff // 12321755120571230975UL
 #define MDC_RVGIC 0xffaaffaaffaaffaa  // 18422818335611355050UL
 
-#define REALDRV_PHYADR 0x1000         // initldrkrl映射文件具体拷贝内存地址
+#define REALDRV_PHYADR 0x1000         // initldrsve映射文件具体拷贝内存地址
 #define ILDRKRL_PHYADR 0x200000       // initldrkrl映射文件具体拷贝内存地址
 #define IMGSHEL_PHYADR 0x30000        // 196608
 
 #define IKSTACK_PHYADR (0x90000-0x10) // 栈顶地址
 #define IKSTACK_SIZE 0x1000           // 栈大小是4KB
 
-#define IMGFILE_PHYADR 0x4000000      // 映射文件物理地址
-#define IMGKRNL_PHYADR 0x2000000      // 内核文件物理地址，Cosmos.eki的位置
+#define IMGFILE_PHYADR 0x4000000      // Gurb文件地址
+#define IMGKRNL_PHYADR 0x2000000      // 
 
 #define KINITPAGE_PHYADR 0x1000000    // 顶级页目录
 #define KINITFRVM_PHYADR 0x800000     // 8388608
