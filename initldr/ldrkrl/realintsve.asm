@@ -65,23 +65,23 @@ cleardisp:
 	ret
 
 ; 获取内存布局试图的函数
-; _getmmap和loop在迭代执行中断，每次中断都要输出一个20字节大小数据项
-; 最后会形成一个s_e820的的结构体
+; 	_getmmap和loop在迭代执行中断，每次中断都要输出一个20字节大小数据项
+; 	最后会形成一个s_e820的的结构体
 _getmmap:
 	push ds
 	push es
 	push ss
 	mov esi, 0
 	mov dword[E80MAP_NR], esi				; 把esi的机器码赋予给内存地址 E80MAP_NR。用于计算内存页个数
-	mov dword[E80MAP_ADRADR], E80MAP_ADR
+	mov dword[E80MAP_ADRADR], E80MAP_ADR	; e820map结构体开始地址
 
 	xor ebx, ebx							; ebx设为0
 	mov edi, E80MAP_ADR
 
 loop:
-	mov eax, 0e820h							; eax必须为0e820h。遍历主机上全部内存
-	mov ecx, 20								; 输出结果数据项的大小为20字节：8字节内存基地址，8字节内存长度，4字节内存类型
-	mov edx, 0534d4150h						; edx必须为0534d4150h
+	mov eax, 0e820h							; eax必须为0e820h。遍历主机上全部内存。获取e820map结构参数
+	mov ecx, 20								; 输出结果数据项的大小为20字节：8字节内存基地址，8字节内存长度，4字节内存类型。e820map结构大小
+	mov edx, 0534d4150h						; edx必须为0534d4150h。获取e820map结构参数必须是这个数据
 	int 15h									; 执行中断
 	jc .1									; 如果flags寄存器的C位置1，则表示出错
 
@@ -92,7 +92,7 @@ loop:
 	inc esi									; 计算内存页个数
 
 	cmp ebx, 0								; 如ebx为0，则表示循环迭代结束
-	jne loop								; 还有结果项，继续迭代
+	jne loop								; 还有结果项，继续迭代。循环获取e820map结构
 
 	jmp .2
 

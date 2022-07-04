@@ -18,7 +18,7 @@ int strcmpl(const char *a, const char *b)
 // 按文件名称在文件数组获取相关文件
 fhdsc_t *get_fileinfo(char_t *fname, machbstart_t *mbsp)
 {
-    mlosrddsc_t *mrddadrs = (mlosrddsc_t *)((u32_t)(mbsp->mb_imgpadr + MLOSDSC_OFF));   // 映像文件实际地址
+    mlosrddsc_t *mrddadrs = (mlosrddsc_t *)((u32_t)(mbsp->mb_imgpadr + MLOSDSC_OFF));   // 映像文件实际地址
     if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_RVGIC  || mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
         kerror("no mrddsc");
     }
@@ -70,6 +70,7 @@ void init_krlfile(machbstart_t *mbsp)
 {
     // 在映像中查找相应的文件，并复制到对应的地址，并返回文件大小，这里是查找Cosmos.bin文件
     u64_t sz = r_file_to_padr(mbsp, IMGKRNL_PHYADR, "Cosmos.bin");
+    kprint("Cosmos.bin:%x\n", sz);
     if (0 == sz) {
         kerror("r_file_to_padr err");
     }
@@ -93,6 +94,7 @@ void init_defutfont(machbstart_t *mbsp)
 
     // 在映像中查找相应的文件，并复制到对应的地址，并返回文件的大小，这里是查找font.fnt文件
     sz = r_file_to_padr(mbsp, dfadr, "font.fnt");
+    kprint("font.fnt:%x\n", sz);
     if (0 == sz) {
         kerror("r_file_to_padr err");
     }

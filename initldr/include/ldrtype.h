@@ -463,6 +463,6 @@ typedef struct s_MACHBSTART {
 // 启用线性帧缓冲区，请在启用 BGA 和 VBE_DISPI_ENABLED 标志时使用 VBE_DISPI_LFB_ENABLED
 #define VBE_DISPI_LFB_ENABLED (0x40)
 
-void REGCALL realadr_call_entry(u16_t callint,u16_t val1,u16_t val2);
+void REGCALL realadr_call_entry(u16_t callint, u16_t val1, u16_t val2);
 
 #endif

@@ -116,7 +116,7 @@ void init_mem(machbstart_t *mbsp)
     mbsp->mb_ebdaphyadr = acpi_get_bios_ebda();
     /**
      * retemnr e820map_t内存数组个数 
-     * retemp 内存首地址
+     * retemp 数组元素个数
      */
     mmap(&retemp, &retemnr);
 
@@ -133,7 +133,7 @@ void init_mem(machbstart_t *mbsp)
     mbsp->mb_e820nr = (u64_t)retemnr;                   // 把e820map_t数据数组元素个数传给mbsp->mb_e820nr
     mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));    // 把e820map_t结构数据大小传给mbsp->mb_e820sz
     mbsp->mb_memsz = get_memsize(retemp, retemnr);      // 根据e820map_t结构数据计算内存大小
-    // init_acpi(mbsp);                                    // 初始化acpi
+    init_acpi(mbsp);                                    // 初始化acpi
 
     return;
 }
@@ -163,7 +163,7 @@ void init_chkcpu(machbstart_t *mbsp)
 // 初始化内核栈
 void init_krlinitstack(machbstart_t *mbsp)
 {
-    // 检测0x8f000～（0x8f000+0x1001）与其他内存是否有冲突
+    // 检测0x8f000 ～（0x8f000+0x1001）与其他内存是否有冲突
     if (1 > move_krlimg(mbsp, (u64_t)(0x8f000), 0x1001)) {
         kerror("iks_moveimg err");
     }
