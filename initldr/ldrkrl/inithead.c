@@ -7,6 +7,10 @@
  *  3. 清屏
  *  4. 调用 write_realintsvefile() 函数 读取 initldrsve.bin 文件到特定的内存地址空间中
  *  5. 调用 write_ldrkrlfile(）函数 读取 initldrkrl.bin文件到特定的内存地址空间中
+ * 
+ * grub会把映像文件eki加载到内存0x4000000（64MB）的位置上，映像文件头描述符的位置在0x4000000+0x1000 (64MB + 4KB）
+ * 从头信息解析到initldrsve.bin和initldrkrl.bin这两个文件在内存中的位置
+ * 然后再分别拷贝到0x1000（4KB，调用BIOS中断的代码）和0x200000（2MB，二级引导器的代码）的位置上
  */
 void inithead_entry()
 {
@@ -38,6 +42,8 @@ void write_realintsvefile()
  * 在映像文件中查找对应的文件
  * find_file 函数负责扫描映像文件中的文件头描述符，对比其中的文件名
  * 然后返回对应的文件头描述符的地址，这样就可以得到文件在映像文件中的位置和大小了
+ * 
+ * eki加载到了0x4001000的地方，这个文件前4kb的空间是引导程序 所以eki文件的管理头的数据就在0x4001000的地址上开始 
  */
 fhdsc_t *find_file(char_t *fname)
 {

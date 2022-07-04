@@ -40,11 +40,10 @@ _32bits_mode:
 	jmp 0x2000000					; 跳转到0x2000000的内存地址， 0x2000000为Cosmos.bin
 	jmp $
 
-; PUSHAD, 本指令将EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI 这8个32位通用寄存器依次压入堆栈
-; POPAD, 指令依次弹出堆栈中的32位字到 EDI,ESI,EBP,ESP,EBX,EDX,ECX,EAX 中
-; push指令, pushl %eax: 将eax数值压入栈中
-; popl指令, 将eax数值弹出栈
-
+; 调用 BIOS 中断
+; 	保护模式下，保存 C 语言环境下的 CPU 上下文
+; 	切换回实模式，调用 BIOS 中断
+; 	切换回保护模式
 realadr_call_entry:
 	pushad                      ; 保存通用寄存器
 	push    ds
@@ -71,6 +70,9 @@ save_eip_jmp:
 
 cpmty_mode:
 	dd 0x1000
+	; 0x18 是段选择子，放在cs寄存器中， 是16位的， 二进制是 0000 0000 0001 1000
+	; 根据段选择子的定义， 低3位是RPL和TI
+	; 其他位才是索引， 所以0000 0000 0001 1 才是索引 ------> 索引是3
 	dw 0x18
 	jmp $
 
