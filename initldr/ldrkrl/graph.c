@@ -69,7 +69,6 @@ void logo(machbstart_t *mbsp)
     }
 
     bmp_print((void*)retadr, mbsp);
-
     return;
 }
 

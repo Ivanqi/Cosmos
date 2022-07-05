@@ -42,7 +42,20 @@ ok_l:
     return &fhdscstart[rethn];
 }
 
-// 判断一个地址空间是否和内存中存放的内容有冲突
+/**
+ * @brief 判断一个地址空间是否和内存中存放的内容有冲突
+ *  首先判断新申请的地址，是否可用
+ *  如果可用直接使用
+ *  如果不可用，则判断申请的内存大小是否超出设备物理大小
+ *      如果超出大小，系统打印内核错误并退出
+ *      如果不超出大小，系统会将内存对齐到0x1000后，将initldrsve.bin移动到新位置，并修正地址
+ *          整体来说move_krlimg更像是申请内存，但不知道为何要不断驱赶initldrsve.bin文件
+ * 
+ * @param mbsp 
+ * @param cpyadr 
+ * @param cpysz 
+ * @return int 
+ */
 int move_krlimg(machbstart_t *mbsp, u64_t cpyadr, u64_t cpysz)
 {
     if (0xffffffff <= (cpyadr + cpysz) || 1 > cpysz) {
@@ -70,7 +83,6 @@ void init_krlfile(machbstart_t *mbsp)
 {
     // 在映像中查找相应的文件，并复制到对应的地址，并返回文件大小，这里是查找Cosmos.bin文件
     u64_t sz = r_file_to_padr(mbsp, IMGKRNL_PHYADR, "Cosmos.bin");
-    kprint("Cosmos.bin:%x\n", sz);
     if (0 == sz) {
         kerror("r_file_to_padr err");
     }
@@ -94,7 +106,6 @@ void init_defutfont(machbstart_t *mbsp)
 
     // 在映像中查找相应的文件，并复制到对应的地址，并返回文件的大小，这里是查找font.fnt文件
     sz = r_file_to_padr(mbsp, dfadr, "font.fnt");
-    kprint("font.fnt:%x\n", sz);
     if (0 == sz) {
         kerror("r_file_to_padr err");
     }

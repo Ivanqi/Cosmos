@@ -25,8 +25,8 @@ real_entry:
 	mov es, bp
 	mov ss, bp          			; 重新设置实模式下的段寄存器 都是CS中值，即为0
 	mov sp, 08000h      			; 设置栈
-	mov bp, func_table
-	add bp, ax
+	mov bp, func_table				; 然后到real_entry这里，通过传入的参数ax，判断调用func_table哪个方法
+	add bp, ax						; 当前参数位0，ax就是0，也就是调用了func_table的第一个函数_getmmap
 	call [bp]           			; 调用函数表中的汇编函数，ax是C函数中传递进来的
 	cli
 	call disable_nmi

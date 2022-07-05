@@ -335,7 +335,14 @@ int chk_cpuid()
     return rets;
 }
 
-// 检查CPU是否支持长模式
+/**
+ * @brief 检查CPU是否支持长模式
+ *  CPU自带检查方式：无法反转 Eflags第21位，表示CPU不支持CPUID功能
+ *  然后调用CPUID功能，判断是否支持长模式
+ *  先通过通过0x80000000参数，调用cpuid命令，判断CPU是否支持扩展处理器信息【返回值比0x80000000大】
+ *  如果支持，通过0x80000001参数，调用cpuid命令，获取扩展处理器信息，然后检测第29位，判断是否支持长模式
+ * @return int 
+ */
 int chk_cpu_longmode()
 {
     int rets = 0;
