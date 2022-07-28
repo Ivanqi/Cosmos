@@ -24,7 +24,7 @@
 #define IKSTACK_SIZE 0x1000           // 栈大小是4KB
 
 #define IMGFILE_PHYADR 0x4000000      // Gurb文件地址
-#define IMGKRNL_PHYADR 0x2000000      // 
+#define IMGKRNL_PHYADR 0x2000000      // Cosmos.bin地址，内核地址
 
 #define KINITPAGE_PHYADR 0x1000000    // 顶级页目录
 #define KINITFRVM_PHYADR 0x800000     // 8388608

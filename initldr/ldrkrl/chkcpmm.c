@@ -160,7 +160,11 @@ void init_chkcpu(machbstart_t *mbsp)
     return;
 }
 
-// 初始化内核栈
+/**
+ * @brief  初始化内核栈
+ *  供内核启动时使用
+ * @param mbsp 
+ */
 void init_krlinitstack(machbstart_t *mbsp)
 {
     // 检测0x8f000 ～（0x8f000+0x1001）与其他内存是否有冲突

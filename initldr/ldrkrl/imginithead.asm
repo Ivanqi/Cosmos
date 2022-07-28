@@ -2,7 +2,7 @@
 ; 它主要工作是初始化 CPU 的寄存器，加载 GDT，切换到 CPU 的保护模式
 
 ; grub是multiboot规范，因此引导器头部数据必须得满足一定的规则才能被grub所加载
-; 本文中的MBT_HDR_FLAGS为0x001003，第16位被置为1，因此load_addr和entry_addr都是有效的，而它们正好分别对应_start和_entry
+; 本文中的MBT_HDR_FLAGS为 0x001003 ，第16位被置为1，因此load_addr和entry_addr都是有效的，而它们正好分别对应_start和_entry
 ; 其中load_addr是引导器二进制文件text段的起始地址，即_start，grub解析头部数据后，拿到_start地址，并从该地址处开始执行二级引导器代码
 ; 而entry_addr对应的是操作系统的入口点，也就是_entry
 ; 引导程序最后将跳转到这里，不过本文的实现并没有完全按照这种思路来，_start直接跳到_entry，然后由_entry负责二级引导工作

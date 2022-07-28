@@ -78,7 +78,14 @@ int move_krlimg(machbstart_t *mbsp, u64_t cpyadr, u64_t cpysz)
     return 2;
 }
 
-// 放置内核文件
+/**
+ * @brief 放置内核文件
+ *  1. 从映像文件查找文件，并复制到对应地址
+ *  2. 把内核信息设置到machbstart_t中
+ *  3. 并设置新的空闲地址
+ * 
+ * @param mbsp 二级引导器结构体
+ */
 void init_krlfile(machbstart_t *mbsp)
 {
     // 在映像中查找相应的文件，并复制到对应的地址，并返回文件大小，这里是查找Cosmos.bin文件
@@ -88,8 +95,8 @@ void init_krlfile(machbstart_t *mbsp)
     }
 
     // 放置完成后更新机器信息结构中的数据
-    mbsp->mb_krlimgpadr = IMGKRNL_PHYADR;
-    mbsp->mb_krlsz = sz;
+    mbsp->mb_krlimgpadr = IMGKRNL_PHYADR;   // 内核文件地址
+    mbsp->mb_krlsz = sz;                    // 文件大小
 
     // mbsp->mb_nextwtpadr始终要保持指向下一段空闲内存的首地址
     mbsp->mb_nextwtpadr = P4K_ALIGN(mbsp->mb_krlimgpadr + mbsp->mb_krlsz);  // 内核文件后的空闲内存
@@ -199,6 +206,7 @@ u64_t r_file_to_padr(machbstart_t *mbsp, u32_t f2adr, char_t *fnm)
 
     u32_t fpadr = 0, sz = 0;
     get_file_rpadrandsz(fnm, mbsp, &fpadr, &sz);
+    kprint("fnm:%s, f2adr:%x\n", fnm, f2adr);
 
     // 检查映像文件的地址和实际大小
     if (0 == fpadr || 0 == sz) {

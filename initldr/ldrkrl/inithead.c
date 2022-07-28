@@ -24,7 +24,7 @@ void inithead_entry()
     return;
 }
 
-// 写initldrsve.bin文件到特定的内存中(0x1000)
+// 写initldrsve.bin文件到特定的内存中(0x1000, 4KB，调用BIOS中断的代码)
 void write_realintsvefile()
 {
 
@@ -55,6 +55,7 @@ fhdsc_t *find_file(char_t *fname)
 
     s64_t rethn = -1;
     fhdsc_t *fhdscstart = (fhdsc_t *)((u32_t)(mrddadrs->mdc_fhdbk_s) + LDRFILEADR);
+    kprint("fname:%s, fname:%x\n", fname, fhdscstart);
 
     for (u64_t i = 0; i < mrddadrs->mdc_fhdnr; i++) {
         if (strcmpl(fname, fhdscstart[i].fhd_name) == 0) {
@@ -69,11 +70,11 @@ ok_l:
     if (rethn < 0) {
         error("not find file");
     }
-
+    kprint("fname:%s, fhdscstart[rethn]:%x\n", fname, &fhdscstart[rethn]);
     return &fhdscstart[rethn];
 }
 
-// 写initldrkrl.bin文件到特定的内存中(0x2097152)
+// 写initldrkrl.bin文件到特定的内存中(0x200000, 2MB，二级引导器的代码)
 void write_ldrkrlfile()
 {
     fhdsc_t *fhdscstart = find_file("initldrkrl.bin");

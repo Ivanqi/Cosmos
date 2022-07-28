@@ -51,7 +51,7 @@ void add_new_teststc(adr_t vadr, size_t vsiz)
 	}
 
 	t->tst_vadr = vadr;
-	t->tst_vsiz = vsiz;
+	t->tst_vsiz = vsiz; 
 	list_add(&t->tst_list, &krlvirmemadrs.kvs_testhead);
 	krlvirmemadrs.kvs_tstcnr++;
 	return;
