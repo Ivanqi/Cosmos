@@ -206,7 +206,6 @@ u64_t r_file_to_padr(machbstart_t *mbsp, u32_t f2adr, char_t *fnm)
 
     u32_t fpadr = 0, sz = 0;
     get_file_rpadrandsz(fnm, mbsp, &fpadr, &sz);
-    kprint("fnm:%s, f2adr:%x\n", fnm, f2adr);
 
     // 检查映像文件的地址和实际大小
     if (0 == fpadr || 0 == sz) {

@@ -71,7 +71,7 @@ void init_bstartparm()
     init_krlfile(mbsp);
     // 放置字库文件
     init_defutfont(mbsp);
-    kerror("\nbreak point\n");
+    u32_t retadr = 0, sz = 0;
     init_meme820(mbsp);
     // 建立MMU页表
     init_bstartpages(mbsp);

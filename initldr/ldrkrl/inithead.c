@@ -55,7 +55,6 @@ fhdsc_t *find_file(char_t *fname)
 
     s64_t rethn = -1;
     fhdsc_t *fhdscstart = (fhdsc_t *)((u32_t)(mrddadrs->mdc_fhdbk_s) + LDRFILEADR);
-    kprint("fname:%s, fname:%x\n", fname, fhdscstart);
 
     for (u64_t i = 0; i < mrddadrs->mdc_fhdnr; i++) {
         if (strcmpl(fname, fhdscstart[i].fhd_name) == 0) {
@@ -70,7 +69,6 @@ ok_l:
     if (rethn < 0) {
         error("not find file");
     }
-    kprint("fname:%s, fhdscstart[rethn]:%x\n", fname, &fhdscstart[rethn]);
     return &fhdscstart[rethn];
 }
 
