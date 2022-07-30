@@ -63,7 +63,18 @@ PUBLIC intfltdsc_t *hal_retn_intfltdsc(uint_t irqnr)
     return &machintflt[irqnr];
 }
 
-// 初始化intserdsc_t结构体实例变量，并把设备指针和回调函数放入其中
+/**
+ * @brief 初始化中断
+ *  1. 初始化intserdsc_t结构体实例变量，并把设备指针和回调函数放入其中
+ *  2. 如果内核或者设备驱动程序要安装一个中断处理函数，就要先申请一个 intserdsc_t 结构体
+ *  3. 然后把中断函数的地址写入其中，最后把这个结构挂载到对应的 intfltdsc_t 结构中的 i_serlist 链表中
+ * 
+ * @param initp 
+ * @param flg 
+ * @param intfltp 
+ * @param device 
+ * @param handle 
+ */
 void intserdsc_t_init(intserdsc_t *initp, u32_t flg, intfltdsc_t *intfltp, void *device, intflthandle_t handle)
 {
 
@@ -127,9 +138,12 @@ drvstus_t hal_intflt_default(uint_t ift_nr, void *sframe)
 }
 
 /**
- * 负责调用中断处理的回调函数
- *  先获取中断异常表machintflt
- *  然后调用i_serlist 链表上所有挂载intserdsc_t 结构中的中断处理的回调函数，是否处理由函数自己判断
+ * @brief 负责调用中断处理的回调函数
+ *  1. 先获取中断异常表machintflt
+ *  2. 然后调用i_serlist 链表上所有挂载intserdsc_t 结构中的中断处理的回调函数，是否处理由函数自己判断
+ * 
+ * @param ifdnr 
+ * @param sframe 
  */
 void hal_run_intflthandle(uint_t ifdnr, void *sframe)
 {
@@ -155,10 +169,13 @@ void hal_run_intflthandle(uint_t ifdnr, void *sframe)
 }
 
 /**
- * 中断处理函数
- *  加锁
- *  调用中断回调函数hal_run_intflthandle
- *  释放锁
+ * @brief 中断处理函数
+ *  1. 加锁
+ *  2. 调用中断回调函数hal_run_intflthandle
+ *  3. 释放锁
+ * 
+ * @param intnumb 
+ * @param krnlsframp 
  */
 void hal_do_hwint(uint_t intnumb, void *krnlsframp)
 {
@@ -193,10 +210,13 @@ void hal_do_hwint(uint_t intnumb, void *krnlsframp)
 }
 
 /**
- * 异常分发器
+ * @brief 异常分发器
  *  1. 缺页异常(异常号14)
  *      1. 缺页异常是从 kernel.asm 文件中的 exc_page_fault 标号处开始，但它只是保存了 CPU 的上下文
  *      2. 然后调用了内核的通用异常分发器函数，最后由异常分发器函数调用不同的异常处理函数
+ * 
+ * @param faultnumb 
+ * @param krnlsframp 
  */
 void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
 {

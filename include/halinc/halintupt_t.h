@@ -36,6 +36,7 @@ typedef struct s_INTFLTDSC {
     void*       i_extp;
 } intfltdsc_t;
 
+// 中断运行结构体
 typedef struct s_INTSERDSC {
     list_h_t    s_list;         // 在中断异常描述符中的链表
     list_h_t    s_indevlst;     // 在设备描述描述符中的链表

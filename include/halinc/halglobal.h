@@ -97,7 +97,7 @@ HAL_DEFGLOB_VARIABLE(dftgraph_t, kdftgh);
 // 小内存管理
 HAL_DEFGLOB_VARIABLE(memmgrob_t, memmgrob);
 
-// 定义intfltdsc_t结构数组大小为256
+// 定义intfltdsc_t结构数组大小为256。全局中断数组
 HAL_DEFGLOB_VARIABLE(intfltdsc_t, machintflt)[IDTMAX];
 
 #endif
