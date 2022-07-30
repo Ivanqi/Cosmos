@@ -54,8 +54,13 @@ void disp_one_msadsc(msadsc_t *mp)
 }
 
 /**
- * ret_msadsc_vadrandsz 函数也是遍历 phymmarge_t 结构数组
- * 计算出有多大的可用内存空间，可以分成多少个页面，需要多少个 msadsc_t 结构
+ * @brief 计算出有多大的可用内存空间，可以分成多少个页面，需要多少个 msadsc_t 结构
+ * 	1. 遍历 phymmarge_t 结构数组
+ * 
+ * @param mbsp 
+ * @param retmasvp msadsc_t 的开始地址
+ * @param retmasnr 页面数量
+ * @return bool_t 
  */
 bool_t ret_msadsc_vadrandsz(machbstart_t *mbsp, msadsc_t **retmasvp, u64_t *retmasnr)
 {
@@ -96,6 +101,13 @@ bool_t ret_msadsc_vadrandsz(machbstart_t *mbsp, msadsc_t **retmasvp, u64_t *retm
 	return TRUE;
 }
 
+/**
+ * @brief 单个msadsc创建
+ * 	1. 物理地址保存在msadsc中
+ * 
+ * @param msap msadsc地址
+ * @param phyadr 物理内存地址
+ */
 void write_one_msadsc(msadsc_t *msap, u64_t phyadr)
 {
 	// 对msadsc_t结构做基本的初始化，比如链表、锁、标志位
@@ -108,10 +120,16 @@ void write_one_msadsc(msadsc_t *msap, u64_t phyadr)
 }
 
 /**
- * 扫描 phymmarge_t 结构体数组中的信息，只要它的类型是可用内存，就建立一个 msadsc_t 结构体，并把其中的开始地址作为第一个页面地址
- * 接着，要给这个开始地址加上 0x1000(4096)，如此循环，直到其结束地址
- * 当这个 phymmarge_t 结构体的地址区间，它对应的所有 msadsc_t 结构体都建立完成之后，就开始下一个 phymmarge_t 结构体
- * 依次类推，最后，我们就能建好所有可用物理内存页面对应的 msadsc_t 结构体
+ * @brief 初始化msadsc内存
+ * 	1. 扫描 phymmarge_t 结构体数组中的信息，只要它的类型是可用内存，就建立一个 msadsc_t 结构体，并把其中的开始地址作为第一个页面地址
+ * 	2. 接着，要给这个开始地址加上 0x1000(4096)，如此循环，直到其结束地址
+ * 	3. 当这个 phymmarge_t 结构体的地址区间，它对应的所有 msadsc_t 结构体都建立完成之后，就开始下一个 phymmarge_t 结构体
+ * 	4. 依次类推，最后，我们就能建好所有可用物理内存页面对应的 msadsc_t 结构体
+ * 
+ * @param mbsp 二级引导信息结构体
+ * @param msavstart msadsc 开始地址
+ * @param msanr 
+ * @return u64_t 内存(msadsc_t)长度
  */
 u64_t init_msadsc_core(machbstart_t *mbsp, msadsc_t *msavstart, u64_t msanr)
 {

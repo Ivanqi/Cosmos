@@ -365,11 +365,12 @@ msadsc_t *mm_divipages_onbafhlst(bafhlst_t *bafhp)
 }
 
 /**
- * 返回一个msadsc_t
- * 返回值
- * 	false。retmstat， retmend 都为NULL
- * 	true. retmstat， retmend 不为NULL
+ * @brief 返回一个msadsc_t
  * 
+ * @param bafhp 
+ * @param retmstat 
+ * @param retmend 
+ * @return bool_t false. retmstat， retmend 都为NULL / true. retmstat， retmend 不为NULL
  */
 bool_t mm_retnmsaob_onbafhlst(bafhlst_t *bafhp, msadsc_t **retmstat, msadsc_t **retmend)
 {

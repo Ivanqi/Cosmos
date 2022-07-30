@@ -84,7 +84,11 @@ void memdivmer_t_init(memdivmer_t *initp)
 	return;
 }
 
-// 初始化memarea_t结构体的基本数据
+/**
+ * @brief 初始化memarea_t结构体的基本数据
+ * 
+ * @param initp memarea虚拟地址
+ */
 void memarea_t_init(memarea_t *initp)
 {
 	list_init(&initp->ma_list);
@@ -117,6 +121,12 @@ void memarea_t_init(memarea_t *initp)
 	return;
 }
 
+/**
+ * @brief 初始化内存区(memarea)
+ * 
+ * @param mbsp 
+ * @return bool_t 
+ */
 bool_t init_memarea_core(machbstart_t *mbsp)
 {
 	// 获取memarea_t结构开始地址
