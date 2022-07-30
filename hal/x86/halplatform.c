@@ -84,7 +84,7 @@ fhdsc_t *get_fileinfo(char_t *fname, machbstart_t *mbsp)
     }
 
     s64_t rethn = -1;
-   fhdsc_t *fhdscstart = (fhdsc_t *)((uint_t)((mrddadrs->mdc_fhdbk_s) + (phyadr_to_viradr((adr_t)mbsp->mb_imgpadr))));
+    fhdsc_t *fhdscstart = (fhdsc_t *)((uint_t)((mrddadrs->mdc_fhdbk_s) + (phyadr_to_viradr((adr_t)mbsp->mb_imgpadr))));
 
     for (u64_t i = 0; i < mrddadrs->mdc_fhdnr; i++) {
         if (strcmpl(fname, fhdscstart[i].fhd_name) == 0) {
@@ -148,7 +148,12 @@ e820map_t *get_maxmappadr_e820map(machbstart_t *mbsp, u64_t mappadr)
 }
 
 /**
- * e820内存数组校验
+ * @brief e820内存数组校验
+ * 
+ * @param mbsp 
+ * @param mappadr 
+ * @param cpsz 
+ * @return e820map_t* 
  */
 e820map_t *ret_kmaxmpadrcmpsz_e820map(machbstart_t *mbsp, u64_t mappadr, u64_t cpsz)
 {
@@ -166,13 +171,17 @@ e820map_t *ret_kmaxmpadrcmpsz_e820map(machbstart_t *mbsp, u64_t mappadr, u64_t c
     // 遍历e820内存数组
     for (u64_t i = 0; i < enr; i++) {
         if (emp[i].type == RAM_USABLE) {
-            if (emp[i].saddr >= maxadr && (mappadr > (emp[i].saddr + emp[i].lsize)) && (emp[i].lsize >= cpsz)) {
-                maxadr = emp[i].saddr;
-                retemp = &emp[i];
+            if (emp[i].saddr >= maxadr                      // 内存区首地址大于已知最大区域起始地址（初始化位第一个区首地址
+            && (mappadr > (emp[i].saddr + emp[i].lsize))    // 内存区尾地址小于内存映射最大地址
+            && (emp[i].lsize >= cpsz))                      // 内存区大小大于镜像文件大小
+            {
+                maxadr = emp[i].saddr;                      // 已知最大区域起始地址
+                retemp = &emp[i];                           // 更新最后满足条件内存区域
             }
         }
     }
 
+    // 校验，但除非一个都不满足条件
     if ((mappadr > (retemp->saddr + retemp->lsize)) && (retemp->lsize >= cpsz)) {
         return retemp;
     }
@@ -180,7 +189,11 @@ e820map_t *ret_kmaxmpadrcmpsz_e820map(machbstart_t *mbsp, u64_t mappadr, u64_t c
     return NULL;
 }
 
-// 将移动initldrsve.bin到最大地址
+/**
+ * @brief 将映像文件移动到最大地址
+ * 
+ * @param mbsp 二级引导器结构体
+ */
 void move_img2maxpadr(machbstart_t *mbsp)
 {
     u64_t kmapadrend = mbsp->mb_kpmapphymemsz;  // 操作系统映射空间大小
@@ -210,10 +223,16 @@ void move_img2maxpadr(machbstart_t *mbsp)
 }
 
 /**
- * 内存监测
+ * @brief 内存监测
  *  1. kadr 大于等于 sadr 且 kadr 小于 (sadr + slen)。意思是kadr 在 (sadr + slen) 之内返回-1
  *  2. kadr 小于等于 sadr 且 (kadr + klen) 大于等于 sadr. kadr 小于但 kadr + klen 大于 sadr 返回-2
  *  3. kadr 大于 sadr 或者 kadr 小于 sadr 返回 0。意味这两个内存区不交集
+ * 
+ * @param sadr 
+ * @param slen 
+ * @param kadr 
+ * @param klen 
+ * @return int 
  */
 int adrzone_is_ok(u64_t sadr, u64_t slen, u64_t kadr, u64_t klen)
 {

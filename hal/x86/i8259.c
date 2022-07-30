@@ -6,9 +6,9 @@
 #include "cosmosmctrl.h"
 
 /**
- * 初始化8529芯片中断
- * 	ICW1和OCW2、OCW3是用偶地址端口0x20(主片)或0xA0(从片)写入
- * 	ICW2～ICW4和OCW1是用奇地址端口0x21(主片)或0xA1(从片)写入
+ * @brief  初始化8529芯片中断
+ * 	1. ICW1和OCW2、OCW3是用偶地址端口0x20(主片)或0xA0(从片)写入
+ * 	2. ICW2～ICW4和OCW1是用奇地址端口0x21(主片)或0xA1(从片)写入
  */
 void init_i8259()
 {

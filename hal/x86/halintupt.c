@@ -55,6 +55,12 @@ PUBLIC void init_halintupt()
     return;
 }
 
+/**
+ * @brief 按中断码返回中断描述符
+ * 
+ * @param irqnr 
+ * @return PUBLIC* 
+ */
 PUBLIC intfltdsc_t *hal_retn_intfltdsc(uint_t irqnr)
 {
     if (irqnr > IDTMAX) {
@@ -142,7 +148,7 @@ drvstus_t hal_intflt_default(uint_t ift_nr, void *sframe)
  *  1. 先获取中断异常表machintflt
  *  2. 然后调用i_serlist 链表上所有挂载intserdsc_t 结构中的中断处理的回调函数，是否处理由函数自己判断
  * 
- * @param ifdnr 
+ * @param ifdnr 中断码
  * @param sframe 
  */
 void hal_run_intflthandle(uint_t ifdnr, void *sframe)
@@ -174,7 +180,7 @@ void hal_run_intflthandle(uint_t ifdnr, void *sframe)
  *  2. 调用中断回调函数hal_run_intflthandle
  *  3. 释放锁
  * 
- * @param intnumb 
+ * @param intnumb 中断码
  * @param krnlsframp 
  */
 void hal_do_hwint(uint_t intnumb, void *krnlsframp)
@@ -215,7 +221,7 @@ void hal_do_hwint(uint_t intnumb, void *krnlsframp)
  *      1. 缺页异常是从 kernel.asm 文件中的 exc_page_fault 标号处开始，但它只是保存了 CPU 的上下文
  *      2. 然后调用了内核的通用异常分发器函数，最后由异常分发器函数调用不同的异常处理函数
  * 
- * @param faultnumb 
+ * @param faultnumb 异常码
  * @param krnlsframp 
  */
 void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
