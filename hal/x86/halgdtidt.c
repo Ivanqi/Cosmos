@@ -6,12 +6,12 @@
 #include "cosmosmctrl.h"
 
 /**
- * 参数
- *  vector 向量也是中断号
- *  dest_type 中断门类型，中断门，陷阱门
- *  handler 中断处理程序的入口地址
- *  privilege 中断门的权限级别
+ * @brief 中断描述分设置
  * 
+ * @param vector 向量也是中断号
+ * @param desc_type 中断门类型，中断门，陷阱门
+ * @param handler 中断处理程序的入口地址
+ * @param privilege 中断门的权限级别
  */
 void set_idt_desc(u8_t vector, u8_t desc_type, inthandler_t handler, u8_t privilege)
 {
@@ -45,7 +45,14 @@ void set_iidtr(gate_t *idtptr)
     return;
 }
 
-// 段描述符
+/**
+ * @brief 设置段描述符
+ * 
+ * @param p_desc 段描述符
+ * @param base 段基址参数
+ * @param limit 段界限参数
+ * @param attribute 属性
+ */
 void set_descriptor(descriptor_t *p_desc, u32_t base, u32_t limit, u16_t attribute)
 {
     p_desc->limit_low = limit & 0x0FFFF;                                                   // 段界限 1(2 字节)
@@ -57,7 +64,14 @@ void set_descriptor(descriptor_t *p_desc, u32_t base, u32_t limit, u16_t attribu
     return;
 }
 
-// 任务状态段
+/**
+ * @brief 设置任务状态段
+ * 
+ * @param p_desc 任务状态段
+ * @param base 段基址参数
+ * @param limit 段界限参数
+ * @param attribute 属性
+ */
 void set_x64tss_descriptor(descriptor_t *p_desc, u64_t base, u32_t limit, u16_t attribute)
 {
     u32_t *x64tssb_h = (u32_t *)(p_desc + 1);
@@ -124,7 +138,11 @@ PUBLIC LKINIT void load_x64_tr(u16_t trindx)
     );
 }
 
-// 初始化段描述符和TSS描述符
+/**
+ * @brief 初始化段描述符和TSS描述符
+ * 
+ * @return void 
+ */
 PUBLIC LKINIT void init_descriptor()
 {
 
@@ -167,9 +185,11 @@ PUBLIC LKINIT void init_descriptor()
 }
 
 /**
- * 设置中断门描述符
- *  中断向量号是中断描述符的索引，当处理器收到一个外部中断向量后，它用此向量号在中断描述符表中查询对应的中断描述符，然后再去执行该中断中的中断处理程序
- *  由于中断描述符是8个字节(64位)，所以处理器用中断向量号乘以8后，再与IDTR中的中断描述符表地址相加，所求的地址之和便是该中断向量号对应的中断描述符
+ * @brief 初始化中断描述符
+ *  1. 中断向量号是中断描述符的索引，当处理器收到一个外部中断向量后，它用此向量号在中断描述符表中查询对应的中断描述符，然后再去执行该中断中的中断处理程序
+ *  2. 由于中断描述符是8个字节(64位)，所以处理器用中断向量号乘以8后，再与IDTR中的中断描述符表地址相加，所求的地址之和便是该中断向量号对应的中断描述符
+ * 
+ * @return void
  */
 PUBLIC LKINIT void init_idt_descriptor()
 {   

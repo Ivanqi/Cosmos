@@ -88,8 +88,10 @@ HAL_DEFGLOB_VARIABLE(x64tss_t, x64tss)[CPUCORE_MAX];
 
 HAL_DEFGLOB_VARIABLE(igdtr_t, x64_igdt_reg)[CPUCORE_MAX];
 HAL_DEFGLOB_VARIABLE(iidtr_t, x64_iidt_reg);
-// 全局phymmarge_t的内存
+
+// 全局二级引导器结构体
 HAL_DEFGLOB_VARIABLE(machbstart_t, kmachbsp);
+// 全局图像结构体
 HAL_DEFGLOB_VARIABLE(dftgraph_t, kdftgh);
 
 // 小内存管理
