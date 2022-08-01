@@ -210,9 +210,15 @@ void disp_phymsadsc()
 }
 
 /**
- * 搜索一段内存地址空间所对应的msadsc_t结构
+ * @brief 搜索一段内存地址空间所对应的msadsc_t结构
+ * 	1. 通过给出被占用内存的起始地址和结束地址，然后从起始地址开始查找对应的 msadsc_t 结构
+ * 	2. 再把它标记为已经分配，最后直到查找到结束地址为止
  * 
- * 通过给出被占用内存的起始地址和结束地址，然后从起始地址开始查找对应的 msadsc_t 结构，再把它标记为已经分配，最后直到查找到结束地址为止
+ * @param msastart 
+ * @param msanr 
+ * @param ocpystat 
+ * @param ocpyend 
+ * @return u64_t 
  */
 u64_t search_segment_occupymsadsc(msadsc_t *msastart, u64_t msanr, u64_t ocpystat, u64_t ocpyend)
 {
@@ -315,9 +321,12 @@ step1:
 }
 
 /**
- * 处理初始内存占用问题
+ * @brief 处理初始内存占用问题
  * 	1. 目前内存中已经有很多数据了，Cosmos 内核本身的执行文件、字体文件、MMU 页表、打包的内核映像文件、还有刚刚建立的内存页和内存区的数据结构
  * 	2. 要把这些已经占用的内存页面所对应的 msadsc_t 结构标记出来，标记成已分配，这样内存分配算法就不会找到它们了
+ * 
+ * @param mbsp 
+ * @return bool_t 
  */
 bool_t search_krloccupymsadsc_core(machbstart_t *mbsp)
 {
@@ -352,7 +361,11 @@ bool_t search_krloccupymsadsc_core(machbstart_t *mbsp)
 	return TRUE;
 }
 
-// 初始化搜索内核占用的内存页面
+/**
+ * @brief 初始化搜索内核占用的内存页面
+ * 
+ * @param mbsp 
+ */
 void init_search_krloccupymm(machbstart_t *mbsp)
 {
 	if (search_krloccupymsadsc_core(mbsp) == FALSE) {

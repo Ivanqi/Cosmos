@@ -100,7 +100,7 @@ void memmgrob_t_init(memmgrob_t *initp)
 }
 
 /**
- * @brief 页表设置
+ * @brief 页表设置(虚拟内存)
  * 
  * @param mbsp 二级信息引导结构体
  * @return bool_t 
@@ -117,13 +117,23 @@ bool_t copy_pages_data(machbstart_t *mbsp)
 	// 顶级页目录
 	uint_t *p = (uint_t *)phyadr_to_viradr((adr_t)topgadr);
 	kprint("topgadr:%x, p:%x\n", topgadr, p);
+	// 页目录指针
 	uint_t *pdpte = (uint_t *)(((uint_t)p) + 0x1000);
+	// 页目录
 	uint_t *pde = (uint_t *)(((uint_t)p) + 0x2000);
+
+	// 将顶级页目录，页目录指针的空间清0
 	for (uint_t mi = 0; mi < PGENTY_SIZE; mi++) {
 		p[mi] = 0;
 		pdpte[mi] = 0;
 	}
 
+	/**
+     * 映射
+     *  映射的核心逻辑由两重循环控制，外层循环控制页目录指针顶，只有16项，其中每一项都指向一个页目录，每个页目录中有512个物理页地址
+     * 
+     *  物理地址每次增加2MB，由内层循环控制，每次执行一次外层循环就要执行512次内层循环
+     */
 	uint_t adr = 0;
 	uint_t pdepd = 0;
 	for (uint_t pdei = 0; pdei < 16; pdei++) {
@@ -138,12 +148,16 @@ bool_t copy_pages_data(machbstart_t *mbsp)
 		pde = (uint_t *)((uint_t)pde + 0x1000);
 	}
 
+	/**
+     * 让顶级页目录中第0项和第((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff项，指向同一个页目录指针页
+     * 这样的话就能让虚拟地址：0xffff800000000000 ~ 0xffff800400000000 和虚拟地址0 ～ 0x400000000，访问都同一个物理地址空间 0 ～ 0x400000000
+     * 这样做是由目的，内核在启动初期，虚拟地址和物理地址要保持相同
+     */
 	uint_t pdptepd = (uint_t)viradr_to_phyadr((adr_t)pdpte);
 	p[((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff] = (uint_t)(pdptepd | KPML4_RW | KPML4_P);
 	p[0] = (uint_t)(pdptepd | KPML4_RW | KPML4_P);
 
-	kprint("copy_pages_data mbsp:%x\n", mbsp);
-	system_error("copy_pages_data\n");
+	// 把页表首地址保存在机器信息结构中
 	mbsp->mb_pml4padr = topgadr;
 	mbsp->mb_subpageslen = (uint_t)(0x1000 * 16 + 0x2000);
 	mbsp->mb_kpmapphymemsz = (uint_t)(0x400000000);
@@ -151,7 +165,13 @@ bool_t copy_pages_data(machbstart_t *mbsp)
 	return TRUE;
 }
 
-// 把显存虚拟地址复制到mb_nextwtpadr中
+/**
+ * @brief 把显存虚拟地址复制到mb_nextwtpadr中
+ * 
+ * @param mbsp 二级信息引导结构体
+ * @param dgp  图像结构体
+ * @return bool_t 
+ */
 bool_t copy_fvm_data(machbstart_t *mbsp, dftgraph_t *dgp)
 {
 	u64_t tofvadr = mbsp->mb_nextwtpadr;

@@ -179,11 +179,13 @@ void init_krlinitstack(machbstart_t *mbsp)
 }
 
 /**
- * 初始化MMU 页表数据
+ * @brief 初始化MMU 页表数据 (物理内存)
  *  1. KINITPAGE_PHYADR: 顶级页目录地址，处于硬件区
  *  2. 内核虚拟空间从0xffff800000000000开始，所以这个虚拟地址映射从物理地址0开始，大小都是0x400000000即16GB
  *      也就说是要虚拟地址空间：0xffff800000000000 ～ 0xffff800400000000 映射到物理地址空间 0 ~ 0x400000000
  *  3. 长模式下的2MB分页方式
+ * 
+ * @param mbsp 
  */
 void init_bstartpages(machbstart_t *mbsp)
 {

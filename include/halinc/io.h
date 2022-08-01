@@ -152,7 +152,14 @@ KLINE void write_msr(const u32_t reg, const u64_t val) {
         : "a"((u32_t)val), "d"((u32_t)(val >> 32)), "c"(reg));
 }
 
-// 逐一指针复制
+/**
+ * @brief 内存复制
+ * 
+ * @param src 源地址
+ * @param dest 目标地址
+ * @param count 复制长度
+ * @return KLINE 
+ */
 KLINE void memcopy(void *src, void *dest, uint_t count) {
     u8_t *ss = src, *sd = dest;
     for (uint_t i = 0; i < count; i++) {
@@ -189,6 +196,14 @@ KLINE sint_t m2mcopy(void *sadr, void *dadr, sint_t len) {
     return 0;
 }
 
+/**
+ * @brief 内存设置
+ * 
+ * @param s 目标内存地址
+ * @param c 设置内容
+ * @param count 内存长度
+ * @return KLINE 
+ */
 KLINE void memset(void *s, u8_t c, uint_t count) {
     u8_t *st = s;
     for (uint_t i = 0; i < count; i++) {
