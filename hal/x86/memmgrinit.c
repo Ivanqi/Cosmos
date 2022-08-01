@@ -99,7 +99,12 @@ void memmgrob_t_init(memmgrob_t *initp)
 	return;
 }
 
-// 页表设置
+/**
+ * @brief 页表设置
+ * 
+ * @param mbsp 二级信息引导结构体
+ * @return bool_t 
+ */
 bool_t copy_pages_data(machbstart_t *mbsp)
 {
 
@@ -109,7 +114,9 @@ bool_t copy_pages_data(machbstart_t *mbsp)
 		return FALSE;
 	}
 
+	// 顶级页目录
 	uint_t *p = (uint_t *)phyadr_to_viradr((adr_t)topgadr);
+	kprint("topgadr:%x, p:%x\n", topgadr, p);
 	uint_t *pdpte = (uint_t *)(((uint_t)p) + 0x1000);
 	uint_t *pde = (uint_t *)(((uint_t)p) + 0x2000);
 	for (uint_t mi = 0; mi < PGENTY_SIZE; mi++) {
@@ -135,6 +142,8 @@ bool_t copy_pages_data(machbstart_t *mbsp)
 	p[((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff] = (uint_t)(pdptepd | KPML4_RW | KPML4_P);
 	p[0] = (uint_t)(pdptepd | KPML4_RW | KPML4_P);
 
+	kprint("copy_pages_data mbsp:%x\n", mbsp);
+	system_error("copy_pages_data\n");
 	mbsp->mb_pml4padr = topgadr;
 	mbsp->mb_subpageslen = (uint_t)(0x1000 * 16 + 0x2000);
 	mbsp->mb_kpmapphymemsz = (uint_t)(0x400000000);

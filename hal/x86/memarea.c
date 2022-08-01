@@ -39,7 +39,14 @@ void mafuncobjs_t_init(mafuncobjs_t *initp)
 	return;
 }
 
-// 初始化bafhlst_t结构体的基本数据
+/**
+ * @brief 初始化bafhlst_t结构体的基本数据
+ * 
+ * @param initp 
+ * @param stus 
+ * @param oder 
+ * @param oderpnr 
+ */
 void bafhlst_t_init(bafhlst_t *initp, u32_t stus, uint_t oder, uint_t oderpnr)
 {
 	knl_spinlock_init(&initp->af_lock);
@@ -58,7 +65,11 @@ void bafhlst_t_init(bafhlst_t *initp, u32_t stus, uint_t oder, uint_t oderpnr)
 	return;
 }
 
-// 初始化medivmer_t结构体的基本数据
+/**
+ * @brief 初始化medivmer_t结构体的基本数据
+ * 
+ * @param initp 
+ */
 void memdivmer_t_init(memdivmer_t *initp)
 {
 	knl_spinlock_init(&initp->dm_lock);
@@ -175,7 +186,11 @@ bool_t init_memarea_core(machbstart_t *mbsp)
 	return TRUE;
 }
 
-// 初始化内存区
+/**
+ * @brief 初始化内存区
+ * 
+ * @return LKINIT 
+ */
 LKINIT void init_memarea()
 {
 	// 真正初始化内存区

@@ -36,9 +36,9 @@ void machbstart_t_init(machbstart_t *initp)
 }
 
 /**
- * 把二级引导器建立的机器信息结构复制到hal层中的一个全局变量中
- *  主要是把二级引导器建立的机器信息结构，复制到了hal层一份给内核使用，同时也为释放二级引导器占用的内存做好准备
- *  其做法就是拷贝一份mbsp到kmbsp，其中用到了虚拟地址转换hyadr_to_viradr
+ * @brief 把二级引导器建立的机器信息结构复制到hal层中的一个全局变量中
+ *  1. 主要是把二级引导器建立的机器信息结构，复制到了hal层一份给内核使用，同时也为释放二级引导器占用的内存做好准备
+ *  2. 其做法就是拷贝一份mbsp到kmbsp，其中用到了虚拟地址转换hyadr_to_viradr
  */
 void init_machbstart()
 {
