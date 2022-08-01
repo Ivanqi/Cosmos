@@ -834,11 +834,14 @@ bool_t merlove_mem_onmemarea(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 }
 
 /**
- * 这个 merlove_mem_core 函数有两个遍历内存区
+ * @brief merlove_mem_core 两次遍历内存区
  * 	1. 第一次遍历是为了完成上述第一步：确定内存页属于哪个区
  * 	2. 当确定内存页属于哪个区之后，就来到了第二次遍历 memarea_t 结构，合并其中的 msadsc_t 结构，并把它们挂载到其中的 memdivmer_t 结构下的 dm_mdmlielst 数组中
  * 		1. 它要保证其中所有的 msadsc_t 结构挂载到 dm_mdmlielst 数组中合适的 bafhlst_t 结构中
  * 		2. 它要保证多个 msadsc_t 结构有最大的连续性
+ * 		
+ * @param mbsp 
+ * @return bool_t 
  */
 bool_t merlove_mem_core(machbstart_t *mbsp)
 {

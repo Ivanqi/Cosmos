@@ -216,9 +216,9 @@ void disp_phymsadsc()
  * 
  * @param msastart 
  * @param msanr 
- * @param ocpystat 
- * @param ocpyend 
- * @return u64_t 
+ * @param ocpystat 搜索的内存的开始地址
+ * @param ocpyend 搜索的内存的结束地址
+ * @return u64_t 内存长度
  */
 u64_t search_segment_occupymsadsc(msadsc_t *msastart, u64_t msanr, u64_t ocpystat, u64_t ocpyend)
 {
