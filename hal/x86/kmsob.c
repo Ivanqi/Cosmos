@@ -78,7 +78,12 @@ void kmbext_t_init(kmbext_t *initp, adr_t vstat, adr_t vend, kmsob_t *kmsp)
 	return;
 }
 
-// 初始化koblst_t结构体
+/**
+ * @brief 初始化koblst_t结构体
+ * 
+ * @param initp 
+ * @param koblsz 内存长度
+ */
 void koblst_t_init(koblst_t *initp, size_t koblsz)
 {
 	list_init(&initp->ol_emplst);
@@ -88,7 +93,11 @@ void koblst_t_init(koblst_t *initp, size_t koblsz)
 	return;
 }
 
-// 初始化kmsobmgrhed_t结构体
+/**
+ * @brief 初始化kmsobmgrhed_t结构体
+ * 
+ * @param initp 
+ */
 void kmsobmgrhed_t_init(kmsobmgrhed_t *initp)
 {
 	size_t koblsz = 32;
@@ -125,7 +134,10 @@ void disp_kmsob(kmsob_t *kmsp)
 	return;
 }
 
-// 初始化kmsob
+/**
+ * @brief 初始化kmsob
+ * 
+ */
 void init_kmsob()
 {
 	kmsobmgrhed_t_init(&memmgrob.mo_kmsobmgr);

@@ -210,13 +210,13 @@ bool_t find_inmarea_msadscsegmant(memarea_t *mareap, msadsc_t *fmstat, uint_t fm
 }
 
 /**
- * 检测前后两个msadsc_t结构体的msadflgs_t是否和cmpmdfp一致且空闲的
+ * @brief 检测前后两个msadsc_t结构体的msadflgs_t是否和cmpmdfp一致且空闲的
  * 
- * 返回值
- *  返回-1，返回失败
- * 	返回0，返回失败
- * 	返回1，前后两个msadsc_t结构体的msadflgs_t是否和cmpmdfp一致且空闲的
- * 	返回2，在1的基础上，前后两个msadsc_t是连续的
+ * @param prevmsa 上一个msadsc地址
+ * @param nextmsa 下一个msadsc地址
+ * @param cmpmdfp 
+ * @return uint_t 返回-1，返回失败 | 返回0，返回失败 | 返回1，前后两个msadsc_t结构体的msadflgs_t是否和cmpmdfp一致且空闲的 
+ * 				| 返回2，在1的基础上，前后两个msadsc_t是连续的
  */
 uint_t continumsadsc_is_ok(msadsc_t *prevmsa, msadsc_t *nextmsa, msadflgs_t *cmpmdfp)
 {
@@ -246,8 +246,16 @@ uint_t continumsadsc_is_ok(msadsc_t *prevmsa, msadsc_t *nextmsa, msadflgs_t *cmp
 	return (~0UL);
 }
 
-// 返回从这个msadsc_t结构开始到下一个非空闲、地址非连续的msadsc_t结构对应的msadsc_t结构索引号到retfindmnr变量中
-// 返回的是连续地址msadsc_t的结构体的个数
+/**
+ * @brief 返回的是连续地址msadsc_t的结构体的个数
+ * 	1. 返回从这个msadsc_t结构开始到下一个非空闲、地址非连续的msadsc_t结构对应的msadsc_t结构索引号到retfindmnr变量中
+ * 
+ * @param mstat 某个msadsc地址
+ * @param cmpmdfp 内存空间地址描述符标志
+ * @param mnr msadsc 总长度
+ * @param retmnr 连续长度
+ * @return bool_t 
+ */
 bool_t scan_len_msadsc(msadsc_t *mstat, msadflgs_t *cmpmdfp, uint_t mnr, uint_t *retmnr)
 {
 	uint_t retclok = 0;
@@ -256,6 +264,7 @@ bool_t scan_len_msadsc(msadsc_t *mstat, msadflgs_t *cmpmdfp, uint_t mnr, uint_t 
 		return FALSE;
 	}
 
+	// 从msadsc 的地址继续进行遍历
 	for (uint_t tmdx = 0; tmdx < mnr - 1; tmdx++) {
 		// 检测前后两个msadsc_t结构体的msadflgs_t是否和cmpmdfp一致且空闲的，并且检测是否是连续的
 		retclok = continumsadsc_is_ok(&mstat[tmdx], &mstat[tmdx + 1], cmpmdfp);
@@ -282,8 +291,14 @@ bool_t scan_len_msadsc(msadsc_t *mstat, msadflgs_t *cmpmdfp, uint_t mnr, uint_t 
 }
 
 /**
- * 检查连续的msadsc_t 结构
- * 为了判断有多少个连续的msadsc_t 属于 memarea_t
+ * @brief 检查连续的msadsc_t 结构
+ * 	1. 为了判断有多少个连续的msadsc_t 属于 memarea_t
+ * 
+ * @param mareap memarea 内存区
+ * @param stat msadsc 开始地址
+ * @param end msadsc 结束地址
+ * @param fmnr 用于检验的msadsc连续长度
+ * @return uint_t 
  */
 uint_t check_continumsadsc(memarea_t *mareap, msadsc_t *stat, msadsc_t *end, uint_t fmnr)
 {
@@ -391,7 +406,18 @@ uint_t check_continumsadsc(memarea_t *mareap, msadsc_t *stat, msadsc_t *end, uin
 	return ok;
 }
 
-// 获取地址连续的msadsc_t结构体的开始、结束地址、一共多少个msadsc_t结构体，下一次循环的fntmnr
+/**
+ * @brief 获取地址连续的msadsc_t结构体的开始、结束地址、一共多少个msadsc_t结构体，下一次循环的fntmnr
+ * 
+ * @param mareap memarea地址
+ * @param fmstat msadsc_t结构体的首地址
+ * @param fntmsanr 已经遍历的msadsc_t的次数(包含连续地址)
+ * @param fmsanr msadsc_t 结构体总长度
+ * @param retmsastatp msadsc_t结构体的开始地址
+ * @param retmsaendp msadsc_t结构体的结束地址
+ * @param retfmnr 已经遍历到的msadsc_t的长度
+ * @return bool_t 
+ */
 bool_t merlove_scan_continumsadsc(memarea_t *mareap, msadsc_t *fmstat, uint_t *fntmsanr, uint_t fmsanr, 
         msadsc_t **retmsastatp, msadsc_t **retmsaendp, uint_t *retfmnr)
 {
@@ -479,7 +505,14 @@ bool_t merlove_scan_continumsadsc(memarea_t *mareap, msadsc_t *fmstat, uint_t *f
 	return FALSE;
 }
 
-// 给msadsc_t结构打上内存区标签
+/**
+ * @brief 给msadsc_t结构打上内存区标签
+ * 
+ * @param mareap 某个 memarea 结构体
+ * @param mstat msadsc 的开始地址
+ * @param msanr msadsc 的内存长度
+ * @return uint_t 返回某个 memare下msadsc 的数量
+ */
 uint_t merlove_setallmarflgs_onmemarea(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 {
 	if (NULL == mareap || NULL == mstat || 0 == msanr) {
@@ -605,8 +638,16 @@ uint_t test_setflgs(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 	return retnr;
 }
 
-// 根据地址连续的msadsc_t结构的数量查找合适bafhlst_t结构
-bafhlst_t *find_continumsa_inbafhlst(memarea_t *mareap, uint_t fmnr)
+/**
+ * @brief 根据地址连续的msadsc_t结构的数量查找合适bafhlst_t结构
+ * 	1. 如果是用户区，页就被单独一个一个的被加入到 dm_onemsalst 中，而不是按组进行分割
+ * 	2. 用户区的页面一般是 lazy allocated，用到一个页面分配一个页面
+ * 
+ * @param mareap memarea 内存区
+ * @param fmnr 连续长度
+ * @return bafhlst_t* 返回bafhlst首地址
+ */
+bafhlst_t* find_continumsa_inbafhlst(memarea_t *mareap, uint_t fmnr)
 {
 	bafhlst_t *retbafhp = NULL;
 	uint_t in = 0;
@@ -614,6 +655,7 @@ bafhlst_t *find_continumsa_inbafhlst(memarea_t *mareap, uint_t fmnr)
 		return NULL;
 	}
 
+	// 如果是用户区， 直接返回第一个
 	if (MA_TYPE_PROC == mareap->ma_type) {
 		return &mareap->ma_mdmdata.dm_onemsalst;
 	}
@@ -638,6 +680,16 @@ bafhlst_t *find_continumsa_inbafhlst(memarea_t *mareap, uint_t fmnr)
 	return retbafhp;
 }
 
+/**
+ * @brief 应用区bafhlst挂载msadsc
+ * 
+ * @param mareap 内存区地址
+ * @param bafhp bafhlst地址
+ * @param fstat msadsc开始地址
+ * @param fend msadsc结束地址
+ * @param fmnr msads连续长度
+ * @return bool_t 
+ */
 bool_t continumsadsc_add_procmareabafh(memarea_t *mareap, bafhlst_t *bafhp, msadsc_t *fstat, msadsc_t *fend, uint_t fmnr)
 {
 	if (NULL == mareap || NULL == bafhp || NULL == fstat || NULL == fend || 0 == fmnr) {
@@ -670,7 +722,16 @@ bool_t continumsadsc_add_procmareabafh(memarea_t *mareap, bafhlst_t *bafhp, msad
 	return TRUE;
 }
 
-// 根据地址连续的msadsc_t结构挂载到bafhlst_t结构中
+/**
+ * @brief 根据地址连续的msadsc_t结构挂载到bafhlst_t结构中
+ * 
+ * @param mareap memarea 内存区地址
+ * @param bafhp bafhlst 内存地址
+ * @param fstat msadsc 开始地址
+ * @param fend msadsc 结束地址
+ * @param fmnr bafhlst 最长长度
+ * @return bool_t 
+ */
 bool_t continumsadsc_add_bafhlst(memarea_t *mareap, bafhlst_t *bafhp, msadsc_t *fstat, msadsc_t *fend, uint_t fmnr)
 {
 	if (NULL == mareap || NULL == bafhp || NULL == fstat || NULL == fend || 0 == fmnr) {
@@ -706,7 +767,15 @@ bool_t continumsadsc_add_bafhlst(memarea_t *mareap, bafhlst_t *bafhp, msadsc_t *
 	return TRUE;
 }
 
-// 为一段地址连续的msadsc_t结构寻找合适m_mdmlielst数组中的bafhlst_t结构
+/**
+ * @brief 为一段地址连续的msadsc_t结构寻找合适m_mdmlielst数组中的bafhlst_t结构
+ * 
+ * @param mareap 内存区
+ * @param rfstat msadsc开始地址
+ * @param rfend msadsc结束地址
+ * @param rfmnr msads连续长度(还剩多少个地址连续长度)
+ * @return bool_t 
+ */
 bool_t continumsadsc_mareabafh_core(memarea_t *mareap, msadsc_t **rfstat, msadsc_t **rfend, uint_t *rfmnr)
 {
 
@@ -755,6 +824,7 @@ bool_t continumsadsc_mareabafh_core(memarea_t *mareap, msadsc_t **rfstat, msadsc
 		return TRUE;
 	}
 
+	// 应用区判断
 	if (BAFH_STUS_ONEM == bafhp->af_stus && MA_TYPE_PROC == mareap->ma_type) {
 		if (continumsadsc_add_procmareabafh(mareap, bafhp, mstat, mend, *rfmnr) == FALSE) {
 			return FALSE;
@@ -767,7 +837,15 @@ bool_t continumsadsc_mareabafh_core(memarea_t *mareap, msadsc_t **rfstat, msadsc
 	return FALSE;
 }
 
-// 把msadsc_t 结构体 挂载到合适的 m_mdmlielst 数组中的 bafhlst_t 结构中
+/**
+ * @brief 把msadsc_t 结构体 挂载到合适的 m_mdmlielst 数组中的 bafhlst_t 结构中
+ * 
+ * @param mareap 内存区地址
+ * @param mstat msadsc 开始地址
+ * @param mend msadsc 结束地址
+ * @param mnr 连续 msadsc 的长度
+ * @return bool_t 
+ */
 bool_t merlove_continumsadsc_mareabafh(memarea_t *mareap, msadsc_t *mstat, msadsc_t *mend, uint_t mnr)
 {
 	if (NULL == mareap || NULL == mstat || NULL == mend || 0 == mnr) {
@@ -788,7 +866,14 @@ bool_t merlove_continumsadsc_mareabafh(memarea_t *mareap, msadsc_t *mstat, msads
 	return TRUE;
 }
 
-// 对每一个内存区进行 msadsc_t 结构的合并操作
+/**
+ * @brief  对每一个内存区进行 msadsc_t 结构的合并操作
+ * 
+ * @param mareap 某个memarea结构体
+ * @param mstat msadsc 开始地址
+ * @param msanr msadsc 的长度
+ * @return bool_t 
+ */
 bool_t merlove_mem_onmemarea(memarea_t *mareap, msadsc_t *mstat, uint_t msanr)
 {
 	if (NULL == mareap || NULL == mstat || 0 == msanr) {

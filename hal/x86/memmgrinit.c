@@ -35,13 +35,16 @@ void disp_memmgrob()
 	return;
 }
 
-// 初始化内存管理核心数据结构的地址和数量，并计算了一些统计信息/物理地址转为虚拟地址，便于以后使用
-// 内存memmgrob_t被划分为多个功能分区，每个功能分区用一个memarea_t描述
+/**
+ * @brief 初始化内存管理核心数据结构的地址和数量，并计算了一些统计信息/物理地址转为虚拟地址，便于以后使用
+ * 	1. 内存memmgrob_t被划分为多个功能分区，每个功能分区用一个memarea_t描述
+ */
 void init_memmgrob()
 {
 	machbstart_t *mbsp = &kmachbsp;
 	memmgrob_t *mobp = &memmgrob;
 	memmgrob_t_init(mobp);
+	
 	if (NULL == mbsp->mb_e820expadr || 0 == mbsp->mb_e820exnr) {
 		system_error("mbsp->mb_e820expadr==NULL\n");
 	}
