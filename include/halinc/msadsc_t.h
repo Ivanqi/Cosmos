@@ -45,8 +45,8 @@ typedef struct s_MSADFLGS {
 } __attribute__((packed)) msadflgs_t;
 
 // 分配位
-#define  PAF_NO_ALLOC (0)
-#define  PAF_ALLOC (1)
+#define  PAF_NO_ALLOC (0)	// 未分配 
+#define  PAF_ALLOC (1)		// 已分配
 
 // 共享位
 #define  PAF_NO_SHARED (0)
