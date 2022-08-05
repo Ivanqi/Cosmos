@@ -210,10 +210,12 @@ msadsc_t* mm_divpages_opmsadsc(msadsc_t *msastat, uint_t mnr)
 }
 
 /**
- * 把freemsa 的 msadsc_t设置成未分配
- * 返回值
- * 	1: 如果依然大于0说明它是共享页面 直接返回1指示不需要进行下一步操作
- * 	2: 返回2指示需要进行下一步操作
+ * @brief 把freemsa 的 msadsc_t设置成未分配
+ * 
+ * @param bafh 内存区对应的bafhlst内存指针
+ * @param freemsa 需要被释放的msadsc
+ * @param freepgs 需要释放的内存页
+ * @return sint_t 1: 如果依然大于0说明它是共享页面 直接返回1指示不需要进行下一步操作。	2: 返回2指示需要进行下一步操作
  */
 sint_t mm_merpages_opmsadsc(bafhlst_t *bafh, msadsc_t *freemsa, uint_t freepgs)
 {
@@ -337,7 +339,15 @@ bool_t onmpgs_retn_bafhlst(memarea_t *malckp, uint_t pages, bafhlst_t **retrelba
 	return FALSE;
 }
 
-// 根据freepgs返回请求释放的和最大释放的bafhlst_t结构指针
+/**
+ * @brief 根据freepgs返回请求释放的和最大释放的bafhlst_t结构指针
+ * 
+ * @param malckp 内存区地址指针
+ * @param freepgs 需要释放的内存页数量
+ * @param retrelbf 需要释放的bafhlst结构指针
+ * @param retmerbf 需要最大释放的bafhlst结构指针
+ * @return bool_t 
+ */
 bool_t onfpgs_retn_bafhlst(memarea_t *malckp, uint_t freepgs, bafhlst_t **retrelbf, bafhlst_t **retmerbf)
 {
 	if (NULL == malckp || 1 > freepgs || NULL == retrelbf || NULL == retmerbf) {
@@ -613,6 +623,14 @@ bool_t mrdmb_add_msa_bafh(bafhlst_t *bafhp, msadsc_t *msastat, msadsc_t *msaend)
 
 /**
  * @brief 实际在bafhlst_t结构中分配页面
+ * 	1. 根据一个页面的请求，会返回 m_mdmlielst 数组中的第 0 个 bafhlst_t 结构
+ * 	2. 如果第 0 个 bafhlst_t 结构中有 msadsc_t 结构就直接返回，若没有 msadsc_t 结构，就会继续查找 m_mdmlielst 数组中的第 1 个 bafhlst_t 结构
+ * 	3. 如果第 1 个 bafhlst_t 结构中也没有 msadsc_t 结构，就会继续查找 m_mdmlielst 数组中的第 2 个 bafhlst_t 结构
+ * 	4. 如果第 2 个 bafhlst_t 结构中有 msadsc_t 结构，记住第 2 个 bafhlst_t 结构中对应是 4 个连续的 msadsc_t 结构
+ * 		这时让这 4 个连续的 msadsc_t 结构从第 2 个 bafhlst_t 结构中脱离
+ *	5. 把这 4 个连续的 msadsc_t 结构，对半分割成 2 个双 msadsc_t 结构，把其中一个双 msadsc_t 结构挂载到第 1 个 bafhlst_t 结构中
+ *  6. 把剩下一个双 msadsc_t 结构，继续对半分割成两个单 msadsc_t 结构，把其中一个单 msadsc_t 结构挂载到第 0 个 bafhlst_t 结构中
+ * 		剩下一个单 msadsc_t 结构返回给请求者，完成内存分配 
  * 
  * @param malckp 内存区地址指针
  * @param pages 需要分配的内存页数量
@@ -969,7 +987,13 @@ msadsc_t *mm_divpages_procmarea(memmgrob_t *mmobjp, uint_t pages, uint_t *retrea
 	return retmsa;
 }
 
-// 待处理的内存是已经分配的
+/**
+ * @brief 待处理的内存是已经分配的
+ * 
+ * @param freemsa 需要释放的msadsc
+ * @param freepgs 需要释放的内存页数量
+ * @return bool_t 
+ */
 bool_t scan_freemsa_isok(msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == freemsa || 1 > freepgs) {
@@ -980,12 +1004,15 @@ bool_t scan_freemsa_isok(msadsc_t *freemsa, uint_t freepgs)
 		return FALSE;
 	}
 
+	// msadsc 结束地址
 	msadsc_t *end = (msadsc_t *)freemsa->md_odlink;
 
+	// 内存没有被分配
 	if (PAF_ALLOC != freemsa->md_phyadrs.paf_alloc || PAF_ALLOC != end->md_phyadrs.paf_alloc || 1 > end->md_indxflgs.mf_uindx) {
 		return FALSE;
 	}
 
+	// 如果释放的内存开始地址和结束地址小于释放的内存页，会报错
 	if (((uint_t)((end - freemsa) + 1)) != freepgs) {
 		return FALSE;
 	}
@@ -994,14 +1021,18 @@ bool_t scan_freemsa_isok(msadsc_t *freemsa, uint_t freepgs)
 }
 
 /**
- * 检查msadsc_t是否在bafhlst_t中
+ * @brief 检查msadsc_t是否在bafhlst_t中
  * 	1. 检查是否msadsc_t的个数，是单个还是多个
  * 	2. msadsc_t是否属于bafhlst_t
  * 	3. 检查msadsc_t是否分配
  * 	4. 检查页物理地址相减的情况是否相等((_1me->md_phyadrs.paf_padrs - _1ms->md_phyadrs.paf_padrs) != (uint_t)(_1me - _1ms))
- * 返回值
+ * 
+ * @param bafh bafhlst地址指针
+ * @param _1ms msadsc开始地址
+ * @param _1me msadsc结束地址
+ * @return sint_t 返回值
  * 	1. 返回0，为错误
- * 	2. 返回2，为正常
+ *  2. 返回2，为正常
  */
 sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 {
@@ -1013,13 +1044,14 @@ sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 		return 0;
 	}
 
-	// 同一个结构体
+	// 单个msadsc
 	if (_1ms == _1me) {
 		// 各种属性检查
 		if (MF_OLKTY_BAFH != _1me->md_indxflgs.mf_olkty) {
 			return 0;
 		}
 
+		// 检查msadsc_t是否属于bafhlst_t
 		if (bafh != (bafhlst_t *)_1me->md_odlink) {
 			return 0;
 		}
@@ -1032,6 +1064,7 @@ sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 			return 0;
 		}
 
+		// 检查页物理地址相减的情况是否相等
 		if ((_1me->md_phyadrs.paf_padrs - _1ms->md_phyadrs.paf_padrs) != (uint_t)(_1me - _1ms)) {
 			return 0;
 		}
@@ -1039,6 +1072,7 @@ sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 		return 2;
 	}
 
+	// 连续的msadsc
 	if (MF_OLKTY_ODER != _1ms->md_indxflgs.mf_olkty) {
 		return 0;
 	}
@@ -1059,6 +1093,7 @@ sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 		return 0;
 	}
 
+	// 检查msadsc_t是否属于bafhlst_t
 	if (bafh != (bafhlst_t *)_1me->md_odlink) {
 		return 0;
 	}
@@ -1079,11 +1114,16 @@ sint_t mm_cmsa1blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me)
 }
 
 /**
- * 检查 msadsc_t 之间的地址是否连续
+ * @brief 检查 msadsc_t 之间的地址是否连续
  * 
- * 返回值
+ * @param bafh bafhlst地址指针
+ * @param _1ms msadsc_1 开始地址
+ * @param _1me msadsc_1 结束地址
+ * @param _2ms msadsc_2 开始地址
+ * @param _2me msadsc_2 结束地址
+ * @return sint_t 返回值
  * 	成功: 2(msadsc_t1结束地址 重合于 msadsc_t2 开始地址) , 4(msadsc_t2结束地址 部分重合于 msadsc_t1开始地址)
- * 	返回: 1(msadsc_t1 和 msadsc_t2不连续)
+ * 	1(msadsc_t1 和 msadsc_t2不连续)
  */
 sint_t mm_cmsa2blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t *_2ms, msadsc_t *_2me)
 {
@@ -1139,7 +1179,16 @@ sint_t mm_cmsa2blk_isok(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_
 	return 0;
 }
 
-// 重新检查合并后的两个msadsc_t的属性
+/**
+ * @brief 重新检查合并后的两个msadsc_t的属性
+ * 
+ * @param bafh 新的bafhlst内存地址
+ * @param _1ms msadsc_1 开始地址
+ * @param _1me msadsc_1 结束地址
+ * @param _2ms msadsc_2 开始地址
+ * @param _2me msadsc_2 结束地址
+ * @return bool_t 
+ */
 bool_t chek_cl2molkflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t *_2ms, msadsc_t *_2me)
 {
 	if (NULL == bafh || NULL == _1ms || NULL == _1me || NULL == _2ms || NULL == _2me) {
@@ -1167,6 +1216,7 @@ bool_t chek_cl2molkflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t
 		return TRUE;
 	}
 
+	// 连续内存区域
 	if (MF_OLKTY_ODER != _1ms->md_indxflgs.mf_olkty || (msadsc_t *)_1ms->md_odlink != _2me) {
 		return FALSE;
 	}
@@ -1186,7 +1236,16 @@ bool_t chek_cl2molkflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t
 	return TRUE;
 }
 
-// 把两个连续msadsc_t重新设置链表属性且设置属于哪个bafhlst_t
+/**
+ * @brief 把两个连续msadsc_t重新设置链表属性且设置属于哪个bafhlst_t
+ * 
+ * @param bafh 新的bafhlst地址
+ * @param _1ms msadsc_1 开始地址
+ * @param _1me msadsc_1 结束地址
+ * @param _2ms msadsc_2 开始地址
+ * @param _2me msadsc_2 结束地址
+ * @return bool_t 
+ */
 bool_t mm_clear_2msaolflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msadsc_t *_2ms, msadsc_t *_2me)
 {
 	if (NULL == bafh || NULL == _1ms || NULL == _1me || NULL == _2ms || NULL == _2me) {
@@ -1207,19 +1266,20 @@ bool_t mm_clear_2msaolflg(bafhlst_t *bafh, msadsc_t *_1ms, msadsc_t *_1me, msads
 	_1ms->md_odlink = _2me;
 
 	_2me->md_indxflgs.mf_olkty = MF_OLKTY_BAFH;
-	_2me->md_odlink = bafh;
+	_2me->md_odlink = bafh;	// 重新设置 bafhlst
 	
 	return TRUE;
 }
 
 /**
- * 查看最大地址连续、且空闲msadsc_t结构
- * 如释放的是第0个msadsc_t结构我们就去查找第1个msadsc_t结构是否空闲，且与第0个msadsc_t结构的地址是不是连续的
- * 同时返回合并后的新的msadsc_t的开始和结束地址
+ * @brief 查看最大地址连续、且空闲msadsc_t结构
+ * 	1. 如释放的是第0个msadsc_t结构我们就去查找第1个msadsc_t结构是否空闲，且与第0个msadsc_t结构的地址是不是连续的
+ * 	2. 同时返回合并后的新的msadsc_t的开始和结束地址
  * 
- * 返回值
- * 	失败：1, 0
- * 	成功: 2
+ * @param fbafh 需要合并的bafhlst开始地址
+ * @param rfnms 需要合并的msadsc开始地址
+ * @param rfnme 需要合并的msadsc结束地址
+ * @return sint_t 失败：1, 0 | 成功: 2
  */
 sint_t mm_find_cmsa2blk(bafhlst_t *fbafh, msadsc_t **rfnms, msadsc_t **rfnme)
 {
@@ -1245,6 +1305,7 @@ sint_t mm_find_cmsa2blk(bafhlst_t *fbafh, msadsc_t **rfnms, msadsc_t **rfnme)
 		if (2 == rets || 4 == rets) {
 			blkms = tmpmsa;
 			blkme = &tmpmsa[fbafh->af_oderpnr - 1];
+			// 从当前bafhlst链表删除msadsc
 			list_del(&tmpmsa->md_list);
 			fbafh->af_fobjnr--;
 			fbafh->af_mobjnr--;
@@ -1289,7 +1350,14 @@ step1:
 	return 0;
 }
 
-// 把空闲的msadsc_t 挂载到bafhlst_t中
+/**
+ * @brief 把空闲的msadsc_t 挂载到bafhlst_t中
+ * 
+ * @param bafhp 需要挂载的bafhlst地址
+ * @param freemstat 被释放的msadsc开始地址
+ * @param freemend 被释放的msadsc结束地址
+ * @return bool_t 
+ */
 bool_t mpobf_add_msadsc(bafhlst_t *bafhp, msadsc_t *freemstat, msadsc_t *freemend)
 {
 	if (NULL == bafhp || NULL == freemstat || NULL == freemend) {
@@ -1326,7 +1394,15 @@ bool_t mpobf_add_msadsc(bafhlst_t *bafhp, msadsc_t *freemstat, msadsc_t *freemen
 	return TRUE;
 }
 
-// 把msadsc_t结构进行合并然后加入对应bafhlst_t结构
+/**
+ * @brief 把msadsc_t结构进行合并然后加入对应bafhlst_t结构
+ * 
+ * @param freemsa 需要合并的msadsc_t结构体的开始地址
+ * @param freepgs 需要合并的内存页数量
+ * @param relbf 需要合并的bafhlst的开始地址
+ * @param merbf 需要合并的bafhlst的结束地址
+ * @return bool_t 
+ */
 bool_t mm_merpages_onbafhlst(msadsc_t *freemsa, uint_t freepgs, bafhlst_t *relbf, bafhlst_t *merbf)
 {
 	sint_t rets = 0;
@@ -1360,7 +1436,24 @@ bool_t mm_merpages_onbafhlst(msadsc_t *freemsa, uint_t freepgs, bafhlst_t *relbf
 	return TRUE;
 }
 
-// 把msadsc_t合并到memarea_t下的bafhlst_t的链表中
+/**
+ * @brief 把msadsc_t合并到memarea_t下的bafhlst_t的链表中
+ * 	1. 释放一个页面，会返回 m_mdmlielst 数组中的第 0 个 bafhlst_t 结构
+ * 	2. 设置这个页面对应的 msadsc_t 结构的相关信息，表示已经执行了释放操作
+ * 	3. 开始查看第 0 个 bafhlst_t 结构中有没有空闲的 msadsc_t，并且它和要释放的 msadsc_t 对应的物理地址是连续的
+ * 		没有则把这个释放的 msadsc_t 挂载第 0 个 bafhlst_t 结构中，算法结束，否则进入下一步
+ * 	4. 把第 0 个 bafhlst_t 结构中的 msadsc_t 结构拿出来与释放的 msadsc_t 结构，合并成 2 个连续且更大的 msadsc_t
+ * 	5. 继续查看第 1 个 bafhlst_t 结构中有没有空闲的 msadsc_t，而且这个空闲 msadsc_t 要和上一步合并的 2 个 msadsc_t 对应的物理地址是连续的
+ * 		没有则把这个合并的 2 个 msadsc_t 挂载第 1 个 bafhlst_t 结构中，算法结束，否则进入下一步
+ * 	6. 把第 1 个 bafhlst_t 结构中的 2 个连续的 msadsc_t 结构，还有合并的 2 个地址连续的 msadsc_t 结构拿出来，合并成 4 个连续且更大的 msadsc_t 结构
+ * 	7. 继续查看第 2 个 bafhlst_t 结构，有没有空闲的 msadsc_t 结构，并且它要和上一步合并的 4 个 msadsc_t 结构对应的物理地址是连续的。
+ * 		没有则把这个合并的 4 个 msadsc_t 挂载第 2 个 bafhlst_t 结构中，算法结束
+ * 
+ * @param malckp 内存区地址指针
+ * @param freemsa 需要释放的msadsc
+ * @param freepgs 需要释放的内存页数量
+ * @return bool_t 
+ */
 bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == malckp || NULL == freemsa || 1 > freepgs) {
@@ -1441,7 +1534,14 @@ bool_t mm_merpages_onmarea(memarea_t *malckp, msadsc_t *freemsa, uint_t freepgs)
 	return FALSE;
 }
 
-// 释放内存页面核心
+/**
+ * @brief 释放内存页面核心
+ * 
+ * @param marea 内存区地址指针
+ * @param freemsa 需要释放的msadsc
+ * @param freepgs 需要释放的内存页数量
+ * @return bool_t 
+ */
 bool_t mm_merpages_core(memarea_t *marea, msadsc_t *freemsa, uint_t freepgs)
 {
 	if (NULL == marea || NULL == freemsa || 1 > freepgs) {
