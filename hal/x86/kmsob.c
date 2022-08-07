@@ -35,7 +35,13 @@ void msomdc_t_init(msomdc_t *initp)
 	return;
 }
 
-// 初始化内存对象数据结构
+/**
+ * @brief 初始化内存对象数据结构
+ * 
+ * @param initp 
+ * @param stus 
+ * @param stat 
+ */
 void freobjh_t_init(freobjh_t *initp, uint_t stus, void *stat)
 {
 	list_init(&initp->oh_list);
@@ -144,7 +150,14 @@ void init_kmsob()
 	return;
 }
 
-// 更新kmsobmgrhed_t结构的信息
+/**
+ * @brief 更新kmsobmgrhed_t结构的信息
+ * 
+ * @param kmobmgrp kmsobmgrhed 地址指针
+ * @param koblp koblst内存指针
+ * @param kmsp kmsob 内存指针
+ * @param flgs 标志
+ */
 void kmsob_updata_cache(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp, uint_t flgs)
 {
 	if (KUC_NEWFLG == flgs) {
@@ -174,7 +187,13 @@ void kmsob_updata_cache(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp,
 	return;
 }
 
-// 看看内存对象容器是不是合乎要求
+/**
+ * @brief 看看内存对象容器是不是合乎要求
+ * 
+ * @param kmsp kmsob 结构体
+ * @param msz 要分配的内存
+ * @return kmsob_t* 
+ */
 kmsob_t *scan_newkmsob_isok(kmsob_t *kmsp, size_t msz)
 {
 	// 只要内存对象大小小于等于内存对象容器的对象大小就行
@@ -189,8 +208,15 @@ kmsob_t *scan_newkmsob_isok(kmsob_t *kmsp, size_t msz)
 	return NULL;
 }
 
-// 检查释放的内存对象是不是在kmsob_t结构中
-kmsob_t *scan_delkmsob_isok(kmsob_t *kmsp, void *fadrs, size_t fsz)
+/**
+ * @brief 检查释放的内存对象是不是在kmsob_t结构中
+ * 
+ * @param kmsp kmsob 内存地址
+ * @param fadrs 要释放内存指针地址
+ * @param fsz 要释放内存长度
+ * @return 成功返回kmsob_t* ，失败返回NULL
+ */
+kmsob_t* scan_delkmsob_isok(kmsob_t *kmsp, void *fadrs, size_t fsz)
 {
 	// 检查释放内存对象的地址是否落在kmsob_t结构的地址区间
 	if (NULL == kmsp || NULL == fadrs || 1 > fsz) {
@@ -310,7 +336,12 @@ bool_t scan_dfszkmsob_isok(kmsob_t *kmsp, void *fadrs, size_t fsz)
 	return FALSE;
 }
 
-// 如果内存对象容器中没有空闲的内存次对象了就需要扩展对象容器的内存了
+/**
+ * @brief 如果内存对象容器中没有空闲的内存次对象了就需要扩展对象容器的内存了
+ * 
+ * @param kmsp kmsob 内存地址
+ * @return uint_t 返回内存对象容器中空闲的对象个数
+ */
 uint_t scan_kmsob_objnr(kmsob_t *kmsp)
 {
 	if (NULL == kmsp) {
@@ -328,7 +359,13 @@ uint_t scan_kmsob_objnr(kmsob_t *kmsp)
 	return 0;
 }
 
-// 返回合适的kmsob_t
+/**
+ * @brief 返回合适的kmsob_t
+ * 
+ * @param koblp koblst内存地址
+ * @param msz 要分配的内存
+ * @return kmsob_t* 
+ */
 kmsob_t *onkoblst_retn_newkmsob(koblst_t *koblp, size_t msz)
 {
 	kmsob_t *kmsp = NULL, *tkmsp = NULL;
@@ -361,8 +398,15 @@ kmsob_t *onkoblst_retn_newkmsob(koblst_t *koblp, size_t msz)
 	return NULL;
 }
 
-// 查找释放内存对象所属的kmsob_t结构
-kmsob_t *onkoblst_retn_delkmsob(koblst_t *koblp, void *fadrs, size_t fsz)
+/**
+ * @brief 查找释放内存对象所属的kmsob_t结构
+ * 
+ * @param koblp koblst内存地址
+ * @param fadrs 要释放的内存地址
+ * @param fsz 要释放的内存长度
+ * @return kmsob_t* 
+ */
+kmsob_t* onkoblst_retn_delkmsob(koblst_t *koblp, void *fadrs, size_t fsz)
 {
 	kmsob_t *kmsp = NULL, *tkmsp = NULL;
 	list_h_t *tmplst = NULL;
@@ -393,7 +437,13 @@ kmsob_t *onkoblst_retn_delkmsob(koblst_t *koblp, void *fadrs, size_t fsz)
 	return NULL;
 }
 
-// koblst_t的内存对象大小大于要分配的数量，就返回这个koblst_t
+/**
+ * @brief koblst_t的内存对象大小大于要分配的数量，就返回这个koblst_t
+ * 
+ * @param kmmgrhlokp kmsobmgrhed_t结构的地址
+ * @param msz 要申请的内存
+ * @return koblst_t* 
+ */
 koblst_t *onmsz_retn_koblst(kmsobmgrhed_t *kmmgrhlokp, size_t msz)
 {
 	// 遍历ks_msoblst数组
@@ -427,7 +477,17 @@ bool_t kmsob_add_koblst(koblst_t *koblp, kmsob_t *kmsp)
 	return TRUE;
 }
 
-// 初始化内存对象容器
+/**
+ * @brief 初始化内存对象容器
+ * 
+ * @param kmsp kmsob 内存指针
+ * @param objsz kmsobj_t结构中内存对象的大小
+ * @param cvadrs 分配的内存的虚拟地址的开始地址
+ * @param cvadre 分配的内存的虚拟地址的结束地址
+ * @param msa msadsc内存指针地址
+ * @param relpnr msadsc内存长度
+ * @return kmsob_t* 
+ */
 kmsob_t *_create_init_kmsob(kmsob_t *kmsp, size_t objsz, adr_t cvadrs, adr_t cvadre, msadsc_t *msa, uint_t relpnr)
 {
 	if (NULL == kmsp || 1 > objsz || NULL == cvadrs || NULL == cvadre || NULL == msa || 1 > relpnr) {
@@ -488,11 +548,16 @@ kmsob_t *_create_init_kmsob(kmsob_t *kmsp, size_t objsz, adr_t cvadrs, adr_t cva
 }
 
 /**
- * 建立一个内存对象容器
- * 	这个函数会找物理页面管理器申请一块连续内存页面
- * 	然后，在其中的开始部分建立kmsob_t结构的实例变量，又在kmsob_t结构的后面建立freobjh_t结构数组
- * 	并把每个freobjh_t结构挂载到kmsob_t结构体中的so_frelist中
- * 	最后再把kmsob_t结构，挂载到kmsobmgrhed_t结构对应的koblst_t结构中
+ * @brief 建立一个内存对象容器
+ * 	1. 这个函数会找物理页面管理器申请一块连续内存页面
+ * 	2. 然后，在其中的开始部分建立kmsob_t结构的实例变量，又在kmsob_t结构的后面建立freobjh_t结构数组
+ * 	3. 并把每个freobjh_t结构挂载到kmsob_t结构体中的so_frelist中
+ * 	4. 最后再把kmsob_t结构，挂载到kmsobmgrhed_t结构对应的koblst_t结构中
+ * 
+ * @param kmmgrlokp kmsobmgrhed地址指针
+ * @param koblp koblst 地址指针
+ * @param objsz 要分配的内存
+ * @return kmsob_t* 
  */
 kmsob_t *_create_kmsob(kmsobmgrhed_t *kmmgrlokp, koblst_t *koblp, size_t objsz)
 {
@@ -555,8 +620,12 @@ kmsob_t *_create_kmsob(kmsobmgrhed_t *kmmgrlokp, koblst_t *koblp, size_t objsz)
 }
 
 /**
- * 实际分配的内存对象
- * 	从空闲内存对象链表头中取出第一个内存对象，返回它的首地址
+ * @brief 实际分配的内存对象
+ * 	1. 从空闲内存对象链表头中取出第一个内存对象，返回它的首地址
+ * 
+ * @param kmsp kmsob内存指针
+ * @param msz 要分配的内存数量
+ * @return void* 要分配的内存地址指针
  */
 void *kmsob_new_opkmsob(kmsob_t *kmsp, size_t msz)
 {
@@ -579,11 +648,13 @@ void *kmsob_new_opkmsob(kmsob_t *kmsp, size_t msz)
 }
 
 /**
- * 扩展内存页面
- * 	如果不断重复分配同一大小的内存对象，那么内存对象容器中的内存对象，迟早要分配完的
- * 	一旦内存对象分配完，内存对象容器就没有空闲的内存空间产生内存对象，就要扩展内存空间
+ * @brief 扩展内存页面
+ * 	1. 如果不断重复分配同一大小的内存对象，那么内存对象容器中的内存对象，迟早要分配完的
+ * 	2. 一旦内存对象分配完，内存对象容器就没有空闲的内存空间产生内存对象，就要扩展内存空间
+ * 	3. 所以，分配另一块连续的内存空间，作为空间的内存对象，并且把这块内存空间加内存对象容器中统一管理
  * 
- *  所以，分配另一块连续的内存空间，作为空间的内存对象，并且把这块内存空间加内存对象容器中统一管理
+ * @param kmsp kmsob 内存地址
+ * @return bool_t 
  */
 bool_t kmsob_extn_pages(kmsob_t *kmsp)
 {
@@ -669,7 +740,13 @@ bool_t kmsob_extn_pages(kmsob_t *kmsp)
 	return TRUE;
 }
 
-// 从空闲内存对象链表头中取出第一个内存对象，返回它的首地址。
+/**
+ * @brief 从空闲内存对象链表头中取出第一个内存对象，返回它的首地址
+ * 
+ * @param kmsp kmsob内存地址
+ * @param msz 要分配的内存
+ * @return void* 
+ */
 void *kmsob_new_onkmsob(kmsob_t *kmsp, size_t msz)
 {
 	if (NULL == kmsp || 1 > msz) {
@@ -694,8 +771,13 @@ ret_step:
 	knl_spinunlock_sti(&kmsp->so_lock, &cpuflg);
 	return retptr;
 }
-
-// 分配内存对象的核心函数
+ 
+/**
+ * @brief 分配内存对象的核心函数
+ * 
+ * @param msz 要分配的内存
+ * @return void* 返回要分配的内存指针
+ */
 void *kmsob_new_core(size_t msz)
 {
 	// 获取kmsobmgrhed_t结构的地址
@@ -752,12 +834,18 @@ void *kmsob_new(size_t msz)
 	return kmsob_new_core(msz);
 }
 
+/**
+ * @brief 扫描是否合适释放内存
+ * 
+ * @param kmsp 
+ * @return uint_t 0失败，1成功，2内存对象空闲
+ */
 uint_t scan_freekmsob_isok(kmsob_t *kmsp)
 {
 	if (NULL == kmsp) {
 		return 0;
 	}
-
+	
 	if (kmsp->so_mobjnr < kmsp->so_fobjnr) {
 		return 0;
 	}
@@ -771,11 +859,15 @@ uint_t scan_freekmsob_isok(kmsob_t *kmsp)
 }
 
 /**
- * 实际销毁内存对象容器
- * 	频繁请求的是不同大小的内存对象，那么空的内存对象容器会越来越多
- * 	这会占用大量内存，所以我们必须要把空的内存对象容器销毁
+ * @brief 实际销毁内存对象容器
+ * 	1. 频繁请求的是不同大小的内存对象，那么空的内存对象容器会越来越多
+ * 	2. 这会占用大量内存，所以我们必须要把空的内存对象容器销毁
+ * 	3. 首先要释放内存对象容器的扩展空间所占用的物理内存页面，最后才可以释放内存对象容器自身占用物理内存页面
  * 
- * 	首先要释放内存对象容器的扩展空间所占用的物理内存页面，最后才可以释放内存对象容器自身占用物理内存页面
+ * @param kmobmgrp 
+ * @param koblp 
+ * @param kmsp 
+ * @return bool_t 
  */
 bool_t _destroy_kmsob_core(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp)
 {
@@ -843,7 +935,14 @@ bool_t _destroy_kmsob_core(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *km
 	return TRUE;
 }
 
-// 销毁内存对象容器
+/**
+ * @brief 销毁内存对象容器
+ * 
+ * @param kmobmgrp 
+ * @param koblp 
+ * @param kmsp 
+ * @return bool_t 
+ */
 bool_t _destroy_kmsob(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp)
 {
 	if (NULL == kmobmgrp || NULL == koblp || NULL == kmsp) {
@@ -874,9 +973,15 @@ bool_t _destroy_kmsob(kmsobmgrhed_t *kmobmgrp, koblst_t *koblp, kmsob_t *kmsp)
 }
 
 /**
- * 释放内存对象
- * 	把要释放内存对象的空间，重新初始化，变成一个freobjh_t结构的实例变量
- * 	最后把这个freobjh_t结构加入到kmsobj_t结构中空闲链表中，这就实现了内存对象的释放
+ * 
+ * @brief 释放内存对象
+ * 	1. 把要释放内存对象的空间，重新初始化，变成一个freobjh_t结构的实例变量
+ * 	2. 最后把这个freobjh_t结构加入到kmsobj_t结构中空闲链表中，这就实现了内存对象的释放
+ * 
+ * @param kmsp msob内存地址
+ * @param fadrs 要释放的内存地址
+ * @param fsz 要释放的内存长度
+ * @return bool_t 
  */
 bool_t kmsob_del_opkmsob(kmsob_t *kmsp, void *fadrs, size_t fsz)
 {
@@ -903,7 +1008,14 @@ bool_t kmsob_del_opkmsob(kmsob_t *kmsp, void *fadrs, size_t fsz)
 	return TRUE;
 }
 
-// 释放内存对象
+/**
+ * @brief 释放内存对象
+ * 
+ * @param kmsp kmsob内存地址
+ * @param fadrs 要释放的内存地址
+ * @param fsz 要释放的内存长度
+ * @return bool_t 
+ */
 bool_t kmsob_delete_onkmsob(kmsob_t *kmsp, void *fadrs, size_t fsz)
 {
 	if (NULL == kmsp || NULL == fadrs || 1 > fsz) {
@@ -928,7 +1040,13 @@ ret_step:
 	return rets;
 }
 
-// 释放内存接口
+/**
+ * @brief 释放内存接口
+ * 
+ * @param fadrs 要释放的内存指针
+ * @param fsz 要释放的内存长度
+ * @return bool_t 
+ */
 bool_t kmsob_delete_core(void *fadrs, size_t fsz)
 {
 	kmsobmgrhed_t *kmobmgrp = &memmgrob.mo_kmsobmgr;

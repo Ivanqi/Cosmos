@@ -1584,10 +1584,12 @@ bool_t mm_merpages_fmwk(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t freepgs)
 }
 
 /**
- * 释放内存页面接口
- * 	mmobjp: 内存管理数据结构指针
- * 	freemsa: 释放内存页面对应的首个msadsc_t结构指针
- * 	freepgs: 请求释放的内存页面数
+ * @brief 释放内存页面接口
+ * 
+ * @param mmobjp 内存管理数据结构指针
+ * @param freemsa 释放内存页面对应的首个msadsc_t结构指针
+ * @param freepgs 请求释放的内存页面数
+ * @return bool_t 
  */
 bool_t mm_merge_pages(memmgrob_t *mmobjp, msadsc_t *freemsa, uint_t freepgs)
 {
