@@ -104,8 +104,8 @@ typedef struct KMVARSDSC {
 	u64_t  kva_limits;
 	vaslknode_t kva_lknode;
 	void*  kva_mcstruct;        // 指向它的上层结构
-	adr_t  kva_start;           // 线性映射区开始地址
-	adr_t  kva_end;             // 线性映射区结束地址
+	adr_t  kva_start;           // 内存开始地址
+	adr_t  kva_end;             // 内存结束地址
 	kvmemcbox_t* kva_kvmbox;    // 管理这个结构映射的物理页面
 	void*  kva_kvmcobj;
 } kmvarsdsc_t;
@@ -137,7 +137,7 @@ typedef struct s_MMADRSDSC mmadrsdsc_t;
 typedef struct s_VIRMEMADRS {
 	spinlock_t vs_lock;             // 保护自身的自旋锁
 	u32_t  vs_resalin;
-	list_h_t vs_list;               // 链表，链接虚拟地址区间
+	list_h_t vs_list;               // 链表，链接虚拟地址区间。kmvarsdsc链表
 	uint_t vs_flgs;                 // 标志
 	uint_t vs_kmvdscnr;             // 多少个虚拟地址区间
 	mmadrsdsc_t* vs_mm;             // 指向它的上层的数据结构

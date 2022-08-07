@@ -76,7 +76,7 @@ typedef struct MDIREFLAGS {
     u64_t m_xd:1;   // 63
 } __attribute__((packed)) mdireflags_t;
 
-// 页目录项
+// 页表项
 typedef struct MDIRE {
     union {
         mdireflags_t m_flags;

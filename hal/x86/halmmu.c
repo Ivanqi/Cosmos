@@ -31,6 +31,12 @@ void mmudsc_t_init(mmudsc_t* init)
 	return;	
 }
 
+/**
+ * @brief MMU 设置页表项管理结构体
+ * 
+ * @param mmulocked MMU地址指针
+ * @return msadsc_t* 
+ */
 msadsc_t* mmu_new_tdirearr(mmudsc_t* mmulocked)
 {
     tdirearr_t* tdirearr = NULL;
@@ -296,7 +302,14 @@ bool_t mmu_del_mdirearr(mmudsc_t* mmulocked, mdirearr_t* mdirearr, msadsc_t* msa
 	return FALSE;
 }
 
-// 得到物理地址
+/**
+ * @brief 得到物理地址
+ * 
+ * @param mmulocked MMU内存指针
+ * @param mdirearr 页目录项指针
+ * @param vadrs 要清除的内存地址
+ * @return adr_t 
+ */
 adr_t mmu_untransform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs)
 {
 	uint_t mindex;
@@ -309,6 +322,7 @@ adr_t mmu_untransform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs
 	// vadrs右移12位(vadrs除以2的12次方)。从页表项列表中获取页表
 	mindex = mmu_mdire_index(vadrs);
 	
+	// 页表项
 	mdire = mdirearr->mde_arr[mindex];
 	if (mmumsa_is_have(&mdire) == FALSE) {
 		return NULL;
@@ -335,7 +349,15 @@ bool_t mmu_transform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs,
 	return TRUE;
 }
 
-// 清空vadrs的页目录指针项
+/**
+ * @brief 清空vadrs的页目录指针项
+ * 
+ * @param mmulocked 
+ * @param idirearr 
+ * @param msa 
+ * @param vadrs 
+ * @return bool_t 
+ */
 bool_t mmu_untransform_mdire(mmudsc_t* mmulocked, idirearr_t* idirearr, msadsc_t* msa, adr_t vadrs)
 {
 	uint_t iindex;
@@ -639,7 +661,13 @@ adr_t mmu_find_msaadr(mdirearr_t* mdirearr, adr_t vadrs)
 	return mmumsa_ret_padr(&dire);
 }
 
-// 通过 idirearr 查找 mdirearr(页目录项)
+/**
+ * @brief 通过 idirearr(页目录指针项) 查找 mdirearr(页目录项)
+ * 
+ * @param idirearr 页目录指针项
+ * @param vadrs 要清除对应地址
+ * @return mdirearr_t* 
+ */
 mdirearr_t* mmu_find_mdirearr(idirearr_t* idirearr, adr_t vadrs)
 {
 	uint_t iindex;
@@ -661,7 +689,13 @@ mdirearr_t* mmu_find_mdirearr(idirearr_t* idirearr, adr_t vadrs)
 	return idire_ret_mdirearr(&dire);
 }
 
-// 通过 sdirearr 查找 idirearr(页目录指针项)
+/**
+ * @brief 通过 sdirearr(顶级页目录项) 查找 idirearr(页目录指针项)
+ * 
+ * @param sdirearr 顶级页目录项
+ * @param vadrs 要清除对应地址
+ * @return idirearr_t* 
+ */
 idirearr_t* mmu_find_idirearr(sdirearr_t* sdirearr, adr_t vadrs)
 {
 	uint_t sindex;
@@ -683,7 +717,13 @@ idirearr_t* mmu_find_idirearr(sdirearr_t* sdirearr, adr_t vadrs)
 	return sdire_ret_idirearr(&dire);
 }
 
-// 通过 mmu 查找 sdirearr(顶级页目录项)
+/**
+ * @brief 通过 mmu 查找 sdirearr(顶级页目录项)
+ * 
+ * @param tdirearr 页表项管理结构体
+ * @param vadrs 要清除对应地址
+ * @return sdirearr_t* 
+ */
 sdirearr_t* mmu_find_sdirearr(tdirearr_t* tdirearr, adr_t vadrs)
 {
 	uint_t tindex;
@@ -705,7 +745,13 @@ sdirearr_t* mmu_find_sdirearr(tdirearr_t* tdirearr, adr_t vadrs)
 	return tdire_ret_sdirearr(&dire);
 }
 
-// 清除对应地址的顶级页目录项、页目录指针项、页目录项
+/**
+ * @brief 清除对应地址的顶级页目录项、页目录指针项、页目录项
+ * 
+ * @param mmu MMU地址在
+ * @param vadrs 要清除对应地址
+ * @return adr_t 
+ */
 adr_t hal_mmu_untransform_core(mmudsc_t* mmu, adr_t vadrs)
 {
 	adr_t retadr;
@@ -735,7 +781,7 @@ adr_t hal_mmu_untransform_core(mmudsc_t* mmu, adr_t vadrs)
 		goto untf_idirearr; 
 	}
 	
-	// 得到物理地址，并晴空页目录项
+	// 得到物理地址，并清空页目录项
 	retadr = mmu_untransform_msa(mmu, mdirearr, vadrs);
 
 	// 清空vadrs的页目录指针项
@@ -754,7 +800,13 @@ out:
 	return retadr;
 }
 
-// 清除对应地址的顶级页目录项、页目录指针项、页目录项
+/**
+ * @brief 清除对应地址的顶级页目录项、页目录指针项、页目录项
+ * 
+ * @param mmu MMU地址在
+ * @param vadrs 要清除对应地址
+ * @return adr_t 
+ */
 adr_t hal_mmu_untransform(mmudsc_t* mmu, adr_t vadrs)
 {
 	if (NULL == mmu) {
@@ -764,7 +816,11 @@ adr_t hal_mmu_untransform(mmudsc_t* mmu, adr_t vadrs)
 	return hal_mmu_untransform_core(mmu, vadrs);
 }
 
-// 往cr3写入
+/**
+ * @brief 往MMU的CR3写入页目录基址
+ * 
+ * @param mmu 
+ */
 void hal_mmu_load(mmudsc_t* mmu)
 {
 	if (NULL == mmu) {
@@ -794,9 +850,12 @@ void hal_mmu_refresh()
 }
 
 /**
- * MMU
+ * @brief 初始化MMU
  * 	1. 读取cr3的物理地址
  * 	2. 然后把cr3的虚拟地址复制到mmu->mud_tdirearr中
+ * 
+ * @param mmu MMU地址指针
+ * @return bool_t 
  */
 bool_t hal_mmu_init(mmudsc_t* mmu)
 {
@@ -819,7 +878,7 @@ bool_t hal_mmu_init(mmudsc_t* mmu)
 	pcr3 = (adr_t)(cr3.c3s_c3sflgs.c3s_plm4a << 12);
 	vcr3 = phyadr_to_viradr(pcr3);
 
-	// 把 vcr3拷贝到mmu->mud_tdirearr
+	// 把 cr3拷贝到mmu->mud_tdirearr
 	hal_memcpy((void*)vcr3, (void*)mmu->mud_tdirearr, sizeof(tdirearr_t));
 	
 	mmu->mud_cr3.c3s_entry = (u64_t)viradr_to_phyadr((adr_t)mmu->mud_tdirearr);

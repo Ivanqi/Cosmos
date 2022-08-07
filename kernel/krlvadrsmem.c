@@ -157,8 +157,12 @@ void kvirmemadrs_t_init(kvirmemadrs_t *initp)
 	return;
 }
 
-// 创建一个kmvarsdsc_t
-kmvarsdsc_t *new_kmvarsdsc()
+/**
+ * @brief 创建一个kmvarsdsc_t
+ * 
+ * @return kmvarsdsc_t* 
+ */
+kmvarsdsc_t* new_kmvarsdsc()
 {
 	kmvarsdsc_t *kmvdc = NULL;
 	kmvdc = (kmvarsdsc_t *)kmsob_new(sizeof(kmvarsdsc_t));
@@ -201,9 +205,12 @@ bool_t del_virmemadrs(virmemadrs_t *vmdsc)
 }
 
 /**
- * 1. 设置内存空间区地址
- * 2. 设置线性映射区
- * 3. 把线性映射区挂载到内存空间区中
+ * @brief 初始化内核空间区和线性映射区
+ * 	1. 设置内存空间区地址
+ * 	2. 设置线性映射区
+ * 	3. 把线性映射区挂载到内存空间区中
+ * 
+ * @param kvma 
  */
 void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
 {
@@ -234,9 +241,12 @@ void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
 }
 
 /**
- * 建立了一个虚拟地址区间和一个栈区，栈区位于虚拟地址空间的顶端
+ * @brief 建立了一个虚拟地址区间和一个栈区，栈区位于虚拟地址空间的顶端
  * 	1. vma 的 0 ～ 0x00007fffffffffff 设置为可分配的虚拟地址
  * 	2. vma 设置两个区域。 虚拟地址区间：kmvdc(0x1000 ~ 0x5000), 栈区：stackkmvdc(0x00007FFFBFFFFFFF ～ 0x00007fffffffffff)
+ * 
+ * @param vma 
+ * @return bool_t 
  */
 bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 {
@@ -290,6 +300,11 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	return TRUE;
 }
 
+/**
+ * @brief 虚拟内存管理结构初始化
+ * 
+ * @param initp 虚拟内存管理结构体
+ */
 void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 {
 	if (NULL == initp) {
@@ -359,17 +374,27 @@ void init_kvirmemadrs()
 
 	test_vadr();
 	kprint("虚拟内存初始化成功\n");
-    die(0x400);
+    // die(0x400);
 	return;
 }
 
-// 检查kmvarsdsc_t结构
-kmvarsdsc_t *vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr, adr_t start, size_t vassize)
+/**
+ * @brief 检查kmvarsdsc_t结构
+ * 	1. 通过判断当前kmvarsdsc结构体的待分配的内存是否大于要分配的内存
+ * 	2. 如果待分配内存不够，就需要切换下一个kmvarsdsc指针
+ * 
+ * @param vmalocked 
+ * @param curr 当前的虚拟地址区间
+ * @param start 需要分配的内存开始地址
+ * @param vassize 需要分配的内存长度
+ * @return kmvarsdsc_t* 
+ */
+kmvarsdsc_t* vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr, adr_t start, size_t vassize)
 {
 	kmvarsdsc_t *nextkmvd = NULL;
 	adr_t newend = start + (adr_t)vassize;
 
-	// 如果curr不是最后一个先检查当前kmvarsdsc_t结构
+	// 如果curr不是最后一个,先检查当前kmvarsdsc_t结构
 	if (list_is_last(&curr->kva_list, &vmalocked->vs_list) == FALSE) {
 		// 就获取curr的下一个kmvarsdsc_t结构
 		nextkmvd = list_next_entry(curr, kmvarsdsc_t, kva_list);
@@ -404,24 +429,24 @@ kmvarsdsc_t *vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr
 	return NULL;
 }
 
-
 /**
- * 根据分配的开始地址和大小，在 virmemadrs_t 结构中查找相应的 kmvarsdsc_t 结构
- * 例子:
- * 	比如 virmemadrs_t 结构中有两个 kmvarsdsc_t 结构，A_kmvarsdsc_t 结构表示 0x1000～0x4000 的虚拟地址空间
- * 	B_kmvarsdsc_t 结构表示 0x7000～0x9000 的虚拟地址空间
+ * @brief 根据分配的开始地址和大小，在 virmemadrs_t 结构中查找相应的 kmvarsdsc_t 结构
+ * 	1. 比如 virmemadrs_t 结构中有两个 kmvarsdsc_t 结构，A_kmvarsdsc_t 结构表示 0x1000～0x4000 的虚拟地址空间
+ * 		B_kmvarsdsc_t 结构表示 0x7000～0x9000 的虚拟地址空间
+ * 	2. 然后分配 2KB 的虚拟地址空间，vma_find_kmvarsdsc 函数查找发现 A_kmvarsdsc_t 结构和 B_kmvarsdsc_t 结构之间正好有 0x4000～0x7000 的空间
+ * 		刚好放得下 0x2000 大小的空间，于是这个函数就会返回 A_kmvarsdsc_t 结构，否则就会继续向后查找
+ * 	3. 为了节约 kmvarsdsc_t 结构占用的内存空间，规定只要分配的虚拟地址空间上一个虚拟地址空间是连续且类型相同的就借用上一个 kmvarsdsc_t 结构
+ * 		而不是重新分配一个 kmvarsdsc_t 结构表示新分配的虚拟地址空间. 目的：避免个应用每次分配一个页面的虚拟地址空间，不停地分配，导致物理内存耗尽
  * 
- * 	然后分配 2KB 的虚拟地址空间，vma_find_kmvarsdsc 函数查找发现 A_kmvarsdsc_t 结构和 B_kmvarsdsc_t 结构之间正好有 0x4000～0x7000 的空间
- * 	刚好放得下 0x2000 大小的空间，于是这个函数就会返回 A_kmvarsdsc_t 结构，否则就会继续向后查找
- * 
- * 为了节约 kmvarsdsc_t 结构占用的内存空间，规定只要分配的虚拟地址空间上一个虚拟地址空间是连续且类型相同的就借用上一个 kmvarsdsc_t 结构
- * 而不是重新分配一个 kmvarsdsc_t 结构表示新分配的虚拟地址空间. 目的：避免个应用每次分配一个页面的虚拟地址空间，不停地分配，导致物理内存耗尽
- * 
+ * @param vmalocked virmemadrs 内存指针
+ * @param start 需要分配的内存的开始地址
+ * @param vassize 需要分配的内存的长度
+ * @return kmvarsdsc_t* 
  */
-kmvarsdsc_t *vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize)
+kmvarsdsc_t* vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize)
 {
 	kmvarsdsc_t *kmvdcurrent = NULL, *curr = vmalocked->vs_currkmvdsc;
-	adr_t newend = start + vassize;
+	adr_t newend = start + vassize;	// 分配的内存的结束地址
 	list_h_t *listpos = NULL;
 
 	// 分配的虚拟空间大小小于4KB不行
@@ -456,7 +481,16 @@ kmvarsdsc_t *vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vas
 	return NULL;
 }
 
-// 虚拟内存分配
+/**
+ * @brief 虚拟内存分配
+ * 
+ * @param mm 虚拟内存管理结构体地址
+ * @param start 需要分配的内存的开始地址
+ * @param vassize 需要分配的内存地址
+ * @param vaslimits 
+ * @param vastype 
+ * @return adr_t 
+ */
 adr_t vma_new_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimits, u32_t vastype)
 {
 	adr_t retadrs = NULL;
@@ -473,7 +507,7 @@ adr_t vma_new_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vas
 
 	// 进行虚拟地址区间进行检查查看是否复用这个数据结构
 	if (((NULL == start) || (start == currkmvd->kva_end)) && (vaslimits == currkmvd->kva_limits) && (vastype == currkmvd->kva_maptype)) {
-		// 能复用的化，当前虚拟地址区间的结束地址返回
+		// 能复用的，当前虚拟地址区间的结束地址返回
 		retadrs = currkmvd->kva_end;
 		// 扩展当前虚拟地址区间的结束地址为分配虚拟地址区间大小
 		currkmvd->kva_end += vassize;
@@ -517,7 +551,16 @@ out:
 	return retadrs;
 }
 
-// 分配虚拟地址空间的接口
+/**
+ * @brief 分配虚拟地址空间的接口
+ * 
+ * @param mm 虚拟内存管理结构体地址
+ * @param start 需要分配的内存的开始地址
+ * @param vassize 需要分配的内存地址
+ * @param vaslimits 
+ * @param vastype 
+ * @return adr_t 
+ */
 adr_t vma_new_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimits, u32_t vastype)
 {
 	if (NULL == mm || 1 > vassize) {
@@ -533,11 +576,14 @@ adr_t vma_new_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimit
 	// 调用虚拟地址空间分配的核心函数
 	return vma_new_vadrs_core(mm, start, VADSZ_ALIGN(vassize), vaslimits, vastype);
 }
-
-
 /**
- * 查找要释放虚拟地址空间的kmvarsdsc_t结构
- * 	释放时，查找虚拟地址区间的函数非常简单，仅仅是检查释放的虚拟地址空间是否落在查找 kmvarsdsc_t 结构表示的虚拟地址区间中
+ * @brief 查找要释放虚拟地址空间的kmvarsdsc_t结构
+ * 	1. 释放时，查找虚拟地址区间的函数非常简单，仅仅是检查释放的虚拟地址空间是否落在查找 kmvarsdsc_t 结构表示的虚拟地址区间中
+ * 
+ * @param vmalocked virmemadrs内存指针
+ * @param start 要释放的内存
+ * @param vassize 要释放的内存长度
+ * @return kmvarsdsc_t* 
  */
 kmvarsdsc_t *vma_del_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize)
 {
@@ -595,7 +641,15 @@ void vma_del_set_endcurrkmvd(virmemadrs_t *vmalocked, kmvarsdsc_t *del)
 	return;
 }
 
-// 删除映射的物理内存
+/**
+ * @brief 删除映射的物理内存
+ * 
+ * @param mm mmadrsdsc内存指针
+ * @param kmvd kmvarsdsc内存指针
+ * @param start 要删除的内存开始地址
+ * @param end 要删除的内存结束地址
+ * @return bool_t 
+ */
 bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, adr_t end)
 {
 	adr_t phyadrs;
@@ -618,7 +672,15 @@ bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start
 	return rets;
 }
 
-// 删除映射的物理内存
+/**
+ * @brief 删除映射的物理内存
+ * 
+ * @param mm mmadrsdsc内存指针
+ * @param kmvd kmvarsdsc内存指针
+ * @param start 要删除的内存开始地址
+ * @param vassize 要删除的内存的长度
+ * @return bool_t 
+ */
 bool_t vma_del_unmapping(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, size_t vassize)
 {
 	adr_t end;
@@ -633,11 +695,16 @@ bool_t vma_del_unmapping(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, size_t
 }
 
 /**
- * 释放虚拟地址空间的核心函数
+ * @brief 释放虚拟地址空间的核心函数
  * 	1. 首位都相等，砍掉kmvarsdsc_t结构
  * 	2. 开始位相等，砍掉kmvarsdsc_t开始位
  * 	3. 结尾位相等，砍掉kmvarsdsc_t结尾位
  * 	4. 首尾都不相等，砍掉中间部分，两边拆分为两个kmvarsdsc_t结构
+ * 
+ * @param mm mmadrsdsc 地址指针
+ * @param start 要释放的地址
+ * @param vassize 要释放的地址长度
+ * @return bool_t 
  */
 bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 {
