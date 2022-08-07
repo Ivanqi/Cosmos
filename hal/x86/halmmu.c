@@ -129,7 +129,14 @@ msadsc_t* mmu_new_sdirearr(mmudsc_t* mmulocked)
     return msa;
 }
 
-// 删除顶级页目录项
+/**
+ * @brief 删除顶级页目录项
+ * 
+ * @param mmulocked 
+ * @param sdirearr 顶级页目录项
+ * @param msa 
+ * @return bool_t 
+ */
 bool_t mmu_del_sdirearr(mmudsc_t* mmulocked, sdirearr_t* sdirearr, msadsc_t* msa)
 {
 	list_h_t* pos;
@@ -195,7 +202,14 @@ msadsc_t* mmu_new_idirearr(mmudsc_t* mmulocked)
     return msa;
 }
 
-// 删除页目录指针项
+/**
+ * @brief 删除页目录指针项
+ * 
+ * @param mmulocked MMU内存指针
+ * @param idirearr 页目录指针项
+ * @param msa msadsc 内存指针
+ * @return bool_t 
+ */
 bool_t mmu_del_idirearr(mmudsc_t* mmulocked, idirearr_t* idirearr, msadsc_t* msa)
 {
 	list_h_t* pos;
@@ -258,7 +272,14 @@ msadsc_t* mmu_new_mdirearr(mmudsc_t* mmulocked)
     return msa;
 }
 
-// 清空页目录项对应的物理内存
+/**
+ * @brief 清空页目录项对应的物理内存
+ * 
+ * @param mmulocked MMU内存指针
+ * @param mdirearr 页目录项
+ * @param msa msadsc内存指针
+ * @return bool_t 
+ */
 bool_t mmu_del_mdirearr(mmudsc_t* mmulocked, mdirearr_t* mdirearr, msadsc_t* msa)
 {
 	list_h_t* pos;
@@ -352,8 +373,8 @@ bool_t mmu_transform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs,
 /**
  * @brief 清空vadrs的页目录指针项
  * 
- * @param mmulocked 
- * @param idirearr 
+ * @param mmulocked MMU地址指针
+ * @param idirearr 页目录指针
  * @param msa 
  * @param vadrs 
  * @return bool_t 
@@ -426,7 +447,15 @@ mdirearr_t* mmu_transform_mdire(mmudsc_t* mmulocked, idirearr_t* idirearr, adr_t
 	return mdirearr;
 }
 
-// 清空顶级页目录项
+/**
+ * @brief 清空页目录指针项
+ * 
+ * @param mmulocked MMU内存指针
+ * @param sdirearr 顶级页目录项
+ * @param msa 
+ * @param vadrs 
+ * @return bool_t 
+ */
 bool_t mmu_untransform_idire(mmudsc_t* mmulocked, sdirearr_t* sdirearr, msadsc_t* msa, adr_t vadrs)
 {
 	uint_t sindex;
@@ -495,7 +524,15 @@ idirearr_t* mmu_transform_idire(mmudsc_t* mmulocked, sdirearr_t* sdirearr, adr_t
 	return idirearr;
 }
 
-// 清空页表项
+/**
+ * @brief 清空顶级页目录项
+ * 
+ * @param mmulocked MMU内存指针
+ * @param tdirearr 页表项管理结构体
+ * @param msa msadsc 内存指针
+ * @param vadrs 要释放的内存
+ * @return bool_t 
+ */
 bool_t mmu_untransform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, msadsc_t* msa, adr_t vadrs)
 {
 	uint_t tindex;
@@ -750,7 +787,7 @@ sdirearr_t* mmu_find_sdirearr(tdirearr_t* tdirearr, adr_t vadrs)
  * 
  * @param mmu MMU地址在
  * @param vadrs 要清除对应地址
- * @return adr_t 
+ * @return adr_t 返回物理地址
  */
 adr_t hal_mmu_untransform_core(mmudsc_t* mmu, adr_t vadrs)
 {
@@ -788,7 +825,7 @@ adr_t hal_mmu_untransform_core(mmudsc_t* mmu, adr_t vadrs)
 	mmu_untransform_mdire(mmu, idirearr, NULL, vadrs);
 
 untf_idirearr:
-	// 清空顶级页目录项
+	// 清空页目录指针项
 	mmu_untransform_idire(mmu, sdirearr, NULL, vadrs);
 
 untf_sdirearr:
@@ -805,7 +842,7 @@ out:
  * 
  * @param mmu MMU地址在
  * @param vadrs 要清除对应地址
- * @return adr_t 
+ * @return adr_t 返回物理地址
  */
 adr_t hal_mmu_untransform(mmudsc_t* mmu, adr_t vadrs)
 {

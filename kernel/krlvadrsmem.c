@@ -652,7 +652,7 @@ void vma_del_set_endcurrkmvd(virmemadrs_t *vmalocked, kmvarsdsc_t *del)
  */
 bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, adr_t end)
 {
-	adr_t phyadrs;
+	adr_t phyadrs;	// 物理地址
 	bool_t rets = TRUE;
 	mmudsc_t *mmu = &mm->msd_mmu;
 	kvmemcbox_t *kmbox = kmvd->kva_kvmbox;
@@ -1142,6 +1142,15 @@ kvmemcbox_t *vma_map_retn_kvmemcbox(kmvarsdsc_t *kmvd)
 	return kmvd->kva_kvmbox;
 }
 
+/**
+ * @brief 
+ * 
+ * @param mm 
+ * @param kmbox 
+ * @param msa 
+ * @param phyadr 
+ * @return bool_t 
+ */
 bool_t vma_del_usermsa(mmadrsdsc_t *mm, kvmemcbox_t *kmbox, msadsc_t *msa, adr_t phyadr)
 {
 	bool_t rets = FALSE;

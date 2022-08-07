@@ -76,7 +76,7 @@ typedef struct MDIREFLAGS {
     u64_t m_xd:1;   // 63
 } __attribute__((packed)) mdireflags_t;
 
-// 页表项
+// 页目录项
 typedef struct MDIRE {
     union {
         mdireflags_t m_flags;
@@ -148,7 +148,7 @@ typedef struct TDIREFLAGS {
     u64_t t_xd:1;    // 63  XD，执行屏蔽位
 } __attribute__((packed)) tdireflags_t;
 
-// 页表项
+// 页表项管理结构体
 typedef struct TDIRE {
     union {
         tdireflags_t t_flags;
@@ -156,7 +156,7 @@ typedef struct TDIRE {
     } __attribute__((packed));
 } __attribute__((packed)) tdire_t;
 
-// 项目录项管理结构体
+// 页目录项管理结构体
 typedef struct MDIREARR {
     mdire_t mde_arr[MDIRE_MAX];
 } __attribute__((packed)) mdirearr_t;
