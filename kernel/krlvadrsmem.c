@@ -174,6 +174,13 @@ kmvarsdsc_t* new_kmvarsdsc()
 	return kmvdc;
 }
 
+/**
+ * @brief kmvarsdsc 删除
+ *  1. delkmvd 对应的内存删除
+ * 
+ * @param delkmvd 
+ * @return bool_t 
+ */
 bool_t del_kmvarsdsc(kmvarsdsc_t *delkmvd)
 {
 	if (NULL == delkmvd) {
@@ -615,7 +622,10 @@ kmvarsdsc_t *vma_del_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t
 }
 
 /**
- * 删除 kmvarsdsc_t
+ * @brief 删除 kmvarsdsc_t
+ * 
+ * @param vmalocked virmemadrs内存指针
+ * @param del 需要被删除的kmvarsdsc指针
  */
 void vma_del_set_endcurrkmvd(virmemadrs_t *vmalocked, kmvarsdsc_t *del)
 {
@@ -1093,8 +1103,14 @@ void kmap_fulshcurrcpu_mmutable()
 	return;
 }
 
-
-kmvarsdsc_t *vma_map_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t vadrs)
+/**
+ * @brief 查找是否被分配的虚拟地址
+ * 
+ * @param vmalocked virmemadrs内存指针
+ * @param vadrs 缺页异常地址
+ * @return kmvarsdsc_t* 
+ */
+kmvarsdsc_t* vma_map_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t vadrs)
 {
 	list_h_t *pos = NULL;
 	kmvarsdsc_t *curr = vmalocked->vs_currkmvdsc;
@@ -1119,6 +1135,12 @@ kmvarsdsc_t *vma_map_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t vadrs)
 	return NULL;
 }
 
+/**
+ * @brief 通过kmvarsdsc结构查找页面盒子(kvmemcbox)
+ * 
+ * @param kmvd 
+ * @return kvmemcbox_t* 
+ */
 kvmemcbox_t *vma_map_retn_kvmemcbox(kmvarsdsc_t *kmvd)
 {
 	kvmemcbox_t *kmbox = NULL;
@@ -1200,6 +1222,13 @@ out:
 	return rets;
 }
 
+/**
+ * @brief 新增对应虚拟地址的msadsc
+ * 
+ * @param mm 
+ * @param kmbox 
+ * @return msadsc_t* 
+ */
 msadsc_t *vma_new_usermsa(mmadrsdsc_t *mm, kvmemcbox_t *kmbox)
 {
 	u64_t pages = 1, retpnr = 0;
@@ -1224,10 +1253,16 @@ msadsc_t *vma_new_usermsa(mmadrsdsc_t *mm, kvmemcbox_t *kmbox)
 }
 
 /**
- * 映射物理内存页面
+ * @brief 映射物理内存页面
  * 	1. vma_new_usermsa 函数，分配一个物理内存页面并把对应的 msadsc_t 结构挂载到 kvmemcbox_t 结构上
  * 	2. 接着获取 msadsc_t 结构对应内存页面的物理地址
  * 	3. 最后是调用 hal_mmu_transform 函数完成虚拟地址到物理地址的映射工作，它主要是建立 MMU 页表
+ * 
+ * @param mm mmadrsdsc 内存指针
+ * @param kmbox kvmemcbox页面盒子指针
+ * @param vadrs 缺页异常地址
+ * @param flags 
+ * @return adr_t 
  */
 adr_t vma_map_msa_fault(mmadrsdsc_t *mm, kvmemcbox_t *kmbox, adr_t vadrs, u64_t flags)
 {
@@ -1269,10 +1304,14 @@ adr_t vma_map_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t vadrs, u64_t fla
 }
 
 /**
- *  缺页异常处理核心函数
- *    1. 查找缺页地址对应的 kmvarsdsc_t 结构
- * 	  2. 查找 kmvarsdsc_t 结构下面的对应 kvmemcbox_t 结构，它是用来挂载物理内存页面的
- * 	  3. 分配物理内存页面并建立 MMU 页表映射关系
+ * @brief 缺页异常处理核心函数
+ * 	1. 查找缺页地址对应的 kmvarsdsc_t 结构
+ * 	2. 查找 kmvarsdsc_t 结构下面的对应 kvmemcbox_t 结构，它是用来挂载物理内存页面的
+ * 	3. 分配物理内存页面并建立 MMU 页表映射关系
+ * 
+ * @param mm mmadrsdsc内存指针
+ * @param vadrs 缺页异常地址
+ * @return sint_t 返回状态码
  */
 sint_t vma_map_fairvadrs_core(mmadrsdsc_t *mm, adr_t vadrs)
 {
@@ -1323,7 +1362,12 @@ sint_t vma_map_fairvadrs(mmadrsdsc_t *mm, adr_t vadrs)
 	return vma_map_fairvadrs_core(mm, vadrs);
 }
 
-// 由异常分发器调用的接口
+/**
+ * @brief 由异常分发器调用的接口
+ * 
+ * @param fairvadrs 异常地址
+ * @return sint_t 
+ */
 sint_t krluserspace_accessfailed(adr_t fairvadrs)
 {
 	// 这里应该获取当前进程的mm，但是现在我们没有进程，才initmmadrsdsc代替
@@ -1422,6 +1466,11 @@ bool_t del_kvmemcobj(kvmemcobj_t* delkvmcop)
 	return TRUE;
 }
 
+/**
+ * @brief 页面盒子初始化
+ * 
+ * @param init 
+ */
 void kvmemcbox_t_init(kvmemcbox_t* init)
 {
 	if(NULL == init) {
@@ -1481,6 +1530,13 @@ kvmemcbox_t* new_kvmemcbox()
 	return kmbox;
 }
 
+/**
+ * @brief kvmemcbox 删除
+ * 	1. 把 del指针对应的内存删除
+ * 
+ * @param del memcbox指针
+ * @return bool_t 
+ */
 bool_t del_kvmemcbox(kvmemcbox_t* del)
 {
 	if(NULL == del) {
@@ -1512,6 +1568,11 @@ void knl_decount_kvmemcbox(kvmemcbox_t* kmbox)
 	return;
 }
 
+/**
+ * @brief 从页面盒子的头查找页面盒子
+ * 
+ * @return kvmemcbox_t* 
+ */
 kvmemcbox_t* knl_get_kvmemcbox()
 {
 	kvmemcbox_t* kmb = NULL;
@@ -1519,12 +1580,15 @@ kvmemcbox_t* knl_get_kvmemcbox()
 	knl_spinlock(&kmbmgr->kbm_lock);
 
 	if (0 < kmbmgr->kbm_cachenr) {
+		// 缓存kvmemcbox_t结构的链表 不为空
 		if(list_is_empty_careful(&kmbmgr->kbm_cachehead) == FALSE) {
 			kmb = list_first_oneobj(&kmbmgr->kbm_cachehead, kvmemcbox_t, kmb_list);
+			// 从缓存链表中脱链
 			list_del(&kmb->kmb_list);
 			kmbmgr->kbm_cachenr--;
 			
 			kvmemcbox_t_init(kmb);
+			// 加入到kbm_kmbhead链表中
 			list_add(&kmb->kmb_list, &kmbmgr->kbm_kmbhead);
 			kmbmgr->kbm_kmbnr++;
 			refcount_inc(&kmb->kmb_cont);
@@ -1549,7 +1613,12 @@ out:
 	return kmb;
 }
 
-// 删除 kvmemcbox_t
+/**
+ * @brief 删除 kvmemcbox_t
+ * 
+ * @param kmbox kvmemcbox内存指针
+ * @return bool_t 
+ */
 bool_t knl_put_kvmemcbox(kvmemcbox_t* kmbox)
 {
 	kvmemcboxmgr_t* kmbmgr = &krlvirmemadrs.kvs_kvmemcboxmgr;

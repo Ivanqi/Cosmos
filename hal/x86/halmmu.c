@@ -566,6 +566,16 @@ bool_t mmu_untransform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, msadsc_t
 	return TRUE; 
 }
 
+/**
+ * @brief MMU映射顶级页表
+ * 
+ * @param mmulocked 
+ * @param tdirearr 
+ * @param vadrs 
+ * @param flags 
+ * @param outmsa 
+ * @return sdirearr_t* 
+ */
 sdirearr_t* mmu_transform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, adr_t vadrs, u64_t flags, msadsc_t** outmsa)
 {
 	uint_t tindex;
@@ -601,7 +611,15 @@ sdirearr_t* mmu_transform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, adr_t
 	return sdirearr;
 }
 
-// 建立MMU页表完成虚拟地址到物理地址的映射
+/**
+ * @brief 建立MMU页表完成虚拟地址到物理地址的映射
+ * 
+ * @param mmu MMU内存指针
+ * @param vadrs 虚拟地址
+ * @param padrs 物理地址
+ * @param flags 标志位
+ * @return bool_t 
+ */
 bool_t hal_mmu_transform_core(mmudsc_t* mmu, adr_t vadrs, adr_t padrs, u64_t flags)
 {
 	bool_t rets = FALSE;
@@ -669,7 +687,15 @@ out:
 	return rets;
 }
 
-// 建立MMU页表完成虚拟地址到物理地址的映射
+/**
+ * @brief 建立MMU页表完成虚拟地址到物理地址的映射
+ * 
+ * @param mmu MMU内存指针
+ * @param vadrs 虚拟地址
+ * @param padrs 物理地址
+ * @param flags 标志位
+ * @return bool_t 
+ */
 bool_t hal_mmu_transform(mmudsc_t* mmu, adr_t vadrs, adr_t padrs, u64_t flags)
 {
 	if (NULL == mmu) {

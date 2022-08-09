@@ -97,10 +97,12 @@ KLINE void refcount_inc(refcount_t *refc) {
     return;
 }
 
+// 计数器减1(原子操作)
 KLINE void refcount_dec(refcount_t *refc) {
     atomic_dec(&refc->ref_count);
 }
 
+// 原子读
 KLINE s32_t refcount_read(refcount_t *refc) {
     return atomic_read(&refc->ref_count);
 }
