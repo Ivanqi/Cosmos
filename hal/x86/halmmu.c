@@ -105,6 +105,12 @@ bool_t mmu_del_tdirearr(mmudsc_t* mmulocked, tdirearr_t* tdirearr, msadsc_t* msa
 	return FALSE;
 }
 
+/**
+ * @brief MMU创建顶级页表目录项
+ * 
+ * @param mmulocked MMU结构体
+ * @return msadsc_t* 
+ */
 msadsc_t* mmu_new_sdirearr(mmudsc_t* mmulocked)
 {
     sdirearr_t* sdirearr = NULL;
@@ -115,6 +121,7 @@ msadsc_t* mmu_new_sdirearr(mmudsc_t* mmulocked)
         return NULL;
     }
     
+	// 申请内存
 	msa = mm_division_pages(&memmgrob, pages, &retpnr, MA_TYPE_KRNL, DMF_RELDIV);
 	if (NULL == msa) {
 		return NULL;
@@ -124,6 +131,7 @@ msadsc_t* mmu_new_sdirearr(mmudsc_t* mmulocked)
 
     sdirearr_t_init(sdirearr);
 
+	// 把msa 加入MMU的顶级页表目录项
     list_add(&msa->md_list, &mmulocked->mud_sdirhead);
     mmulocked->mud_sdirmsanr++;
     return msa;
@@ -177,6 +185,12 @@ bool_t mmu_del_sdirearr(mmudsc_t* mmulocked, sdirearr_t* sdirearr, msadsc_t* msa
 	return FALSE;
 }
 
+/**
+ * @brief 创建页目录指针项
+ * 
+ * @param mmulocked MMU内存指针
+ * @return msadsc_t* 
+ */
 msadsc_t* mmu_new_idirearr(mmudsc_t* mmulocked)
 {
     idirearr_t* idirearr = NULL;
@@ -186,7 +200,8 @@ msadsc_t* mmu_new_idirearr(mmudsc_t* mmulocked)
     if (NULL == mmulocked) {
         return NULL;
     }
-    
+	
+	// 分配内存
 	msa = mm_division_pages(&memmgrob, pages, &retpnr, MA_TYPE_KRNL, DMF_RELDIV);
 	if (NULL == msa) {
 		return NULL;
@@ -356,7 +371,16 @@ adr_t mmu_untransform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs
 	return retadr; 
 }
 
-// 页表项映射
+/**
+ * @brief 页表项映射
+ * 
+ * @param mmulocked MMU指针
+ * @param mdirearr 页目录项
+ * @param vadrs 虚拟地址
+ * @param padrs 物理地址
+ * @param flags 标志
+ * @return bool_t 
+ */
 bool_t mmu_transform_msa(mmudsc_t* mmulocked, mdirearr_t* mdirearr, adr_t vadrs, adr_t padrs, u64_t flags)
 {
 	uint_t mindex;	
@@ -412,6 +436,16 @@ bool_t mmu_untransform_mdire(mmudsc_t* mmulocked, idirearr_t* idirearr, msadsc_t
 	return TRUE; 
 }
 
+/**
+ * @brief 定位页目录项
+ * 
+ * @param mmulocked MMU指针
+ * @param idirearr 页目录指针项
+ * @param vadrs 缺页异常地址
+ * @param flags 标志
+ * @param outmsa 返回的msadsc
+ * @return mdirearr_t* 页目录项
+ */
 mdirearr_t* mmu_transform_mdire(mmudsc_t* mmulocked, idirearr_t* idirearr, adr_t vadrs, u64_t flags, msadsc_t** outmsa)
 {
 	uint_t iindex;
@@ -432,6 +466,7 @@ mdirearr_t* mmu_transform_mdire(mmudsc_t* mmulocked, idirearr_t* idirearr, adr_t
 		return mdirearr;
 	}
 
+	// 创建新的页目录项
 	msa = mmu_new_mdirearr(mmulocked);
 	if (NULL == msa) {
 		*outmsa = NULL;
@@ -489,6 +524,16 @@ bool_t mmu_untransform_idire(mmudsc_t* mmulocked, sdirearr_t* sdirearr, msadsc_t
 	return TRUE; 
 }
 
+/**
+ * @brief 定位页目录指针项
+ * 
+ * @param mmulocked MMU指针
+ * @param sdirearr 顶级页表目录项指针
+ * @param vadrs 缺页异常地址
+ * @param flags 
+ * @param outmsa 返回的msadsc
+ * @return idirearr_t* 返回页目录指针项
+ */
 idirearr_t* mmu_transform_idire(mmudsc_t* mmulocked, sdirearr_t* sdirearr, adr_t vadrs, u64_t flags, msadsc_t** outmsa)
 {
 	uint_t sindex;
@@ -567,14 +612,14 @@ bool_t mmu_untransform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, msadsc_t
 }
 
 /**
- * @brief MMU映射顶级页表
+ * @brief MMU映射顶级页表目录项
  * 
- * @param mmulocked 
- * @param tdirearr 
- * @param vadrs 
- * @param flags 
- * @param outmsa 
- * @return sdirearr_t* 
+ * @param mmulocked MMU内存指针
+ * @param tdirearr 页表项管理结构体指针
+ * @param vadrs 缺页异常地址
+ * @param flags 标志
+ * @param outmsa 要需要输出的msadsc指针
+ * @return sdirearr_t* 顶级页表目录项
  */
 sdirearr_t* mmu_transform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, adr_t vadrs, u64_t flags, msadsc_t** outmsa)
 {
@@ -587,8 +632,8 @@ sdirearr_t* mmu_transform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, adr_t
 		return NULL;
 	}
 	
+	// 获得顶级页目录项
 	tindex = mmu_tdire_index(vadrs);
-	
 	tdire = tdirearr->tde_arr[tindex];
 	if (sdire_is_have(&tdire) == TRUE) {
 		sdirearr = tdire_ret_sdirearr(&tdire);
@@ -596,6 +641,7 @@ sdirearr_t* mmu_transform_sdire(mmudsc_t* mmulocked, tdirearr_t* tdirearr, adr_t
 		return sdirearr;
 	}
 
+	// 如果无法从表项管理结构体指针获取，就需要新建顶级页表目录项
 	msa = mmu_new_sdirearr(mmulocked);
 	if (NULL == msa) {
 		*outmsa = NULL;
