@@ -76,12 +76,12 @@ typedef struct s_THREAD {
     uint_t      td_cpuid;               // 进程所在的CPU的id
     uint_t      td_id;                  // 进程id
     uint_t      td_tick;                // 进程运行了多少tick
+    uint_t      td_sumtick;
     uint_t      td_privilege;           // 进程的权限
     uint_t      td_priority;            // 进程的优先级，数值越小优先级越高
     uint_t      td_runmode;             // 进程的运行模式
     adr_t       td_krlstktop;           // 应用程序内核栈顶地址
     adr_t       td_krlstkstart;         // 应用程序内核栈开始地址
-#if((defined CFG_X86_PLATFORM))     
     adr_t       td_usrstktop;           // 应用程序栈顶地址
     adr_t       td_usrstkstart;         // 应用程序栈开始地址
     mmadrsdsc_t* td_mmdsc;              // 地址空间结构，指向mmadrsdsc_t 结构
@@ -90,7 +90,6 @@ typedef struct s_THREAD {
     void*       td_extdatap;
     char_t*     td_appfilenm;
     uint_t      td_appfilenmlen;
-#endif
     context_t   td_context;                 // 机器上下文结构
     objnode_t*  td_handtbl[TD_HAND_MAX];    // 打开的对象数组，进程打开的资源的描述符
     char_t      td_name[THREAD_NAME_MAX];   // 进程名称

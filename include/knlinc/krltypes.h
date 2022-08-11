@@ -30,6 +30,6 @@
 #include "krlsvewrite_t.h"
 #include "krlsveioctrl_t.h"
 #include "krlsvelseek_t.h"
-
+#include "krlstr_t.h"
 
 #endif

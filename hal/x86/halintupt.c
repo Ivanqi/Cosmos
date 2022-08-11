@@ -263,7 +263,7 @@ void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
         // 成功就返回
         return;
     }
-    
+
     kprint("当前进程:%s,犯了不该犯的错误:%d,所以要杀\n", krlsched_retn_currthread()->td_appfilenm, faultnumb);
     dump_stack(krnlsframp);
     krlsve_exit_thread();

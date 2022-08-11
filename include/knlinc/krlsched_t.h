@@ -15,6 +15,7 @@
 #ifdef CFG_X86_PLATFORM
 #define TNCCALL __attribute__((regparm(2)))         
 #endif
+
 #if((defined CFG_S3C2440A_PLATFORM) || (defined CFG_STM32F0XX_PLATFORM))
 #define TNCCALL 
 #endif

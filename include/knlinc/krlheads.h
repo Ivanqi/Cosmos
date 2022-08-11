@@ -32,5 +32,6 @@
 #include "krlsvewrite.h"
 #include "krlsveioctrl.h"
 #include "krlsvelseek.h"
+#include "krlstr.h"
 
 #endif // KRLHEADS_H

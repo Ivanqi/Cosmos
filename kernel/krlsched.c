@@ -27,6 +27,8 @@ void schdata_t_init(schdata_t *initp)
     for (uint_t ti = 0; ti < PRITY_MAX; ti++) {
         thrdlst_t_init(&initp->sda_thdlst[ti]);
     }
+
+    list_init(&initp->sda_exitlist);
     return;
 }
 
@@ -53,12 +55,15 @@ void init_krlsched()
 {
     // 初始化osschedcls变量
     schedclass_t_init(&osschedcls);
+    kprint("进程调度器初始化成功\n");
     return;
 }
 
 /**
- * 获取当前运行的进程
- *  获取当前正在运行的进程，目的是为了保存当前进程的运行上下文，确保在下一次调度到当前运行的进程时能够恢复运行
+ * @brief 获取当前运行的进程
+ *  1. 获取当前正在运行的进程，目的是为了保存当前进程的运行上下文，确保在下一次调度到当前运行的进程时能够恢复运行
+ * 
+ * @return thread_t* 返回当前运行的进程
  */
 thread_t *krlsched_retn_currthread()
 {

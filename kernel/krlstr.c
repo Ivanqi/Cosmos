@@ -92,4 +92,3 @@ sint_t krlmemset(void* s,u8_t c,uint_t count)
     
 	return (sint_t)(i - 1);
 }
-
