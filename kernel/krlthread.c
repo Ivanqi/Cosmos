@@ -23,7 +23,12 @@ void context_t_init(context_t *initp)
     return;
 }
 
-// 返回进程id其实就thread_t结构的地址
+/**
+ * @brief 返回进程id其实就thread_t结构的地址
+ * 
+ * @param tdp thread_t内存指针
+ * @return uint_t 返回进程id
+ */
 uint_t krlretn_thread_id(thread_t *tdp)
 {
     return (uint_t)tdp;
@@ -50,6 +55,8 @@ void thread_t_init(thread_t *initp)
     initp->td_resdsc = NULL;
     initp->td_privtep = NULL;
     initp->td_extdatap = NULL;
+    initp->td_appfilenm = NULL;
+    initp->td_appfilenmlen = 0;
 
     context_t_init(&initp->td_context);
 
@@ -57,6 +64,8 @@ void thread_t_init(thread_t *initp)
     for (uint_t hand = 0; hand < TD_HAND_MAX; hand++) {
         initp->td_handtbl[hand] = NULL;
     }
+
+    krlmemset((void*)initp->td_name, 0, THREAD_NAME_MAX);
     return;
 }
 

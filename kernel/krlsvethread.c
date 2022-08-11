@@ -56,6 +56,7 @@ hand_t krlsve_exel_thread(void *file, uint_t flgs)
 
 sysstus_t krlsve_exit_thread()
 {
+    krlsve_core_exit_thread();
     return SYSSTUSERR;
 }
 
@@ -86,6 +87,8 @@ hand_t krlsve_core_exel_thread(void *file, uint_t flgs)
 
 void krlsve_core_exit_thread()
 {
+    krlsched_exit();
+    krlschedul();
     return;
 }
 

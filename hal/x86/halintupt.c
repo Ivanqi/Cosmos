@@ -5,6 +5,18 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+void dump_stack(void* stk)
+{
+    faultstkregs_t* f = (faultstkregs_t*)stk;
+    kprint("程序指令寄存器%x:\n",f->r_rip_old);
+    kprint("程序标志寄存器%x:\n",f->r_rflgs);
+    kprint("程序栈寄存器%x:\n",f->r_rsp_old);
+    kprint("程序缺页地址%x:\n",read_cr2());
+    kprint("程序段寄存器CS:%x SS:%x DS:%x ES:%x FS:%x GS:%x\n",
+    f->r_cs_old, f->r_ss_old, f->r_ds, f->r_es, f->r_fs, f->r_gs);
+    return;
+}
+
 void intfltdsc_t_init(intfltdsc_t *initp, u32_t flg, u32_t sts, uint_t prity, uint_t irq)
 {
     hal_spinlock_init(&initp->i_lock);
@@ -52,6 +64,7 @@ PUBLIC void init_halintupt()
 
     init_i8259();
     i8259_enabled_line(0);
+    kprint("中断初始化成功\n");
     return;
 }
 
@@ -174,6 +187,12 @@ void hal_run_intflthandle(uint_t ifdnr, void *sframe)
     return;
 }
 
+void hal_hwint_eoi()
+{
+    i8259_send_eoi();
+    return;
+}
+
 /**
  * @brief 中断处理函数
  *  1. 加锁
@@ -227,33 +246,39 @@ void hal_do_hwint(uint_t intnumb, void *krnlsframp)
 void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
 {
     adr_t fairvadrs;
-    kprint("faultnumb is :%d\n", faultnumb);
+    cpuflg_t cpuflg;
+    hal_cpuflag_sti(&cpuflg);
 
     // 如果异常号等于14则是内存缺页异常
     if (faultnumb == 14) {
         // 获取缺页的地址。打印缺页地址，这地址保存在CPU的CR2寄存器中
         fairvadrs = (adr_t)read_cr2();
-        kprint("异常地址:%x, 此地址禁止访问\n", fairvadrs);
         if (krluserspace_accessfailed(fairvadrs) != 0) {
+            dump_stack(krnlsframp);
             // 处理缺页失败就死机
             system_error("缺页处理失败\n");
         }
+
+        hal_cpuflag_cli(&cpuflg);
         // 成功就返回
         return;
     }
-    // 死机，不让这个函数返回了
-    die(0);
+    
+    kprint("当前进程:%s,犯了不该犯的错误:%d,所以要杀\n", krlsched_retn_currthread()->td_appfilenm, faultnumb);
+    dump_stack(krnlsframp);
+    krlsve_exit_thread();
+    hal_cpuflag_cli(&cpuflg);
     return;
 }
 
 // 中断分发器
 sysstus_t hal_syscl_allocator(uint_t inr, void* krnlsframp)
 {
-	// cpuflg_t cpuflg;
+	cpuflg_t cpuflg;
     sysstus_t ret;
-    // hal_cpuflag_sti(&cpuflg);
+    hal_cpuflag_sti(&cpuflg);
 	ret = krlservice(inr, krnlsframp);
-    // hal_cpuflag_cli(&cpuflg);
+    hal_cpuflag_cli(&cpuflg);
     return ret;
 }
 

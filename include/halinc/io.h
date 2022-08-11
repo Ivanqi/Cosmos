@@ -212,8 +212,9 @@ KLINE void memset(void *s, u8_t c, uint_t count) {
     return;
 }
 
-KLINE void save_flags_cli(cpuflg_t *flags) {
-     __asm__ __volatile__(
+KLINE void save_flags_cli(cpuflg_t *flags)
+{
+    __asm__ __volatile__(
         "pushfq \t\n"
         "cli    \t\n"
         "popq %0 \t\n"
@@ -224,7 +225,8 @@ KLINE void save_flags_cli(cpuflg_t *flags) {
     return;
 }
 
-KLINE void restore_flags_sti(cpuflg_t *flagsres) {
+KLINE void restore_flags_sti(cpuflg_t *flagsres)
+{
     __asm__ __volatile__(
         "pushq %0 \t\n"
         "popfq \t\n"
@@ -233,6 +235,31 @@ KLINE void restore_flags_sti(cpuflg_t *flagsres) {
         : "memory");
     return;
 }
+
+KLINE void restore_flags_cli(cpuflg_t *flags)
+{
+    __asm__ __volatile__(
+        "pushq %0 \t\n"
+        "popfq \t\n"
+        : "=m"(*flags)
+        :
+        : "memory");
+    return;
+}
+
+KLINE void save_flags_sti(cpuflg_t *flags)
+{
+    __asm__ __volatile__(
+        "pushfq \t\n"
+        "popq %0\t\n"
+        "sti\t\n"
+        :
+        : "m"(*flags)
+        : "memory");
+    return;
+}
+
+
 
 KLINE u64_t x86_rdpmc(const int ctrsel) {
     u32_t eax, edx;

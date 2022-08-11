@@ -5,6 +5,39 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+
+void hal_wbinvd()
+{
+	__asm__ __volatile__("wbinvd": : :"memory");
+}
+
+void hal_invd()
+{
+	__asm__ __volatile__("invd": : :"memory");
+}
+
+void hal_sti_cpuflag(cpuflg_t* cpuflg)
+{
+    restore_flags_sti(cpuflg);
+}
+
+void hal_cli_cpuflag(cpuflg_t* cpuflg)
+{
+    save_flags_cli(cpuflg);
+}
+
+// CPU 暂存
+void hal_cpuflag_sti(cpuflg_t* cpuflg)
+{
+    save_flags_sti(cpuflg);
+}
+
+// CPU 释放
+void hal_cpuflag_cli(cpuflg_t* cpuflg)
+{
+    restore_flags_cli(cpuflg);
+}
+
 void hal_spinlock_init(spinlock_t *lock)
 {
     lock->lock = 0;
@@ -210,7 +243,11 @@ void system_error(char_t *errmsg)
     return;
 }
 
-// 获取CPU id
+/**
+ * @brief 获取CPU id
+ * 
+ * @return uint_t 
+ */
 uint_t hal_retn_cpuid()
 {
     return 0;

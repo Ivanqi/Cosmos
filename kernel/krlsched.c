@@ -321,6 +321,63 @@ void krlschedul()
     return;
 }
 
+void krlschdclass_del_thread_addexit(thread_t *thdp)
+{
+    uint_t cpuid = hal_retn_cpuid();
+    schdata_t *schdap = &osschedcls.scls_schda[cpuid];
+    cpuflg_t cufg;
+
+    krlspinlock_cli(&schdap->sda_lock, &cufg);
+
+    schdap->sda_thdlst[thdp->td_priority].tdl_nr--;
+    schdap->sda_threadnr--;
+
+    if (schdap->sda_thdlst[thdp->td_priority].tdl_curruntd == thdp) {
+        schdap->sda_thdlst[thdp->td_priority].tdl_curruntd = NULL;
+    }
+
+    list_del(&thdp->td_list);
+    thdp->td_stus = TDSTUS_EXIT;
+    list_add(&thdp->td_list, &schdap->sda_exitlist);
+
+    krlspinunlock_sti(&schdap->sda_lock, &cufg);
+    return;
+}
+
+/**
+ * @brief 进程退出
+ * 
+ */
+void krlsched_exit()
+{
+    //cpuflg_t cufg, tcufg;
+    uint_t cpuid = hal_retn_cpuid();
+    schdata_t *schdap = &osschedcls.scls_schda[cpuid];
+    thread_t *tdp = krlsched_retn_currthread();
+
+    if (tdp == krlsched_retn_idlethread())
+    {
+        system_error("krlsched_exit");
+        return;
+    }
+
+    uint_t pity = tdp->td_priority;
+
+    if (pity >= PRITY_MAX)
+    {
+        goto err_step;
+    }
+    if (schdap->sda_thdlst[pity].tdl_nr < 1)
+    {
+        goto err_step;
+    }
+
+    return krlschdclass_del_thread_addexit(tdp);
+err_step:
+    hal_sysdie("krlsched_wait err");
+    return;
+}
+
 // 把进程加入调度系统(原子操作)
 void krlschdclass_add_thread(thread_t *thdp)
 {

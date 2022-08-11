@@ -9,6 +9,7 @@
 #define TDSTUS_WAIT 4       // 进程等待状态
 #define TDSTUS_NEW 5        // 进程新建状态
 #define TDSTUS_ZOMB 6       // 进程僵死状态
+#define TDSTUS_EXIT 12      // 进程退出状态
 
 #define TDFLAG_FREE (1)
 #define TDFLAG_BUSY (2)
@@ -24,6 +25,8 @@
 #define MICRSTK_MAX 4
 
 #define THREAD_MAX (4)
+
+#define THREAD_NAME_MAX (64)    // 名字最长长度
 
 // 内核态
 #define KERNTHREAD_FLG 0
@@ -56,29 +59,6 @@ typedef struct s_MICRSTK {
     uint_t msk_val[MICRSTK_MAX];
 } micrstk_t;
 
-
-// // 进程的机器上下文old
-// typedef struct s_CONTEXT {
-// #if((defined CFG_X86_PLATFORM))     
-//     reg_t       ctx_usrsp;
-//     reg_t       ctx_svcsp;
-//     reg_t       ctx_svcspsr;
-//     reg_t       ctx_cpsr;
-//     reg_t       ctx_lr;
-// #ifdef CFG_X86_PLATFORM
-//     reg_t       ctx_nxteip;     // 保存下一次运行的地址
-//     reg_t       ctx_nxtesp;     // 保存下一次运行时内核栈的地址
-//     reg_t       ctx_nxtss;
-//     reg_t       ctx_nxtcs;
-//     x64tss_t*   ctx_nexttss;     // 指向tss结构
-// #endif
-// #endif
-// #if((defined CFG_STM32F0XX_PLATFORM))
-//     reg_t       ctx_svcsp;
-//     reg_t       ctx_cpsr;
-// #endif     
-// } context_t;
-
 // 进程的机器上下文
 typedef struct s_CONTEXT
 {  
@@ -104,13 +84,16 @@ typedef struct s_THREAD {
 #if((defined CFG_X86_PLATFORM))     
     adr_t       td_usrstktop;           // 应用程序栈顶地址
     adr_t       td_usrstkstart;         // 应用程序栈开始地址
-    mmadrsdsc_t* td_mmdsc;       // 地址空间结构，指向mmadrsdsc_t 结构
+    mmadrsdsc_t* td_mmdsc;              // 地址空间结构，指向mmadrsdsc_t 结构
     void*       td_resdsc;
     void*       td_privtep;
     void*       td_extdatap;
+    char_t*     td_appfilenm;
+    uint_t      td_appfilenmlen;
 #endif
     context_t   td_context;                 // 机器上下文结构
     objnode_t*  td_handtbl[TD_HAND_MAX];    // 打开的对象数组，进程打开的资源的描述符
+    char_t      td_name[THREAD_NAME_MAX];   // 进程名称
 } thread_t;
 
 #endif // KRLTHREAD_T_H
