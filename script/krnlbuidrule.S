@@ -22,7 +22,6 @@ PRINTCFLAGS  =   @echo $(CFLAGS)
 [$(CC) $(CFLAGS) -o $@ $<
 [$(PRINTCSTR)
 
-
 %.o : $(CCBUILDPATH)%.S
 [$(CC) $(CFLAGS) -o $@ $<
 [$(PRINTCSTR)
