@@ -253,9 +253,11 @@ void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
     if (faultnumb == 14) {
         // 获取缺页的地址。打印缺页地址，这地址保存在CPU的CR2寄存器中
         fairvadrs = (adr_t)read_cr2();
-        if (krluserspace_accessfailed(fairvadrs) != 0) {
+        sint_t ret = krluserspace_accessfailed(fairvadrs);
+        if (ret != 0) {
             dump_stack(krnlsframp);
             // 处理缺页失败就死机
+            kprint("处理缺页失败状态码:%q\n", ret);
             system_error("缺页处理失败\n");
         }
 

@@ -59,6 +59,10 @@ void vsprintfk(char_t *buf, const char_t *fmt, va_list args)
                 p = numberk(p, va_arg(args, uint_t), 10);
                 fmt++;
                 break;
+			case 'q':
+				p = numberksigned(p, va_arg(args, sint_t), 10);
+				fmt++;
+                break;
             case 's':
                 p = strcopyk(p, (char_t *)va_arg(args, uint_t));
                 fmt++;
@@ -71,6 +75,40 @@ void vsprintfk(char_t *buf, const char_t *fmt, va_list args)
 	*p = 0;
 	return;
 }
+
+char_t *numberksigned(char_t *str, sint_t n, sint_t base)
+{
+	register char_t *p;
+	char_t strbuf[36];
+	p = &strbuf[36];
+	*--p = 0;
+
+	bool_t issigned = 0;
+
+	if (n == 0) {
+		*--p = '0';
+	} else {
+		if (n < 0) {			
+			issigned = 1;
+			n = -n;
+		}
+
+		do {
+			*--p = "0123456789abcdef"[n % base];
+		} while (n /= base);
+
+		if (issigned) {
+			*--p = '-';
+		}
+	}
+
+	while (*p != 0) {
+		*str++ = *p++;
+	}
+    
+	return str;
+}
+
 
 char_t *numberk(char_t *str, uint_t n, sint_t base)
 {

@@ -10,11 +10,12 @@
                         memmgrinit.o memdivmer.o memarea.o msadsc.o \
                         kmsob.o halmmu.o
 
+// kernel层编译目标
 #define BUILD_KRNL_OBJS krlinit.o krlvadrsmem.o krlglobal.o krlmm.o krlpagempol.o \
                         krlsem.o krlspinlock.o krlwaitlist.o krlsched.o krlthread.o \
                         krlcpuidle.o krldevice.o krlintupt.o krlobjnode.o krlservice.o \
                         krltime.o krlsveopen.o krlsveclose.o krlsveread.o krlsvewrite.o \
-                        krlsvethread.o krlsvemm.o krlsvelseek.o krlsveioctrl.o
+                        krlsvethread.o krlsvemm.o krlsvelseek.o krlsveioctrl.o krlstr.o
 
 #define BUILD_MEMY_OBJS
 #define BUILD_FSYS_OBJS
