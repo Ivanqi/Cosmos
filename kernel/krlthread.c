@@ -188,7 +188,13 @@ retn_step:
     return retondp;
 }
 
-// 初始化内核栈
+/**
+ * @brief 初始化内核栈
+ * 
+ * @param thdp 
+ * @param runadr 
+ * @param cpuflags 
+ */
 void krlthread_kernstack_init(thread_t *thdp, void *runadr, uint_t cpuflags)
 {
     // 处理栈顶16字节对齐
@@ -303,6 +309,12 @@ char_t* thread_name(thread_t *thread, char_t *name)
 
 /**
  * @brief 建立普通进程
+ *  1. krlnew分配应用程序栈空间
+ *  2. krlnew分配内核栈空间
+ *  3. krlnew_thread_dsc建立thread_t结构体的实例变量，并初始化
+ *  4. 设置进程权限，优先级，进程的内核栈顶和内核栈开始地址，进程用户栈顶和内核栈开始地址
+ *  5. 初始化进程的应用栈
+ *  6. 加入进程调度系统，sschedcls.scls_schda[cpuid].sda_thdlst[td_priority].tdl_lsth
  * 
  * @param name 进程名
  * @param filerun 应用程序启动运行的地址
@@ -395,11 +407,11 @@ thread_t *krlnew_user_thread_core(char_t *name, void *filerun, uint_t flg, uint_
 
 /**
  * @brief 建立内核进程
- *  1. 内核进程就是用进程的方式去运行一段内核代码
- *      那么这段代码就可以随时暂停或者继续运行，又或者和其它代码段并发运行，只是这种进程永远不会回到进程应用程序地址空间中去，只会在内核地址空间中运行
- *  2. 首先分配一个内核栈的内存空间，接着创建thread_t结构的实例变量
- *      然后通过thread_t结构体的字段进行设置，最后，初始化进程内核栈把这个新进程加入到进程的调度系统之中
- * 
+ *  1. krlnew分配内核栈空间
+ *  2. krlnew_thread_dsc建立thread_t结构体的实例变量，并初始化
+ *  3. 设置进程权限，优先级，进程的内核栈顶和内核栈开始地址
+ *  4. 初始化进程的内核栈
+ *  5. 加入进程调度系统，sschedcls.scls_schda[cpuid].sda_thdlst[td_priority].tdl_lsth
  * @param name 进程名
  * @param filerun 应用程序启动运行的地址
  * @param flg 标志

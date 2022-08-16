@@ -74,7 +74,7 @@ void vaslknode_t_init(vaslknode_t *initp)
 
 void pgtabpage_t_init(pgtabpage_t *initp)
 {
-	knl_spinlock_init(&initp->ptp_lock);
+	krlspinlock_init(&initp->ptp_lock);
 	list_init(&initp->ptp_msalist);
 	initp->ptp_msanr = 0;
 	return;
@@ -86,7 +86,7 @@ void virmemadrs_t_init(virmemadrs_t *initp)
 		return;
 	}
 
-	knl_spinlock_init(&initp->vs_lock);
+	krlspinlock_init(&initp->vs_lock);
 	initp->vs_resalin = 0;
 	list_init(&initp->vs_list);
 	initp->vs_flgs = 0;
@@ -115,7 +115,7 @@ void kmvarsdsc_t_init(kmvarsdsc_t *initp)
 		system_error("kmvarsdsc_t_init pram err\n");
 	}
 
-	knl_spinlock_init(&initp->kva_lock);
+	krlspinlock_init(&initp->kva_lock);
 	initp->kva_maptype = 0;
 	list_init(&initp->kva_list);
 	initp->kva_flgs = 0;
@@ -135,7 +135,7 @@ void kvirmemadrs_t_init(kvirmemadrs_t *initp)
 		system_error("kvirmemadrs_t_init pram err\n");
 	}
 
-	knl_spinlock_init(&initp->kvs_lock);
+	krlspinlock_init(&initp->kvs_lock);
 	initp->kvs_flgs = 0;
 	initp->kvs_kmvdscnr = 0;
 	initp->kvs_startkmvdsc = NULL;
@@ -259,7 +259,7 @@ void kvma_seting_kvirmemadrs(kvirmemadrs_t *kvma)
  */
 bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 {
-	kmvarsdsc_t *kmvdc = NULL, *stackkmvdc = NULL;
+	kmvarsdsc_t *kmvdc = NULL, *stackkmvdc = NULL, *heapkmvdc = NULL;
 	// 分配一个kmvarsdsc_t
 	if (NULL == vma) {
 		return FALSE;
@@ -270,10 +270,17 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 		return FALSE;
 	}
 
+	heapkmvdc = new_kmvarsdsc();
+	if (NULL == heapkmvdc) {
+		del_kmvarsdsc(kmvdc);
+		return FALSE;
+	}
+
 	// 分配一个栈区的kmvarsdsc_t
 	stackkmvdc = new_kmvarsdsc();
 	if (NULL == stackkmvdc) {
 		del_kmvarsdsc(kmvdc);
+		del_kmvarsdsc(heapkmvdc);
 		return FALSE;
 	}
 
@@ -282,6 +289,7 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	// 虚拟区间结束地址0x5000
 	kmvdc->kva_end = kmvdc->kva_start + 0x4000;
 	kmvdc->kva_mcstruct = vma;	// kmvdc的上层结构为vma
+	stackkmvdc->kva_maptype = KMV_STACK_TYPE;
 
 	// 0x00007FFFBFFFFFFF ～ 0x00007fffffffffff
 	// 栈虚拟区间开始地址0x1000USER_VIRTUAL_ADDRESS_END - 0x40000000
@@ -290,7 +298,7 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	stackkmvdc->kva_end = USER_VIRTUAL_ADDRESS_END;
 	stackkmvdc->kva_mcstruct = vma;	// stackkmvdc 的 上层结构为vma
 
-	knl_spinlock(&vma->vs_lock);
+	krlspinlock_init(&vma->vs_lock);
 
 	// 0 ～ 0x00007fffffffffff
 	vma->vs_isalcstart = USER_VIRTUAL_ADDRESS_START;
@@ -303,9 +311,9 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	// 加入链表
 	list_add_tail(&kmvdc->kva_list, &vma->vs_list);
 	list_add_tail(&stackkmvdc->kva_list, &vma->vs_list);
-	// 计数加2
-	vma->vs_kmvdscnr += 2;
-	knl_spinunlock(&vma->vs_lock);
+	// 计数加3
+	vma->vs_kmvdscnr += 3;
+	krlspinlock_unlock(&vma->vs_lock);
 	return TRUE;
 }
 
@@ -320,7 +328,7 @@ void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 		return;
 	}
 
-	knl_spinlock_init(&initp->msd_lock);
+	krlspinlock_init(&initp->msd_lock);
 	list_init(&initp->msd_list);
 	initp->msd_flag = 0;
 	initp->msd_stus = 0;
@@ -541,7 +549,8 @@ adr_t vma_new_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vas
 	adr_t retadrs = NULL;
 	kmvarsdsc_t *newkmvd = NULL, *currkmvd = NULL;
 	virmemadrs_t *vma = &mm->msd_virmemadrs;
-	knl_spinlock(&vma->vs_lock);
+	cpuflg_t cpuflg;
+	krlspinlock_cli(&vma->vs_lock, &cpuflg);
 
 	// 查找虚拟地址区间
 	currkmvd = vma_find_kmvarsdsc(vma, start, vassize);
@@ -592,7 +601,7 @@ adr_t vma_new_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vas
 	// 返回新的虚拟地址区间的开始地址
 	retadrs = newkmvd->kva_start;
 out:
-	knl_spinunlock(&vma->vs_lock);
+	krlspinunlock_sti(&vma->vs_lock, &cpuflg);
 	return retadrs;
 }
 
@@ -759,7 +768,8 @@ bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 	bool_t rets = FALSE;
 	kmvarsdsc_t *newkmvd = NULL, *delkmvd = NULL;
 	virmemadrs_t *vma = &mm->msd_virmemadrs;
-	knl_spinlock(&vma->vs_lock);
+	cpuflg_t cpuflg;
+	krlspinlock_cli(&vma->vs_lock, &cpuflg);
 
 	// 查找要释放虚拟地址空间的kmvarsdsc_t结构
 	delkmvd = vma_del_find_kmvarsdsc(vma, start, vassize);
@@ -845,7 +855,7 @@ bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize)
 	rets = FALSE;
 
 out:
-	knl_spinunlock(&vma->vs_lock);
+	krlspinunlock_sti(&vma->vs_lock, &cpuflg);
 	return rets;
 }
 
@@ -1221,7 +1231,7 @@ bool_t vma_del_usermsa(mmadrsdsc_t *mm, kvmemcbox_t *kmbox, msadsc_t *msa, adr_t
 		return FALSE;
 	}
 
-	knl_spinlock(&kmbox->kmb_lock);
+	krlspinlock_lock(&kmbox->kmb_lock);
 
 	if (NULL != msa) {
 		if (msadsc_ret_addr(msa) == phyadr) {
@@ -1248,7 +1258,7 @@ bool_t vma_del_usermsa(mmadrsdsc_t *mm, kvmemcbox_t *kmbox, msadsc_t *msa, adr_t
 	rets = FALSE;
 
 out:
-	knl_spinunlock(&kmbox->kmb_lock);
+	krlspinlock_unlock(&kmbox->kmb_lock);
 
 	if (NULL != delmsa) {
 		if (mm_merge_pages(&memmgrob, delmsa, onfrmsa_retn_fpagenr(delmsa)) == FALSE) {
@@ -1358,7 +1368,8 @@ sint_t vma_map_fairvadrs_core(mmadrsdsc_t *mm, adr_t vadrs)
 	virmemadrs_t *vma = &mm->msd_virmemadrs;
 	kmvarsdsc_t *kmvd = NULL;
 	kvmemcbox_t *kmbox = NULL;
-	knl_spinlock(&vma->vs_lock);
+	cpuflg_t cpuflg;
+	krlspinlock_cli(&vma->vs_lock, &cpuflg);
 
 	// 查找对应的kmvarsdsc_t结构。 没找到说明没有分配该虚拟地址空间，那属于非法访问不予处理
 	kmvd = vma_map_find_kmvarsdsc(vma, vadrs);
@@ -1384,7 +1395,7 @@ sint_t vma_map_fairvadrs_core(mmadrsdsc_t *mm, adr_t vadrs)
 	rets = EOK;
 
 out:
-	knl_spinunlock(&vma->vs_lock);
+	krlspinunlock_sti(&vma->vs_lock, &cpuflg);
 	return rets;
 }
 
@@ -1444,7 +1455,7 @@ void kvmcobjmgr_t_init(kvmcobjmgr_t* initp)
 		system_error("kvmcobjmgr_t_init parm NULL\n");
 	}
 
-	knl_spinlock_init(&initp->kom_lock);
+	krlspinlock_init(&initp->kom_lock);
 	initp->kom_flgs = 0;
 	initp->kom_kvmcobjnr = 0;
 
@@ -1465,7 +1476,7 @@ void kvmemcobj_t_init(kvmemcobj_t* initp)
 	}
 
 	list_init(&initp->kco_list);
-	knl_spinlock_init(&initp->kco_lock);
+	krlspinlock_init(&initp->kco_lock);
 	initp->kco_cont = 0;
 	initp->kco_flgs = 0;
 	initp->kco_type = 0;
@@ -1516,7 +1527,7 @@ void kvmemcbox_t_init(kvmemcbox_t* init)
 	}
 
 	list_init(&init->kmb_list);
-	knl_spinlock_init(&init->kmb_lock);
+	krlspinlock_init(&init->kmb_lock);
 
 	refcount_init(&init->kmb_cont);
 	init->kmb_flgs = 0;
@@ -1540,7 +1551,7 @@ void kvmemcboxmgr_t_init(kvmemcboxmgr_t* init)
 	}
 
 	list_init(&init->kbm_list);
-	knl_spinlock_init(&init->kbm_lock);
+	krlspinlock_init(&init->kbm_lock);
 	init->kbm_flgs = 0;
 	init->kbm_stus = 0;
 	init->kbm_kmbnr = 0;
@@ -1615,7 +1626,7 @@ kvmemcbox_t* knl_get_kvmemcbox()
 {
 	kvmemcbox_t* kmb = NULL;
 	kvmemcboxmgr_t* kmbmgr = &krlvirmemadrs.kvs_kvmemcboxmgr;
-	knl_spinlock(&kmbmgr->kbm_lock);
+	krlspinlock_init(&kmbmgr->kbm_lock);
 
 	if (0 < kmbmgr->kbm_cachenr) {
 		// 缓存kvmemcbox_t结构的链表 不为空
@@ -1665,7 +1676,7 @@ bool_t knl_put_kvmemcbox(kvmemcbox_t* kmbox)
 		return FALSE;
 	}
 
-	knl_spinlock(&kmbmgr->kbm_lock);
+	krlspinlock_lock(&kmbmgr->kbm_lock);
 	
 	// 减1
 	refcount_dec(&kmbox->kmb_cont);
@@ -1693,7 +1704,7 @@ bool_t knl_put_kvmemcbox(kvmemcbox_t* kmbox)
 	
 	rets = TRUE;
 out:
-	knl_spinunlock(&kmbmgr->kbm_lock);
+	krlspinlock_unlock(&kmbmgr->kbm_lock);
 	return rets;
 } 
 

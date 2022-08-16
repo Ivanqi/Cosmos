@@ -56,6 +56,15 @@ typedef struct KVMEMCBOXMGR {
 	void* kbm_ext;             // 扩展数据指针
 } kvmemcboxmgr_t;
 
+#define KMV_TEXT_TYPE 1
+#define KMV_DATA_TYPE 2
+#define KMV_BSS_TYPE 4
+#define KMV_HEAP_TYPE 8
+#define KMV_STACK_TYPE 16
+#define KMV_BIN_TYPE 64
+
+#define THREAD_HEAPADR_START 0x100000000
+
 // 用于挂载msadsc_t结构的页面盒子
 typedef struct KVMEMCBOX {
 	list_h_t kmb_list;          // 链表
@@ -154,6 +163,8 @@ typedef struct s_VIRMEMADRS {
 	void* vs_privte;                // 私有数据指针
 	void* vs_ext;                   // 扩展数据指针
 } virmemadrs_t;
+
+typedef struct s_THREAD thread_t;
 
 // 进程数据结构下的一个结构，它包含virmemadrs_t结构和mmudsc_t结构
 typedef struct s_MMADRSDSC {
