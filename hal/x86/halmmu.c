@@ -1082,6 +1082,12 @@ bool_t mmu_clean_tdirearrmsas(mmudsc_t* mmulocked)
 	return TRUE;
 }
 
+/**
+ * @brief 删除各级页表
+ * 
+ * @param mmu MMU内存指针
+ * @return bool_t 
+ */
 bool_t hal_mmu_clean(mmudsc_t* mmu)
 {
 	bool_t  rets = FALSE;

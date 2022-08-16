@@ -5,6 +5,9 @@
 #ifndef _KRLVADRSMEM_H
 #define _KRLVADRSMEM_H
 
+mmadrsdsc_t* new_mmadrsdsc();
+bool_t del_mmadrsdsc(mmadrsdsc_t *mm);
+
 void teststc_t_init(teststc_t *initp);
 teststc_t *new_teststc();
 void del_teststc(teststc_t *delstc);

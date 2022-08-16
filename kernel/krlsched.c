@@ -383,7 +383,11 @@ err_step:
     return;
 }
 
-// 把进程加入调度系统(原子操作)
+/**
+ * @brief 把进程加入调度系统(原子操作)
+ * 
+ * @param thdp 进程实例
+ */
 void krlschdclass_add_thread(thread_t *thdp)
 {
     uint_t cpuid = hal_retn_cpuid();
@@ -406,11 +410,14 @@ void krlschdclass_add_thread(thread_t *thdp)
 }
 
 /**
- * 上下文切换
+ * @brief 上下文切换
  *  1. 设置当前运行的进程，处理 CPU 发生中断时需要切换栈的问题
  *  2. tss切换
  *  3. 切换了一个进程的 MMU 页表（即使用新进程的地址空间）
  *  4. 最后如果是新建进程第一次运行，就调用 retnfrom_first_sched 函数进行处理
+ * 
+ * @param next 上一个进程
+ * @param prev 下一个进程
  */
 void __to_new_context(thread_t *next, thread_t *prev)
 {
@@ -499,10 +506,12 @@ void save_to_new_context(thread_t *next, thread_t *prev)
 }
 
 /**
- * 新进程第一次运行
- *  把要运行的地址，复制到rsp栈寄存器中
- *  恢复进程保存在内核栈中的段寄存器
- *  通过iretd返回原来进程的上下文
+ * @brief 新进程第一次运行
+ *  1. 把要运行的地址，复制到rsp栈寄存器中
+ *  2. 恢复进程保存在内核栈中的段寄存器
+ *  3. 通过iretd返回原来进程的上下文
+ * 
+ * @param thrdp 进程实例
  */
 void retnfrom_first_sched(thread_t *thrdp)
 {

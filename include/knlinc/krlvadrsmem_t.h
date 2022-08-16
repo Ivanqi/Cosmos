@@ -147,6 +147,8 @@ typedef struct s_VIRMEMADRS {
 	kmvarsdsc_t* vs_krlmapdsc;
 	kmvarsdsc_t* vs_krlhwmdsc;
 	kmvarsdsc_t* vs_krlolddsc;
+	kmvarsdsc_t* vs_heapkmvdsc;
+	kmvarsdsc_t* vs_stackkmvdsc;
 	adr_t vs_isalcstart;            // 能分配的开始虚拟地址
 	adr_t vs_isalcend;              // 能分配的结束虚拟地址
 	void* vs_privte;                // 私有数据指针
@@ -160,6 +162,7 @@ typedef struct s_MMADRSDSC {
 	uint_t msd_flag;                // 状态和标志
 	uint_t msd_stus;
 	uint_t msd_scount;              // 计数，该结构可能被共享
+	thread_t *msd_thread;			// 进程实例
 	sem_t  msd_sem;                 // 信号量
 	mmudsc_t msd_mmu;               // MMU相关信息
 	virmemadrs_t msd_virmemadrs;    // 虚拟地址空间

@@ -28,8 +28,8 @@ void thread_b_main()
 
 void init_ab_thread()
 {
-    krlnew_thread((void*)thread_a_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
-    krlnew_thread((void*)thread_b_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    krlnew_thread("kernelthread-a", (void*)thread_a_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    krlnew_thread("kernelthread-b", (void*)thread_b_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
     return;
 }
 

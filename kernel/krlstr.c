@@ -34,6 +34,12 @@ sint_t krlstrcmp(char_t* str_s, char_t* str_d)
 	return STR_CMP_OK;
 }
 
+/**
+ * @brief 字符串长度
+ * 
+ * @param str_s 字符串
+ * @return sint_t 返回长度
+ */
 sint_t krlstrlen(char* str_s)
 {
 	sint_t chaidx = 0;
@@ -45,6 +51,13 @@ sint_t krlstrlen(char* str_s)
 	return chaidx;
 }
 
+/**
+ * @brief 字符串拷贝
+ * 
+ * @param str_s 源
+ * @param str_d 目的
+ * @return sint_t 返回字符复制长度
+ */
 sint_t krlstrcpy(char_t* str_s, char_t* str_d)
 {
 	sint_t chaidx = 0;

@@ -98,6 +98,8 @@ void virmemadrs_t_init(virmemadrs_t *initp)
 	initp->vs_krlmapdsc = NULL;
 	initp->vs_krlhwmdsc = NULL;
 	initp->vs_krlolddsc = NULL;
+	initp->vs_heapkmvdsc = NULL;
+	initp->vs_stackkmvdsc = NULL;
 
 	initp->vs_isalcstart = 0;		// 能分配的开始虚拟地址
 	initp->vs_isalcend = 0;			// 能分配的结束虚拟地址
@@ -343,6 +345,42 @@ void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 	initp->msd_sbrk = 0;
 	initp->msd_ebrk = 0;
 	return; 
+}
+
+/**
+ * @brief 创建虚拟内存
+ * 
+ * @return mmadrsdsc_t* 
+ */
+mmadrsdsc_t* new_mmadrsdsc()
+{
+	mmadrsdsc_t* mm;
+	mm = (mmadrsdsc_t*)kmsob_new(sizeof(mmadrsdsc_t));
+	if (NULL == mm) {
+		return NULL;
+	}
+
+	mmadrsdsc_t_init(mm);
+	kvma_inituserspace_virmemadrs(&mm->msd_virmemadrs);
+	hal_mmu_init(&mm->msd_mmu);
+	return mm;
+}
+
+/**
+ * @brief 删除虚拟地址
+ * 
+ */
+bool_t del_mmadrsdsc(mmadrsdsc_t *mm) 
+{
+	if (NULL == mm) {
+		return FALSE;
+	}
+
+	if (hal_mmu_clean(&mm->msd_mmu) == FALSE) {
+		return FALSE;
+	}
+
+	return kmsob_delete((void*)mm, sizeof(mmadrsdsc_t));
 }
 
 // 测试函数

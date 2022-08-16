@@ -34,7 +34,11 @@ uint_t krlretn_thread_id(thread_t *tdp)
     return (uint_t)tdp;
 }
 
-// 初始化thread_t结构
+/**
+ * @brief 初始化thread_t结构
+ * 
+ * @param initp 进程内存指针
+ */
 void thread_t_init(thread_t *initp)
 {
     krlspinlock_init(&initp->td_lock);          // 进程的自旋锁
@@ -69,7 +73,11 @@ void thread_t_init(thread_t *initp)
     return;
 }
 
-// 创建thread_t结构
+/**
+ * @brief 创建thread_t结构
+ * 
+ * @return thread_t* 
+ */
 thread_t *krlnew_thread_dsc()
 {
     // 分配thread_t结构大小的内存空间
@@ -250,24 +258,102 @@ void krlthread_userstack_init(thread_t *thdp, void *runadr, uint_t cpuflags)
     return;
 }
 
-// 建立普通进程
-thread_t *krlnew_user_thread_core(void *filerun, uint_t flg, uint_t prilg, uint_t prity, size_t usrstksz, size_t krlstksz)
+/**
+ * @brief 进程名称设置
+ * 
+ * @param thread 进程指针
+ * @param name 进程名称
+ * @return char_t* 
+ */
+char_t* thread_name(thread_t *thread, char_t *name) 
+{
+    uint_t len = 0;
+    adr_t vadr = NULL;
+    if (NULL == thread) {
+        return NULL;
+    }
+
+    if (NULL == name) {
+        krlstrcpy("unkown thread", thread->td_name);
+        thread->td_appfilenm = thread->td_name;
+        thread->td_appfilenmlen = THREAD_NAME_MAX;
+        return thread->td_appfilenm;
+    }
+
+    len = krlstrlen(name);
+    if (len < (THREAD_NAME_MAX - 1)) {
+        krlstrcpy(name, thread->td_name);
+        thread->td_appfilenm = thread->td_name;
+        thread->td_appfilenmlen = THREAD_NAME_MAX;
+        return thread->td_appfilenm;
+    }
+
+    vadr = krlnew((size_t)len + 1);
+    if (NULL == vadr) {
+        return NULL;
+    }
+
+    krlmemset((void*)vadr, 0, len + 1);
+    krlstrcpy(name, (char_t*)vadr);
+
+    thread->td_appfilenm = (char_t*)vadr;
+    thread->td_appfilenmlen = (uint_t)(len + 1);    
+    return thread->td_appfilenm;
+}
+
+/**
+ * @brief 建立普通进程
+ * 
+ * @param name 进程名
+ * @param filerun 应用程序启动运行的地址
+ * @param flg 标志
+ * @param prilg 
+ * @param prity 进程权限和进程优先级
+ * @param usrstksz 进程的应用程序栈
+ * @param krlstksz 内核栈
+ * @return thread_t* 
+ */
+thread_t *krlnew_user_thread_core(char_t *name, void *filerun, uint_t flg, uint_t prilg, uint_t prity, size_t usrstksz, size_t krlstksz)
 {
     thread_t *ret_td = NULL;
     bool_t acs = FALSE;
-    adr_t usrstkadr = NULL, krlstkadr = NULL;
+    adr_t usrstkadr = NULL, krlstkadr = NULL, usrstktop = NULL;
+
+    mmadrsdsc_t* mm; 
+    mm = new_mmadrsdsc();
+    if (NULL == mm) {
+        return NULL;
+    }
+
+    if (NULL == mm->msd_virmemadrs.vs_stackkmvdsc) {
+        del_mmadrsdsc(mm);
+        return NULL;
+    }
+
+    usrstkadr = mm->msd_virmemadrs.vs_stackkmvdsc->kva_start;
+    usrstktop = mm->msd_virmemadrs.vs_stackkmvdsc->kva_end;
+
+    if (USER_VIRTUAL_ADDRESS_END != usrstktop) {
+        del_mmadrsdsc(mm);
+        return NULL;
+    }
+
+    if ((usrstktop - usrstkadr) < usrstksz) {
+        del_mmadrsdsc(mm);
+        return NULL;
+    }
+
     // 分配应用程序栈空间
     usrstkadr = krlnew(usrstksz);
     if (usrstkadr == NULL) {
+        del_mmadrsdsc(mm);
         return NULL;
     }
 
     // 分配内核栈空间
     krlstkadr = krlnew(krlstksz);
     if (krlstkadr == NULL) {
-        if (krldelete(usrstkadr, usrstksz) == FALSE) {
-            return NULL;
-        }
+        del_mmadrsdsc(mm);
         return NULL;
     }
 
@@ -276,12 +362,16 @@ thread_t *krlnew_user_thread_core(void *filerun, uint_t flg, uint_t prilg, uint_
     // 创建失败必须要释放之前的栈空间
     if (ret_td == NULL) {
         acs = krldelete(usrstkadr, usrstksz);
-        acs = krldelete(krlstkadr, krlstksz);
+        acs = del_mmadrsdsc(mm);
         if (acs == FALSE) {
             return NULL;
         }
         return NULL;
     }
+
+    thread_name(ret_td, name);
+    ret_td->td_mmdsc = mm;
+    mm->msd_thread = ret_td;
 
     // 设置进程权限
     ret_td->td_privilege = prilg;
@@ -293,7 +383,7 @@ thread_t *krlnew_user_thread_core(void *filerun, uint_t flg, uint_t prilg, uint_
     ret_td->td_krlstkstart = krlstkadr;
 
     // 设置进程的应用程序栈顶和内核应用程序栈开始地址
-    ret_td->td_usrstktop = usrstkadr + (adr_t)(usrstksz - 1);
+    ret_td->td_usrstktop = usrstktop;
     ret_td->td_usrstkstart = usrstkadr;
 
     // 初始化返回进程应用程序空间的内核栈
@@ -304,14 +394,22 @@ thread_t *krlnew_user_thread_core(void *filerun, uint_t flg, uint_t prilg, uint_
 }
 
 /**
- * 建立内核进程
- *  内核进程就是用进程的方式去运行一段内核代码
- *  那么这段代码就可以随时暂停或者继续运行，又或者和其它代码段并发运行，只是这种进程永远不会回到进程应用程序地址空间中去，只会在内核地址空间中运行
+ * @brief 建立内核进程
+ *  1. 内核进程就是用进程的方式去运行一段内核代码
+ *      那么这段代码就可以随时暂停或者继续运行，又或者和其它代码段并发运行，只是这种进程永远不会回到进程应用程序地址空间中去，只会在内核地址空间中运行
+ *  2. 首先分配一个内核栈的内存空间，接着创建thread_t结构的实例变量
+ *      然后通过thread_t结构体的字段进行设置，最后，初始化进程内核栈把这个新进程加入到进程的调度系统之中
  * 
- *  首先分配一个内核栈的内存空间，接着创建thread_t结构的实例变量
- *  然后通过thread_t结构体的字段进行设置，最后，初始化进程内核栈把这个新进程加入到进程的调度系统之中
+ * @param name 进程名
+ * @param filerun 应用程序启动运行的地址
+ * @param flg 标志
+ * @param prilg 
+ * @param prity 进程权限和进程优先级
+ * @param usrstksz 进程的应用程序栈
+ * @param krlstksz 内核栈
+ * @return thread_t* 
  */
-thread_t *krlnew_kern_thread_core(void *filerun, uint_t flg, uint_t prilg, uint_t prity, size_t usrstksz, size_t krlstksz)
+thread_t *krlnew_kern_thread_core(char_t* name, void *filerun, uint_t flg, uint_t prilg, uint_t prity, size_t usrstksz, size_t krlstksz)
 {
     thread_t *ret_td = NULL;
     bool_t acs = FALSE;
@@ -334,6 +432,8 @@ thread_t *krlnew_kern_thread_core(void *filerun, uint_t flg, uint_t prilg, uint_
         return NULL;
     }
 
+    thread_name(ret_td, name);
+
     // 设置进程权限
     ret_td->td_privilege = prilg;
     // 设置进程优先级
@@ -353,13 +453,14 @@ thread_t *krlnew_kern_thread_core(void *filerun, uint_t flg, uint_t prilg, uint_
 
 /**
  * 建立进程接口
+ * @param name 进程名
  * @param filerun 应用程序启动运行的地址
  * @param flg 创建标志
  * @param prity 进程权限和进程优先级
  * @param usrstksz 进程的应用程序栈
  * @param krlstksz 内核栈大小
  */
-thread_t *krlnew_thread(void *filerun, uint_t flg, uint_t prilg, uint_t prity, size_t usrstksz, size_t krlstksz)
+thread_t *krlnew_thread(char_t *name, void *filerun, uint_t flg, uint_t prilg, uint_t prity, size_t usrstksz, size_t krlstksz)
 {
     size_t tustksz = 0, tkstksz = 0;
     // 对参数进行检查，不合乎要求就返回NULL表示创建失败
@@ -383,9 +484,9 @@ thread_t *krlnew_thread(void *filerun, uint_t flg, uint_t prilg, uint_t prity, s
 
     // 是否建立内核进程
     if (KERNTHREAD_FLG == flg) {
-        return krlnew_kern_thread_core(filerun, flg, prilg, prity, tustksz, tkstksz);
+        return krlnew_kern_thread_core(name, filerun, flg, prilg, prity, tustksz, tkstksz);
     } else if (USERTHREAD_FLG == flg) { // 是否建立普通进程
-        return krlnew_user_thread_core(filerun, flg, prilg, prity, tustksz, tkstksz);
+        return krlnew_user_thread_core(name, filerun, flg, prilg, prity, tustksz, tkstksz);
     }
 
     return NULL;

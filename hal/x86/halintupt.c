@@ -257,7 +257,7 @@ void hal_fault_allocator(uint_t faultnumb, void *krnlsframp)
         if (ret != 0) {
             dump_stack(krnlsframp);
             // 处理缺页失败就死机
-            kprint("处理缺页失败状态码:%q\n", ret);
+            kprint("处理缺页失败状态码:%q\n", -ret);
             system_error("缺页处理失败\n");
         }
 
