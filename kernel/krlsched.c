@@ -48,8 +48,9 @@ void schedclass_t_init(schedclass_t *initp)
 }
 
 /**
- * init_krlsched 函数调用 schedclass_t_init 函数
- * 对 osschedcls 变量进行初始化工作
+ * @brief init_krlsched 函数调用 schedclass_t_init 函数
+ *  对 osschedcls 变量进行初始化工作
+ * 
  */
 void init_krlsched()
 {
@@ -87,8 +88,10 @@ uint_t krlsched_retn_schedflgs()
 }
 
 /**
- * 进程等待
- *  这个函数会设置进程状态为等待状态，让进程从调度系统数据结构中脱离，最后让进程加入到 kwlst_t 等待结构中
+ * @brief 进程等待
+ *  1. 这个函数会设置进程状态为等待状态，让进程从调度系统数据结构中脱离，最后让进程加入到 kwlst_t 等待结构中
+ * 
+ * @param wlst 
  */
 void krlsched_wait(kwlst_t *wlst)
 {
@@ -133,9 +136,11 @@ err_step:
 }
 
 /**
- * 进程唤醒
- *  进程的唤醒则是进程等待的反向操作行为
- *  即从等待数据结构中获取进程，然后设置进程的状态为运行状态，最后将这个进程加入到进程调度系统数据结构中
+ * @brief 进程唤醒
+ *  1. 进程的唤醒则是进程等待的反向操作行为
+ *  2. 即从等待数据结构中获取进程，然后设置进程的状态为运行状态，最后将这个进程加入到进程调度系统数据结构中
+ * 
+ * @param wlst 
  */
 void krlsched_up(kwlst_t *wlst)
 {
@@ -176,12 +181,13 @@ err_step:
     return;
 }
 
-
 /**
- * 获取空转进程
- *  在选择下一个进程的函数中，如果没有找到合适的进程，就返回默认的空转进程
+ * @brief 获取空转进程
+ *  1. 在选择下一个进程的函数中，如果没有找到合适的进程，就返回默认的空转进程
+ * 
+ * @return thread_t* 
  */
-thread_t *krlsched_retn_idlethread()
+thread_t* krlsched_retn_idlethread()
 {
     uint_t cpuid = hal_retn_cpuid();
     // 通过cpuid获取当前cpu的调度数据结构
@@ -245,46 +251,51 @@ void krlsched_chkneed_pmptsched()
 
     return;
 }
+
 /**
- * 选择下一个进程
- *  从高到低扫描优先级进程链表，然后若当前优先级进程链表不为空，就取出该链表上的第一个进程
- *  放入 thrdlst_t 结构中的 tdl_curruntd 字段中，并把之前 thrdlst_t 结构的 tdl_curruntd 字段中的进程挂入该链表的尾部，并返回
- *  最后，当扫描到最低优先级时也没有找到进程，就返回默认的空转进程
+ * @brief 选择下一个进程
+ *  1. 从高到低扫描优先级进程链表，然后若当前优先级进程链表不为空，就取出该链表上的第一个进程
+ *  2. 放入 thrdlst_t 结构中的 tdl_curruntd 字段中，并把之前 thrdlst_t 结构的 tdl_curruntd 字段中的进程挂入该链表的尾部，并返回
+ *  3. 最后，当扫描到最低优先级时也没有找到进程，就返回默认的空转进程
+ * 
+ * @return thread_t* 
  */
 thread_t *krlsched_select_thread()
 {
-    thread_t *retthd, *tdtmp;
+    thread_t *retthd = NULL, *tdtmp = NULL, *cur = NULL;
+    list_h_t *pos = NULL;
     cpuflg_t cufg;
     uint_t cpuid = hal_retn_cpuid();
     schdata_t *schdap = &osschedcls.scls_schda[cpuid];
 
     krlspinlock_cli(&schdap->sda_lock, &cufg);
+
     // 从最高优先级开始扫描
     for (uint_t pity = 0; pity < PRITY_MAX; pity++) {
         // 若当前优先级的进程链表不为空
-        if (schdap->sda_thdlst[pity].tdl_nr > 0) {
-            // 取出当前优先级进程链表下的第一个进程
-            if (list_is_empty_careful(&(schdap->sda_thdlst[pity].tdl_lsth)) == FALSE) {
-                tdtmp = list_entry(schdap->sda_thdlst[pity].tdl_lsth.next, thread_t, td_list);
+        // 取出当前优先级进程链表下的第一个进程
+        list_for_each(pos, &(schdap->sda_thdlst[pity].tdl_lsth)) {
+            tdtmp = list_entry(pos, thread_t, td_list);
+            // 进程状态
+            if (tdtmp->td_stus == TDSTUS_RUN || tdtmp->td_stus == TDSTUS_NEW) {
                 list_del(&tdtmp->td_list);  // 脱链
-
                 // 将这sda_thdlst[pity].tdl_curruntd的进程挂入链表尾
-                if (schdap->sda_thdlst[pity].tdl_curruntd != NULL) {
-                    list_add_tail(&(schdap->sda_thdlst[pity].tdl_curruntd->td_list), &schdap->sda_thdlst[pity].tdl_lsth);
+                cur = schdap->sda_thdlst[pity].tdl_curruntd;
+                if (cur != NULL) {
+                    list_add_tail(&cur->td_list, &schdap->sda_thdlst[pity].tdl_lsth);
                 }
 
                 schdap->sda_thdlst[pity].tdl_curruntd = tdtmp;
                 // 将选择的进程放入sda_thdlst[pity].tdl_curruntd中，并返回
                 retthd = tdtmp;
-
                 goto return_step;
-            }
 
-            if (schdap->sda_thdlst[pity].tdl_curruntd != NULL) {
-                // 若sda_thdlst[pity].tdl_curruntd不为空就直接返回它
-                retthd = schdap->sda_thdlst[pity].tdl_curruntd;
-                goto return_step;
             }
+        }
+
+        if (schdap->sda_thdlst[pity].tdl_curruntd != NULL) {
+            retthd = schdap->sda_thdlst[pity].tdl_curruntd;
+            goto return_step;
         }
     }
 
@@ -445,11 +456,13 @@ void __to_new_context(thread_t *next, thread_t *prev)
 }
 
 /**
- * 进程切换的函数
- *  首先把当前进程的通用寄存器保存到当前进程的内核栈中
- *  然后，保存 CPU 的 RSP 寄存器到当前进程的机器上下文结构中，并且读取保存在下一个进程机器上下文结构中的 RSP 的值，把它存到 CPU 的 RSP 寄存器中
- *  接着，调用一个函数切换 MMU 页表
- *  后，从下一个进程的内核栈中恢复下一个进程的通用寄存器
+ * @brief 进程切换的函数
+ *  1. 首先把当前进程的通用寄存器保存到当前进程的内核栈中
+ *  2. 然后，保存 CPU 的 RSP 寄存器到当前进程的机器上下文结构中，并且读取保存在下一个进程机器上下文结构中的 RSP 的值，把它存到 CPU 的 RSP 寄存器中
+ *      接着，调用一个函数切换 MMU 页表后，从下一个进程的内核栈中恢复下一个进程的通用寄存器  
+ * 
+ * @param next 下一个进程
+ * @param prev 上一个进程
  */
 void save_to_new_context(thread_t *next, thread_t *prev)
 {

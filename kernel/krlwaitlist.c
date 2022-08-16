@@ -38,18 +38,29 @@ void krlwlst_allup(kwlst_t* wlst)
     return;
 }
 
-void krlwlst_add_thread(kwlst_t* wlst,thread_t* tdp)
+/**
+ * @brief 进程加入到 kwlst_t 等待结构
+ * 
+ * @param wlst 
+ * @param tdp 
+ */
+void krlwlst_add_thread(kwlst_t* wlst, thread_t* tdp)
 {
     cpuflg_t cufg;
-    krlspinlock_cli(&wlst->wl_lock,&cufg);
+    krlspinlock_cli(&wlst->wl_lock, &cufg);
     
-    list_add(&tdp->td_list,&wlst->wl_list);
+    list_add(&tdp->td_list, &wlst->wl_list);
     wlst->wl_tdnr++;   
-    krlspinunlock_sti(&wlst->wl_lock,&cufg);
+    krlspinunlock_sti(&wlst->wl_lock, &cufg);
     return;
 }
 
-// 取出等待数据结构第一个进程并从等待数据结构中删除
+/**
+ * @brief 取出等待数据结构第一个进程并从等待数据结构中删除
+ * 
+ * @param wlst 
+ * @return thread_t* 
+ */
 thread_t* krlwlst_del_thread(kwlst_t *wlst)
 {
     thread_t* tdp=NULL;

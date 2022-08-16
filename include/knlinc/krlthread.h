@@ -24,4 +24,5 @@ void krlthread_kernstack_init(thread_t *thdp, void *runadr, uint_t cpuflags);
 thread_t* krlnew_user_thread_core(char_t *name, void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
 thread_t* krlnew_kern_thread_core(char_t *name, void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
 thread_t* krlnew_thread(char_t *name, void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
+char_t* thread_name(thread_t *thread, char_t *name);
 #endif // KRLTHREAD_H

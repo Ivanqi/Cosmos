@@ -33,11 +33,23 @@ void init_ab_thread()
     return;
 }
 
+void init_user_thread()
+{
+    thread_t *t = NULL;
+    t = krlnew_thread("oneuser.app", (void *)APPRUN_START_VITRUALADDR, USERTHREAD_FLG, PRILG_USR, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    t = krlthread_execvl(t, "oneuser.app");
+    if (NULL != t) {
+        kprint("oneuser.app进程建立成功:%x\n", (uint_t)t);
+    }
+    return;
+}
+
 // 初始化空转进程
 void init_krlcpuidle()
 {
     new_cpuidle();      // 建立空转进程
     init_ab_thread();   // 初始化建立A、B进程
+    // init_user_thread();
     krlcpuidle_start(); // 启动空转进程运行
     return;
 }
@@ -60,6 +72,7 @@ void krlcpuidle_start()
 
     // 设置空转进程的tss和R0特权级的栈
     tdp->td_context.ctx_nexttss = &x64tss[cpuid];
+    x64tss[cpuid].rsp0 = tdp->td_krlstktop;
     tdp->td_context.ctx_nexttss->rsp0 = tdp->td_krlstktop;
     // 设置空转进程的状态为运行状态
     tdp->td_stus = TDSTUS_RUN;
@@ -98,6 +111,8 @@ thread_t *new_cpuidle_thread()
         return NULL;
     }
 
+    thread_name(ret_td, "cpuidle-thread");
+
     // 设置进程具有系统权限
     ret_td->td_privilege = PRILG_SYS;
     ret_td->td_priority = PRITY_MIN;
@@ -134,9 +149,38 @@ void krlcpuidle_main()
 {
     uint_t i = 0;
     for (;; i++) {
-        //hal_sysdie("cpuidle DIE\n");
         kprint("cpuidle is run:%x\n", i);
         krlschedul();   // 调度进程
     }
     return;
+}
+
+thread_t* krlthread_execvl(thread_t* thread, char_t* filename)
+{
+    u64_t retadr = 0, filelen = 0;
+    adr_t vadr = 0;
+
+    if (NULL == thread || NULL == filename) {
+        return NULL;
+    }
+
+    get_file_rvadrandsz(filename, &kmachbsp, &retadr, &filelen);
+    if (NULL == retadr || 0 == filelen) {
+        return NULL;
+    }
+
+    if (thread->td_mmdsc == &initmmadrsdsc) {
+        return NULL;
+    }
+
+    if ((0x100000 + filelen) >= THREAD_HEAPADR_START) {
+        return NULL;
+    }
+
+    vadr = kvma_initdefault_virmemadrs(thread->td_mmdsc, APPRUN_START_VITRUALADDR, filelen, KMV_BIN_TYPE);
+    if (NULL == vadr) {
+        return NULL;
+    }
+
+    return thread;
 }

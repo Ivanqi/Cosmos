@@ -74,5 +74,6 @@ void knl_decount_kvmemcbox(kvmemcbox_t *kmbox);
 kvmemcbox_t *knl_get_kvmemcbox();
 bool_t knl_put_kvmemcbox(kvmemcbox_t *kmbox);
 void dump_kvmemcboxmgr(kvmemcboxmgr_t *dump);
+adr_t kvma_initdefault_virmemadrs(mmadrsdsc_t* mm, adr_t start, size_t size, u32_t type);
 
 #endif

@@ -317,6 +317,14 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	return TRUE;
 }
 
+adr_t kvma_initdefault_virmemadrs(mmadrsdsc_t* mm, adr_t start, size_t size, u32_t type)
+{
+	if(0x1000 >= start || 0 >= size || NULL == mm) {
+		return NULL;
+	}
+	return vma_new_vadrs(mm, start, size, 0, type);
+}
+
 /**
  * @brief 虚拟内存管理结构初始化
  * 
