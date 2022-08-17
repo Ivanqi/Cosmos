@@ -8,6 +8,8 @@ void init_krlpagempol()
 {
 #if ((defined CFG_X86_PLATFORM))
     kmempool_t_init(&oskmempool);
+    kprint("内存池初始化成功\n");
+    die(0x400);
 #endif
     //testpagemgr();
     return;
@@ -26,13 +28,13 @@ void msahead_t_init(msahead_t *initp)
 
 void kmempool_t_init(kmempool_t *initp)
 {
-    hal_spinlock_init(&initp->mp_lock);
+    krlspinlock_init(&initp->mp_lock);
     list_init(&initp->mp_list);
     initp->mp_stus = 0;
     initp->mp_flgs = 0;
 
-    hal_spinlock_init(&initp->mp_pglock);
-    hal_spinlock_init(&initp->mp_oblock);
+    krlspinlock_init(&initp->mp_pglock);
+    krlspinlock_init(&initp->mp_oblock);
     initp->mp_pgmplnr = 0;
     initp->mp_obmplnr = 0;
 
@@ -63,7 +65,7 @@ void msadsc_add_kmempool(kmempool_t *kmplp, msadsc_t *msa, uint_t relpnr)
     }
 
     cpuflg_t cpuflg;
-    hal_spinlock_saveflg_cli(&kmplp->mp_lock, &cpuflg);
+    krlspinlock_cli(&kmplp->mp_lock, &cpuflg);
 
     if ((PHYMSA_MAX - 1) <= relpnr) {
         list_add(&msa->md_list, &kmplp->mp_msalsthead[(PHYMSA_MAX - 1)].mlh_msalst);
@@ -73,7 +75,7 @@ void msadsc_add_kmempool(kmempool_t *kmplp, msadsc_t *msa, uint_t relpnr)
         kmplp->mp_msalsthead[relpnr].mlh_nr++;
     }
 
-    hal_spinunlock_restflg_sti(&kmplp->mp_lock, &cpuflg);
+    krlspinunlock_sti(&kmplp->mp_lock, &cpuflg);
     return;
 }
 
@@ -94,7 +96,7 @@ msadsc_t *msadsc_del_kmempool(kmempool_t *kmplp, uint_t relpnr, adr_t fradr)
     if ((PHYMSA_MAX - 1) <= relpnr) {
         list_for_each(tmplst, &kmplp->mp_msalsthead[(PHYMSA_MAX - 1)].mlh_msalst) {
             tmpmsa = list_entry(tmplst, msadsc_t, md_list);
-            if ((retmsa->md_phyadrs.paf_padrs << 12) == fradr) {
+            if (msadsc_ret_vaddr(tmpmsa) == fradr) {
                 list_del(&tmpmsa->md_list);
                 retmsa = tmpmsa;
                 kmplp->mp_msalsthead[(PHYMSA_MAX - 1)].mlh_nr--;
@@ -104,7 +106,7 @@ msadsc_t *msadsc_del_kmempool(kmempool_t *kmplp, uint_t relpnr, adr_t fradr)
     } else {
         list_for_each(tmplst, &kmplp->mp_msalsthead[relpnr].mlh_msalst) {
             tmpmsa = list_entry(tmplst, msadsc_t, md_list);
-            if ((tmpmsa->md_phyadrs.paf_padrs << 12) == fradr) {
+            if (msadsc_ret_vaddr(tmpmsa) == fradr) {
                 list_del(&tmpmsa->md_list);
                 retmsa = tmpmsa;
                 kmplp->mp_msalsthead[relpnr].mlh_nr--;
@@ -139,7 +141,7 @@ adr_t kmempool_pages_core_new(size_t msize)
     }
 
     msadsc_add_kmempool(kmplp, retmsa, relpnr);
-    return (adr_t)(retmsa->md_phyadrs.paf_padrs << 12);
+    return msadsc_ret_vaddr(retmsa);
 #endif
 }
 

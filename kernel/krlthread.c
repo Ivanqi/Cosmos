@@ -203,6 +203,7 @@ void krlthread_kernstack_init(thread_t *thdp, void *runadr, uint_t cpuflags)
 
     // 内核栈顶减去intstkregs_t结构的大小。因为地址是从下往上，减去了正好在栈底
     intstkregs_t *arp = (intstkregs_t *)(thdp->td_krlstktop - sizeof(intstkregs_t));
+    kprint("krlthread_kernstack_init arp:%x\n", arp);
     // 把intstkregs_t结构的空间初始化为0
     hal_memset((void*)arp, 0, sizeof(intstkregs_t));
     

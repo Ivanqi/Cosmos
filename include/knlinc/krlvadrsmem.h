@@ -23,7 +23,7 @@ virmemadrs_t *new_virmemadrs();
 bool_t del_virmemadrs(virmemadrs_t *vmdsc);
 void init_kvirmemadrs();
 kmvarsdsc_t *vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr, adr_t start, size_t vassize);
-kmvarsdsc_t *vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize);
+kmvarsdsc_t *vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize, u64_t vaslimits, u32_t vastype);
 adr_t vma_new_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimits, u32_t vastype);
 adr_t vma_new_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vaslimits, u32_t vastype);
 kmvarsdsc_t *vma_del_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize);
@@ -32,6 +32,9 @@ bool_t vma_del_unmapping_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start
 bool_t vma_del_unmapping(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t start, size_t vassize);
 bool_t vma_del_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize);
 bool_t vma_del_vadrs(mmadrsdsc_t *mm, adr_t start, size_t vassize);
+mmadrsdsc_t* krl_curr_mmadrsdsc();
+void vma_full_textbin(mmadrsdsc_t* mm, kmvarsdsc_t* kmvd, adr_t vadr);
+void dump_mem_range(adr_t vadr, uint_t count, uint_t type);
 
 int imrand();
 int kvma_rand(int s, int e);

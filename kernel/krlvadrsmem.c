@@ -289,7 +289,11 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	// 虚拟区间结束地址0x5000
 	kmvdc->kva_end = kmvdc->kva_start + 0x4000;
 	kmvdc->kva_mcstruct = vma;	// kmvdc的上层结构为vma
-	stackkmvdc->kva_maptype = KMV_STACK_TYPE;
+
+	heapkmvdc->kva_start = THREAD_HEAPADR_START;
+	heapkmvdc->kva_end = heapkmvdc->kva_start + 0x1000;
+	heapkmvdc->kva_mcstruct = vma;
+	heapkmvdc->kva_maptype = KMV_HEAP_TYPE;
 
 	// 0x00007FFFBFFFFFFF ～ 0x00007fffffffffff
 	// 栈虚拟区间开始地址0x1000USER_VIRTUAL_ADDRESS_END - 0x40000000
@@ -297,6 +301,7 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	// 栈虚拟区间结束地址0x1000USER_VIRTUAL_ADDRESS_END
 	stackkmvdc->kva_end = USER_VIRTUAL_ADDRESS_END;
 	stackkmvdc->kva_mcstruct = vma;	// stackkmvdc 的 上层结构为vma
+	stackkmvdc->kva_maptype = KMV_STACK_TYPE;
 
 	krlspinlock_init(&vma->vs_lock);
 
@@ -307,6 +312,8 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	vma->vs_startkmvdsc = kmvdc;
 	// 设置虚拟地址空间的开始区间为栈区 
 	vma->vs_endkmvdsc = stackkmvdc;
+	vma->vs_heapkmvdsc = heapkmvdc;
+	vma->vs_stackkmvdsc = stackkmvdc;
 
 	// 加入链表
 	list_add_tail(&kmvdc->kva_list, &vma->vs_list);
@@ -504,7 +511,7 @@ kmvarsdsc_t* vma_find_kmvarsdsc_is_ok(virmemadrs_t *vmalocked, kmvarsdsc_t *curr
  * @param vassize 需要分配的内存的长度
  * @return kmvarsdsc_t* 
  */
-kmvarsdsc_t* vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize)
+kmvarsdsc_t* vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vassize, u64_t vaslimits, u32_t vastype)
 {
 	kmvarsdsc_t *kmvdcurrent = NULL, *curr = vmalocked->vs_currkmvdsc;
 	adr_t newend = start + vassize;	// 分配的内存的结束地址
@@ -524,17 +531,31 @@ kmvarsdsc_t* vma_find_kmvarsdsc(virmemadrs_t *vmalocked, adr_t start, size_t vas
 		// 先检查当前kmvarsdsc_t结构
 		kmvdcurrent = vma_find_kmvarsdsc_is_ok(vmalocked, curr, start, vassize);
 		if (NULL != kmvdcurrent) {
-			return kmvdcurrent;
+			if (vaslimits == kmvdcurrent->kva_limits && vastype == kmvdcurrent->kva_maptype) {
+				return kmvdcurrent;
+			}
 		}
 	}
 
 	// 遍历virmemadrs_t中的所有的kmvarsdsc_t结构
 	list_for_each(listpos, &vmalocked->vs_list) {
 		curr = list_entry(listpos, kmvarsdsc_t, kva_list);
+		if (vaslimits == curr->kva_limits && vastype == curr->kva_maptype) {
+			// 检查每个kmvarsdsc_t结构
+			kmvdcurrent = vma_find_kmvarsdsc_is_ok(vmalocked, curr, start, vassize);
+			if (NULL != kmvdcurrent) {
+				// 如果符合要求就返回
+				return kmvdcurrent;
+			}
+		}
+		
+	}
+
+	list_for_each(listpos, &vmalocked->vs_list) {
+		curr = list_entry(listpos, kmvarsdsc_t, kva_list);
 		// 检查每个kmvarsdsc_t结构
 		kmvdcurrent = vma_find_kmvarsdsc_is_ok(vmalocked, curr, start, vassize);
 		if (NULL != kmvdcurrent) {
-			// 如果符合要求就返回
 			return kmvdcurrent;
 		}
 	}
@@ -561,7 +582,7 @@ adr_t vma_new_vadrs_core(mmadrsdsc_t *mm, adr_t start, size_t vassize, u64_t vas
 	krlspinlock_cli(&vma->vs_lock, &cpuflg);
 
 	// 查找虚拟地址区间
-	currkmvd = vma_find_kmvarsdsc(vma, start, vassize);
+	currkmvd = vma_find_kmvarsdsc(vma, start, vassize, vaslimits, vastype);
 	if (NULL == currkmvd) {
 		retadrs = NULL;
 		goto out;
@@ -1299,12 +1320,12 @@ msadsc_t *vma_new_usermsa(mmadrsdsc_t *mm, kvmemcbox_t *kmbox)
 		return NULL;
 	}
 
-	knl_spinlock(&kmbox->kmb_lock);
+	krlspinlock_lock(&kmbox->kmb_lock);
 
 	list_add(&msa->md_list, &kmbox->kmb_msalist);
 	kmbox->kmb_msanr++;
 
-	knl_spinunlock(&kmbox->kmb_lock);
+	krlspinlock_unlock(&kmbox->kmb_lock);
 	return msa;
 }
 
@@ -1359,6 +1380,34 @@ adr_t vma_map_phyadrs(mmadrsdsc_t *mm, kmvarsdsc_t *kmvd, adr_t vadrs, u64_t fla
 	return vma_map_msa_fault(mm, kmbox, vadrs, flags);
 }
 
+// 这样的骚操作只是暂时为之
+void vma_full_textbin(mmadrsdsc_t* mm, kmvarsdsc_t* kmvd, adr_t vadr)
+{
+	thread_t* td = mm->msd_thread;
+	adr_t vstart = kmvd->kva_start;
+	adr_t vnr = (vadr - vstart) >> PAGE_SZRBIT;
+	u64_t filevadr = 0, filesize = 0;
+	if (KMV_BIN_TYPE != kmvd->kva_maptype) {
+		return; 
+	}
+
+	if (NULL == td) {
+		system_error("vma_full_textbin td is null\n");
+		return;
+		
+	}
+	get_file_rvadrandsz(td->td_appfilenm, &kmachbsp, &filevadr, &filesize);
+	if (0 == filevadr || 0 == filesize) {
+		system_error("vma_full_textbin file is null\n");
+		return;
+	}
+	
+	krlmemcopy((void*)(filevadr + ((u64_t)(vnr << PAGE_SZRBIT))), (void*)(vadr & (~0xfffUL)), (1 << PAGE_SZRBIT));
+	// kprint("vma_full_textbin fvadr:%x fsize:%x vadr:%x vstart:%x\n", filevadr, filesize, vadr, vstart);
+	// dump_mem_range((vadr & (~0xfffUL)), 10, 1);
+	return;	
+}
+
 /**
  * @brief 缺页异常处理核心函数
  * 	1. 查找缺页地址对应的 kmvarsdsc_t 结构
@@ -1389,17 +1438,19 @@ sint_t vma_map_fairvadrs_core(mmadrsdsc_t *mm, adr_t vadrs)
 	// 返回kmvarsdsc_t结构下对应kvmemcbox_t结构，它是用来挂载物理内存页面的
 	kmbox = vma_map_retn_kvmemcbox(kmvd);
 	if (NULL == kmbox) {
-		rets = -ENOMEM;
+		rets = -ENOOBJ;
 		goto out;
 	}
 
 	// 分配物理内存页面并建立MMU页表
 	phyadrs = vma_map_phyadrs(mm, kmvd, vadrs, (0 | PML4E_US | PML4E_RW | PML4E_P));
 	if (NULL == phyadrs) {
+		kprint("vma_map_phyadrs null %x\n", vadrs);
 		rets = -ENOMEM;
 		goto out;
 	}
 
+	vma_full_textbin(mm, kmvd, vadrs); // 骚操作
 	rets = EOK;
 
 out:
@@ -1419,6 +1470,13 @@ sint_t vma_map_fairvadrs(mmadrsdsc_t *mm, adr_t vadrs)
 	return vma_map_fairvadrs_core(mm, vadrs);
 }
 
+mmadrsdsc_t* krl_curr_mmadrsdsc()
+{
+	thread_t* td;
+	td = krlsched_retn_currthread();
+	return td->td_mmdsc;
+}
+
 /**
  * @brief 由异常分发器调用的接口
  * 
@@ -1433,7 +1491,6 @@ sint_t krluserspace_accessfailed(adr_t fairvadrs)
 	if (USER_VIRTUAL_ADDRESS_END < fairvadrs) {
 		return -EACCES;
 	}
-
 	return vma_map_fairvadrs(mm, fairvadrs);
 }
 
@@ -1634,7 +1691,7 @@ kvmemcbox_t* knl_get_kvmemcbox()
 {
 	kvmemcbox_t* kmb = NULL;
 	kvmemcboxmgr_t* kmbmgr = &krlvirmemadrs.kvs_kvmemcboxmgr;
-	krlspinlock_init(&kmbmgr->kbm_lock);
+	krlspinlock_lock(&kmbmgr->kbm_lock);
 
 	if (0 < kmbmgr->kbm_cachenr) {
 		// 缓存kvmemcbox_t结构的链表 不为空
@@ -1728,5 +1785,18 @@ void dump_kvmemcboxmgr(kvmemcboxmgr_t* dump)
 	kprint("kvmemcboxmgr_t.kmb_cachemax:%x\n", dump->kbm_cachemax);
 	kprint("kvmemcboxmgr_t.kmb_cachemin:%x\n", dump->kbm_cachemin);
 	kprint("kvmemcboxmgr_t.kmb_cachehead:%x\n", list_is_empty_careful(&dump->kbm_cachehead));
+	return;
+}
+
+void dump_mem_range(adr_t vadr, uint_t count, uint_t type)
+{
+	u8_t* form = (u8_t*)vadr;
+	if (1 != type) {
+		return;
+	}
+
+	for (uint_t i = 0; i < count; i++) {
+		kprint("dump_mem address:%x value:%x\n", &form[i], form[i]);
+	}
 	return;
 }
