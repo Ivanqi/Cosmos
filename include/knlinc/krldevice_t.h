@@ -39,7 +39,8 @@
 #define SYSTICK_DEVICE 31           // 系统TICK设备
 #define UNKNOWN_DEVICE 32           // 未知设备，也是设备
 
-#define DEVICE_MAX 33               // 硬盘设备
+#define HD_DEVICE 33
+#define DEVICE_MAX 34               // 硬盘设备
 
 #define IOIF_CODE_OPEN 0            // 对应于open操作
 #define IOIF_CODE_CLOSE 1           // 对应于close操作
@@ -75,12 +76,12 @@ typedef struct s_DEVID {
     uint_t  dev_mtype;  // 设备类型号
     uint_t  dev_stype;  // 设备子类型号
     uint_t  dev_nr;     // 设备序号
-} devid_t;
+} __attribute__((aligned(64))) devid_t;
 
 /**
  * devtlst_t 是每个设备类型一个，表示一类设备，但每一类可能有多个设备
  */
-typedef struct s_DEVTLS {
+typedef struct s_DEVTLST {
     uint_t dtl_type;    // 设备类型
     uint_t dtl_nr;      // 设备计数
     list_h_t dtl_list;  // 挂载设备device_t结构的链表

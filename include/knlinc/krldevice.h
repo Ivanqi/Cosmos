@@ -33,5 +33,6 @@ device_t* krlonidfl_retn_device(void* dfname,uint_t flgs);
 drvstus_t krlnew_devhandle(device_t* devp,intflthandle_t handle,uint_t phyiline);
 drvstus_t krldev_io(objnode_t* nodep);
 drvstus_t krldev_call_driver(device_t* devp,uint_t iocode,uint_t val1,uint_t val2,void* p1,void* p2);
+drvstus_t krlnew_devid(devid_t *devid);
 
 #endif // KRLDEVICE_H
