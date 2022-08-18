@@ -10,6 +10,7 @@ void thread_a_main()
     uint_t i = 0;
     for (;; i++) {
         kprint("进程A运行:%x\n", i);
+        die(200); //延迟一会
         krlschedul();
     }
     return;
@@ -21,6 +22,7 @@ void thread_b_main()
     uint_t i = 0;
     for (;; i++) {
         kprint("进程B运行:%x\n", i);
+        die(150); //延迟一会
         krlschedul();
     }
     return;
@@ -48,17 +50,17 @@ void init_user_thread()
 void init_krlcpuidle()
 {
     new_cpuidle();      // 建立空转进程
-    init_ab_thread();   // 初始化建立A、B进程
+    // init_ab_thread();   // 初始化建立A、B进程
     // init_user_thread();
     krlcpuidle_start(); // 启动空转进程运行
     return;
 }
 
 /**
- * 空转进程运行
- *  首先就是取出空转进程
- *  然后设置一下机器上下文结构和运行状态
- *  最后调用 retnfrom_first_sched 函数，恢复进程内核栈中的内容，让进程启动运行
+ * @brief 空转进程运行
+ *  1. 首先就是取出空转进程
+ *  2. 然后设置一下机器上下文结构和运行状态
+ *  3. 最后调用 retnfrom_first_sched 函数，恢复进程内核栈中的内容，让进程启动运行
  */
 void krlcpuidle_start()
 {
@@ -68,7 +70,6 @@ void krlcpuidle_start()
 
     // 取得空转进程
     thread_t *tdp = schdap->sda_cpuidle;
-    kprint("schdap->sda_cpuidle:%x\n\r", schdap->sda_cpuidle);
 
     // 设置空转进程的tss和R0特权级的栈
     tdp->td_context.ctx_nexttss = &x64tss[cpuid];
@@ -83,8 +84,10 @@ void krlcpuidle_start()
 }
 
 /**
- * 建立空转进程
- *  并把这个空进程CPU下的schdata中
+ * @brief 建立空转进程
+ *  1. 并把这个空进程CPU下的schdata中
+ * 
+ * @return thread_t* 
  */
 thread_t *new_cpuidle_thread()
 {
@@ -150,6 +153,7 @@ void krlcpuidle_main()
     uint_t i = 0;
     for (;; i++) {
         kprint("cpuidle is run:%x\n", i);
+        die(0x400);
         krlschedul();   // 调度进程
     }
     return;
