@@ -1367,7 +1367,8 @@ void test_rfs_bitmap(device_t *devp)
 
     kprint("文件系统空闲块数:%d\n", b);
     del_buf(buf, FSYS_ALCBLKSZ);
-    hal_sysdie("结束文件系统位图测试\n");   // 死机用于观察测试结果
+    kprint("结束文件系统位图测试\n");   // 死机用于观察测试结果
+    die(0x400);
     return;
 }
 
@@ -1419,7 +1420,8 @@ void test_rfs_rootdir(device_t *devp)
 
     del_buf(buf, FSYS_ALCBLKSZ);
     del_rootdir(devp, dr);
-    hal_sysdie("结束文件系统根目录测试\n"); // 死机用于观察测试结果
+    kprint("结束文件系统根目录测试\n"); // 死机用于观察测试结果
+    die(0x400);
     return;
 }
 
@@ -1434,7 +1436,8 @@ void test_rfs_superblk(device_t *devp)
     kprint("文件系统根目录块号:%d 类型:%d\n", sbp->rsb_rootdir.rdr_blknr, sbp->rsb_rootdir.rdr_type);
     kprint("文件系统根目录名称:%s\n", sbp->rsb_rootdir.rdr_name);
     del_superblk(devp, sbp);
-    hal_sysdie("结束文件系统超级块测试");   // 死机用于观察测试结果
+    kprint("结束文件系统超级块测试");   // 死机用于观察测试结果
+    die(0x400);
     return;
 }
 
@@ -1479,7 +1482,7 @@ void test_fsys(device_t *devp)
 
     // 新建文件
     if (rfs_open(devp, ondp) == DFCERRSTUS) {
-        hal_sysdie("new file is err");
+        hal_sysdie("新建文件错误");
     }
 
     // 设置打开文件标志
@@ -1487,12 +1490,12 @@ void test_fsys(device_t *devp)
 
     // 打开文件
     if (rfs_open(devp, ondp) == DFCERRSTUS) {
-        hal_sysdie("open file is err");
+        hal_sysdie("打开文件错误");
     }
 
     // 把数据写入文件
     if (rfs_write(devp, ondp) == DFCERRSTUS) {
-        hal_sysdie("write file is err");
+        hal_sysdie("写入文件错误");
     }
 
     // 清零缓冲区
@@ -1500,12 +1503,12 @@ void test_fsys(device_t *devp)
 
     // 读取文件数据
     if (rfs_read(devp, ondp) == DFCERRSTUS) {
-        hal_sysdie("read file is err");
+        hal_sysdie("读取文件错误");
     }
 
     // 关闭文件
     if (rfs_close(devp, ondp) == DFCERRSTUS) {
-        hal_sysdie("close file is err");
+        hal_sysdie("关闭文件错误");
     }
 
     // 指向缓冲区
@@ -1514,15 +1517,15 @@ void test_fsys(device_t *devp)
     for (uint_t i = 0; i < 512; i++) {
         // 如果不等于0xff就死机
         if (cb[i] != 0xff) {
-            hal_sysdie("chek rwbuf err");
+            hal_sysdie("检查文件内容错误");
         }
         // 打印文件内容
-        kprint("rwblk[%x]:%x\n", i, (uint_t)cb[i]);
+        kprint("testfile文件第[%x]个字节数据:%x\n", i, (uint_t)cb[i]);
     }
 
     // 删除文件
     if (rfs_ioctrl(devp, ondp) == DFCERRSTUS) {
-        hal_sysdie("del file is err");
+        hal_sysdie("删除文件错误");
     }
 
     // 再次设置打开文件标志
@@ -1530,9 +1533,10 @@ void test_fsys(device_t *devp)
 
     // 再次打开文件
     if (rfs_open(devp, ondp) == DFCERRSTUS) {
-        hal_sysdie("2open2 file is err");
+        kprint("再次打开文件失败");
     }
 
-    hal_sysdie("test_fsys ok");
+    kprint("结束文件操作测试");
+    die(0x400);
     return;
 }

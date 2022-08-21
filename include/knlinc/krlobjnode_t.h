@@ -4,6 +4,7 @@
 #ifndef _KRLOBJNODE_T_H
 #define _KRLOBJNODE_T_H
 
+// IO包
 typedef struct s_OBJNODE {
     spinlock_t  on_lock;        // 自旋锁
     list_h_t    on_list;        // 链表

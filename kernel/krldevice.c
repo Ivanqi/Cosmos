@@ -37,6 +37,11 @@ void devid_t_init(devid_t *initp, uint_t mty, uint_t sty, uint_t nr)
     return;
 }
 
+/**
+ * @brief 设备初始化
+ * 
+ * @param initp 
+ */
 void device_t_init(device_t *initp)
 {
     list_init(&initp->dev_list);
@@ -178,6 +183,12 @@ driver_t *new_driver_dsc()
     return dp;
 }
 
+/**
+ * @brief 释放设备资源
+ * 
+ * @param devp 设备指针
+ * @return drvstus_t 
+ */
 drvstus_t del_device_dsc(device_t *devp)
 {
     if (krldelete((adr_t)devp, sizeof(device_t)) == FALSE) {
@@ -187,6 +198,11 @@ drvstus_t del_device_dsc(device_t *devp)
     return DFCOKSTUS;
 }
 
+/**
+ * @brief 新建一个设备
+ * 
+ * @return device_t* 
+ */
 device_t *new_device_dsc()
 {
     device_t *dp = (device_t *)krlnew(sizeof(device_t));
@@ -211,6 +227,13 @@ drvstus_t drv_defalt_func(device_t *devp, void *iopack)
     return DFCERRSTUS;
 }
 
+/**
+ * @brief 设备比较
+ * 
+ * @param sdidp 
+ * @param cdidp 
+ * @return bool_t 
+ */
 bool_t krlcmp_devid(devid_t *sdidp, devid_t *cdidp)
 {
     if (sdidp->dev_mtype != cdidp->dev_mtype) {
@@ -287,6 +310,13 @@ drvstus_t krldriver_add_system(driver_t *drvp)
     return DFCOKSTUS;
 }
 
+/**
+ * @brief 把设备加入到驱动的设备链表中
+ * 
+ * @param devp 设备指针
+ * @param drvp 驱动指针
+ * @return drvstus_t 
+ */
 drvstus_t krldev_add_driver(device_t *devp, driver_t *drvp)
 {
     list_h_t *lst;
@@ -294,7 +324,8 @@ drvstus_t krldev_add_driver(device_t *devp, driver_t *drvp)
     if (devp == NULL || drvp == NULL) {
         return DFCERRSTUS;
     }
-
+    
+    // 遍历驱动上的设备链表，如果找到相同的就代表已经加入了链表
     list_for_each(lst, &drvp->drv_alldevlist) {
         fdevp = list_entry(lst, device_t, dev_indrvlst);
         if (krlcmp_devid(&devp->dev_id, &fdevp->dev_id) == TRUE) {
@@ -307,6 +338,12 @@ drvstus_t krldev_add_driver(device_t *devp, driver_t *drvp)
     return DFCOKSTUS;
 }
 
+/**
+ * @brief 向内核(设备表)注册设备
+ * 
+ * @param devp 
+ * @return drvstus_t 
+ */
 drvstus_t krlnew_device(device_t *devp)
 {
     device_t *findevp;
@@ -319,6 +356,7 @@ drvstus_t krlnew_device(device_t *devp)
         return DFCERRSTUS;
     }
 
+    // 没有驱动的设备不行
     if (devp->dev_drv == NULL) {
         return DFCERRSTUS;
     }
@@ -327,27 +365,31 @@ drvstus_t krlnew_device(device_t *devp)
         return DFCERRSTUS;
     }
 
-    krlspinlock_cli(&dtbp->devt_lock, &cpufg);
+    krlspinlock_cli(&dtbp->devt_lock, &cpufg);  // 加锁
     if (devmty != dtbp->devt_devclsl[devmty].dtl_type) {
         rets = DFCERRSTUS;
         goto return_step;
     }
-
+    
+    // 往设备表里挂载设备
     list_for_each(lstp, &dtbp->devt_devclsl[devmty].dtl_list) {
         findevp = list_entry(lstp, device_t, dev_intbllst);
+        // 不能有设备ID相同的设备，如果有则出错
         if (krlcmp_devid(&devp->dev_id, &findevp->dev_id) == TRUE) {
             rets = DFCERRSTUS;
             goto return_step;
         }
     }
 
+    // 先把设备加入设备表的全局设备链表
     list_add(&devp->dev_intbllst, &dtbp->devt_devclsl[devmty].dtl_list);
+    // 将设备加入对应设备类型的链表中
     list_add(&devp->dev_list, &dtbp->devt_devlist);
-    dtbp->devt_devclsl[devmty].dtl_nr++;
-    dtbp->devt_devnr++;
+    dtbp->devt_devclsl[devmty].dtl_nr++;    // 设备计数加一
+    dtbp->devt_devnr++;                     // 总的设备数加一
     rets = DFCOKSTUS;
 return_step:
-    krlspinunlock_sti(&dtbp->devt_lock, &cpufg);
+    krlspinunlock_sti(&dtbp->devt_lock, &cpufg);    // 解锁
     return rets;
 }
 
@@ -527,8 +569,17 @@ return_step:
     return findevp;
 }
 
+/**
+ * @brief 安装中断回调函数接口
+ * 
+ * @param devp 
+ * @param handle 
+ * @param phyiline 
+ * @return drvstus_t 
+ */
 drvstus_t krlnew_devhandle(device_t *devp, intflthandle_t handle, uint_t phyiline)
 {
+    // 调用内核层中断框架接口函数
     intserdsc_t *sdp = krladd_irqhandle(devp, handle, phyiline);
     if (sdp == NULL){
         return DFCERRSTUS;
@@ -537,6 +588,7 @@ drvstus_t krlnew_devhandle(device_t *devp, intflthandle_t handle, uint_t phyilin
     cpuflg_t cpufg;
     krlspinlock_cli(&devp->dev_lock, &cpufg);
 
+    // 将中断服务描述符结构挂入这个设备结构中
     list_add(&sdp->s_indevlst, &devp->dev_intserlst);
     devp->dev_intlnenr++;
     krlspinunlock_sti(&devp->dev_lock, &cpufg);

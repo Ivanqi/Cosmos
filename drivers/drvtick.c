@@ -18,7 +18,7 @@ void init_8254()
     return;
 }
 
-// 设置设备对应的功能
+// 设置驱动对应的功能(函数)
 void systick_set_driver(driver_t *drvp)
 {
     drvp->drv_dipfun[IOIF_CODE_OPEN] = systick_open;
@@ -37,7 +37,12 @@ void systick_set_driver(driver_t *drvp)
     return;
 }
 
-// 设置设备属性
+/**
+ * @brief 设置设备属性
+ * 
+ * @param devp 设备指针
+ * @param drvp 驱动指针
+ */
 void systick_set_device(device_t *devp, driver_t *drvp)
 {
     devp->dev_flgs = DEVFLG_SHARE;              // 设备标志。共享
@@ -51,12 +56,17 @@ void systick_set_device(device_t *devp, driver_t *drvp)
 }
 
 /**
- * 驱动程序入口
+ * @brief 驱动程序入口
  *  1. 建立设备描述符结构
  *  2. 将驱动程序的功能函数指针，设置到driver_t结构中的drv_dipfun数组中
  *  3. 将设备挂载到驱动中
  *  4. 调用krlnew_device向内核注册设备
  *  5. 确认没有相同设备ID，注册到对应设备类型的列表以及全局设备列表
+ * 
+ * @param drvp 驱动程序指针
+ * @param val 
+ * @param p 
+ * @return drvstus_t 
  */
 drvstus_t systick_entry(driver_t *drvp, uint_t val, void *p)
 {
@@ -71,7 +81,7 @@ drvstus_t systick_entry(driver_t *drvp, uint_t val, void *p)
         return DFCERRSTUS;
     }
 
-    // 设置设备对应的功能
+    // 设置驱动对应的功能(函数)
     systick_set_driver(drvp);
     // 设置设备属性
     systick_set_device(devp, drvp);
