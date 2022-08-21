@@ -313,7 +313,6 @@ return_step:
  * @brief 进程调度器入口
  *  1. 确定当前正在运行的进程，然后选择下一个将要运行的进程
  *  2. 最后从当前运行的进程，切换到下一个将要运行的进程
- * 
  */
 void krlschedul()
 {
@@ -331,7 +330,7 @@ void krlschedul()
     thread_t *prev = krlsched_retn_currthread(),    // 返回当前运行进程
              *next = krlsched_select_thread();      // 选择下一个运行的进程
 
-    kprint("krlschedul run currtd:%x,nexttd:%x\n", prev, next);
+    // kprint("调度器运行 当前进程:%s ID:%d,下一个进程:%s stus:%x ID:%d\n", prev->td_appfilenm, prev->td_id, next->td_appfilenm, next->td_stus, next->td_id);
 
     // 从当前进程切换到下一个进程
     save_to_new_context(next, prev);

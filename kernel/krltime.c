@@ -25,6 +25,10 @@ void init_ktime()
 }
 
 
+/**
+ * @brief 写入新的时间信息
+ * 
+ */
 void krlupdate_times_from_cmos()
 {
     ktime_t *initp = &osktime;
@@ -44,7 +48,7 @@ void krlupdate_times_from_cmos()
     CMOS_READ(tmptm,CMOS_YEAR_ADR);
     initp->kt_year = bcd_to_bin(tmptm);
     // kprint("osktime y:%d,m:%x,d:%d,h:%d,m:%d,s:%d\n", initp->kt_year, initp->kt_mon,initp->kt_day,
-    //                                                     initp->kt_hour, initp->kt_min, initp->kt_sec);
+        // initp->kt_hour, initp->kt_min, initp->kt_sec);
     krlspinunlock_sti(&initp->kt_lock, &cpufg);
     return;
 }

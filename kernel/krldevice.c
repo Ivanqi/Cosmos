@@ -393,6 +393,12 @@ return_step:
     return rets;
 }
 
+/**
+ * @brief 增加设备计数
+ * 
+ * @param devp 设备指针
+ * @return drvstus_t 
+ */
 drvstus_t krldev_inc_devcount(device_t *devp)
 {
 
@@ -407,6 +413,12 @@ drvstus_t krldev_inc_devcount(device_t *devp)
     return DFCOKSTUS;
 }
 
+/**
+ * @brief 减少设备计数
+ * 
+ * @param devp 
+ * @return drvstus_t 
+ */
 drvstus_t krldev_dec_devcount(device_t *devp)
 {
 
@@ -595,13 +607,22 @@ drvstus_t krlnew_devhandle(device_t *devp, intflthandle_t handle, uint_t phyilin
     return DFCOKSTUS;
 }
 
+/**
+ * @brief 发送设备IO
+ * 
+ * @param nodep 
+ * @return drvstus_t 
+ */
 drvstus_t krldev_io(objnode_t *nodep)
 {
+    // 获取设备对象
     device_t *devp = (device_t *)(nodep->on_objadr);
+    // 检查操作对象类型是不是文件或者设备，对象地址是不是为空
     if ((nodep->on_objtype != OBJN_TY_DEV && nodep->on_objtype != OBJN_TY_FIL) || nodep->on_objadr == NULL) {
         return DFCERRSTUS;
     }
 
+    // 检查IO操作码是不是合乎要求
     if (nodep->on_opercode < 0 || nodep->on_opercode >= IOIF_CODE_MAX) {
         return DFCERRSTUS;
     }
@@ -609,17 +630,32 @@ drvstus_t krldev_io(objnode_t *nodep)
     return krldev_call_driver(devp, nodep->on_opercode, 0, 0, NULL, nodep);
 }
 
+/**
+ * @brief 调用设备驱动
+ *  1. IO 操作码为索引调用驱动程序功能分派函数数组中的函数，并把设备和 objnode_t 结构传递进去
+ * 
+ * @param devp 设备指针
+ * @param iocode 操作码
+ * @param val1 
+ * @param val2 
+ * @param p1 
+ * @param p2 
+ * @return drvstus_t 
+ */
 drvstus_t krldev_call_driver(device_t *devp, uint_t iocode, uint_t val1, uint_t val2, void *p1, void *p2)
 {
     driver_t *drvp = NULL;
+    // 检查设备和IO操作码
     if (devp == NULL || iocode >= IOIF_CODE_MAX) {
         return DFCERRSTUS;
     }
 
     drvp = devp->dev_drv;
+    // 检查设备是否有驱动程序
     if (drvp == NULL) {
         return DFCERRSTUS;
     }
 
+    // 用IO操作码为索引调用驱动程序功能分派函数数组中的函数
     return drvp->drv_dipfun[iocode](devp, p2);
 }

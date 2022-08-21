@@ -5,7 +5,9 @@
 #include "cosmosmctrl.h"
 
 /**
- * 初始化8254定时器
+ * @brief 初始化8254定时器
+ *  systick 设备的主要功能和作用是每隔 1ms 产生一个中断，相当于一个定时器
+ *  每次时间到达就产生一个中断向系统报告又过了 1ms，相当于千分之一秒，即每秒钟内产生 1000 次中断
  */
 void init_8254()
 {
@@ -126,18 +128,30 @@ drvstus_t systick_exit(driver_t *drvp, uint_t val, void *p)
     return DFCERRSTUS;
 }
 
-// 设备中断处理函数
+/**
+ * @brief 设备中断处理函数
+ *  1. systick 设备每秒钟产生 1000 次中断
+ * 
+ * @param ift_nr 
+ * @param devp 
+ * @param sframe 
+ * @return drvstus_t 
+ */
 drvstus_t systick_handle(uint_t ift_nr, void *devp, void *sframe)
 {
     // 更新当前进程的tick
     krlthd_inc_tick(krlsched_retn_currthread());
     krlupdate_times_from_cmos();
-    // kprint("systick_handle run devname:%s intptnr:%d\n", ((device_t *)devp)->dev_name, ift_nr);
-    // hal_sysdie("systick_hand\n");
     return DFCOKSTUS;
 }
 
-// 打开、关闭设备函数
+/**
+ * @brief 打开设备函数
+ * 
+ * @param devp 设备指针
+ * @param iopack IO包
+ * @return drvstus_t 
+ */
 drvstus_t systick_open(device_t *devp, void *iopack)
 {
     // 增加设备计数
@@ -146,6 +160,13 @@ drvstus_t systick_open(device_t *devp, void *iopack)
     return DFCOKSTUS;
 }
 
+/**
+ * @brief 关闭设备
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
+ */
 drvstus_t systick_close(device_t *devp, void *iopack)
 {
     // 减少设备计数
@@ -154,35 +175,73 @@ drvstus_t systick_close(device_t *devp, void *iopack)
     return DFCOKSTUS;
 }
 
-// 读、写设备数据函数
+/**
+ * @brief 读设备数据函数
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
+ */
 drvstus_t systick_read(device_t *devp, void *iopack)
 {
     return DFCERRSTUS;
 }
 
+/**
+ * @brief 写设备数据函数
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
+ */
 drvstus_t systick_write(device_t *devp, void *iopack)
 {
     return DFCERRSTUS;
 }
 
-// 调整读写设备数据位置函数
+/**
+ * @brief 调整读写设备数据位置函数
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
+ */
 drvstus_t systick_lseek(device_t *devp, void *iopack)
 {
     return DFCERRSTUS;
 }
 
-// 控制设备函数
+/**
+ * @brief 控制设备函数
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
+ */
 drvstus_t systick_ioctrl(device_t *devp, void *iopack)
 {
     return DFCERRSTUS;
 }
 
-// 开启、停止设备函数
+/**
+ * @brief 开启设备函数
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
+ */
 drvstus_t systick_dev_start(device_t *devp, void *iopack)
 {
     return DFCERRSTUS;
 }
 
+/**
+ * @brief 停止设备函数
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
+ */
 drvstus_t systick_dev_stop(device_t *devp, void *iopack)
 {
     return DFCERRSTUS;

@@ -4,6 +4,11 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+/**
+ * @brief objnode_t结构初始化
+ * 
+ * @param initp 
+ */
 void objnode_t_init(objnode_t *initp)
 {
     krlspinlock_init(&initp->on_lock);
@@ -31,6 +36,11 @@ void objnode_t_init(objnode_t *initp)
     return;
 }
 
+/**
+ * @brief 建立objnode_t结构
+ * 
+ * @return objnode_t* 返回IO包
+ */
 objnode_t *krlnew_objnode()
 {
     objnode_t *ondp = (objnode_t *)krlnew((size_t)sizeof(objnode_t));
@@ -42,6 +52,12 @@ objnode_t *krlnew_objnode()
     return ondp;
 }
 
+/**
+ * @brief 删除objnode_t结构
+ * 
+ * @param onodep 
+ * @return bool_t 
+ */
 bool_t krldel_objnode(objnode_t *onodep)
 {
 

@@ -90,6 +90,11 @@ thread_t *krlnew_thread_dsc()
     return rettdp;
 }
 
+/**
+ * @brief 更新当前进程的tick
+ * 
+ * @param thdp 
+ */
 void krlthd_inc_tick(thread_t *thdp)
 {
     cpuflg_t cpuflg;

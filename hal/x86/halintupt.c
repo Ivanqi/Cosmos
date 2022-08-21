@@ -132,6 +132,12 @@ bool_t hal_add_ihandle(intfltdsc_t *intdscp, intserdsc_t *serdscp)
     return TRUE;
 }
 
+/**
+ * @brief 开启中断请求
+ * 
+ * @param ifdnr 
+ * @return drvstus_t 
+ */
 drvstus_t hal_enable_intline(uint_t ifdnr)
 {
     if (20 > ifdnr || 36 < ifdnr) {

@@ -91,10 +91,14 @@ void fimgrhd_t_init(fimgrhd_t *initp)
 }
 
 /**
- * 分配模拟储存设备的内存空间
+ * @brief 分配模拟储存设备的内存空间
  *  1. 分配了一个内存空间和一个 rfsdevext_t 结构实例变量
  *  2. rfsdevext_t 结构中保存了内存空间的地址和大小
  *  3. 而 rfsdevext_t 结构的地址放在了 device_t 结构的 dev_extdata 字段中
+ * 
+ * @param devp 设备指针
+ * @param blksz 待分配的内存
+ * @return drvstus_t 
  */
 drvstus_t new_rfsdevext_mmblk(device_t *devp, size_t blksz)
 {
@@ -171,12 +175,24 @@ drvstus_t write_rfsdevblk(device_t *devp, void *weadr, uint_t blknr)
     return DFCOKSTUS;
 }
 
+/**
+ * @brief 分配缓冲区
+ * 
+ * @param bufsz 分配缓冲区的大小
+ * @return void* 
+ */
 void *new_buf(size_t bufsz)
 {
     // 分配缓冲区
     return (void *)krlnew(bufsz);
 }
 
+/**
+ * @brief 删除缓冲区
+ * 
+ * @param buf 
+ * @param bufsz 
+ */
 void del_buf(void *buf, size_t bufsz)
 {
     // 释放缓冲区
@@ -186,6 +202,11 @@ void del_buf(void *buf, size_t bufsz)
     return;
 }
 
+/**
+ * @brief 设置驱动默认函数
+ * 
+ * @param drvp 驱动指针
+ */
 void rfs_set_driver(driver_t *drvp)
 {
     drvp->drv_dipfun[IOIF_CODE_OPEN] = rfs_open;
@@ -204,6 +225,12 @@ void rfs_set_driver(driver_t *drvp)
     return;
 }
 
+/**
+ * @brief 设置设备属性
+ * 
+ * @param devp 设备指针
+ * @param drvp 驱动指针
+ */
 void rfs_set_device(device_t *devp, driver_t *drvp)
 {
     // 设备类型为文件系统类型
@@ -218,7 +245,14 @@ void rfs_set_device(device_t *devp, driver_t *drvp)
     return;
 }
 
-// rfs驱动程序入口
+/**
+ * @brief rfs驱动程序入口
+ * 
+ * @param drvp 驱动指针
+ * @param val 
+ * @param p 
+ * @return drvstus_t 
+ */
 drvstus_t rfs_entry(driver_t *drvp, uint_t val, void *p)
 {
     if (drvp == NULL) {
@@ -516,7 +550,11 @@ sint_t rfs_strcpy(char_t *str_s, char_t *str_d)
     return chaidx;
 }
 
-// rfs初始化
+/**
+ * @brief rfs初始化
+ * 
+ * @param devp 设备指针
+ */
 void init_rfs(device_t *devp)
 {
     // 格式化rfs
@@ -524,7 +562,14 @@ void init_rfs(device_t *devp)
     return;
 }
 
-// 格式化rfs
+/**
+ * @brief 格式化rfs
+ *  1. 建立超级块
+ *  2. 建立位图
+ *  3. 建立根目录
+ * 
+ * @param devp 
+ */
 void rfs_fmat(device_t *devp)
 {
     // 建立超级块
@@ -1181,11 +1226,14 @@ err:
 }
 
 /**
- * 建立超级块
+ * @brief 建立超级块
  *  1. 分配4KB大小的缓冲区，清零
  *  2. 使rfssublk_t结构的指针指向缓冲区并进行初始化
  *  3. 把缓冲区中超级块的数据写入到储存设备的第0个逻辑储存块中
  *  4. 释放缓冲区
+ * 
+ * @param devp 
+ * @return bool_t 
  */
 bool_t create_superblk(device_t *devp)
 {

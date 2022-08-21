@@ -43,6 +43,12 @@ intserdsc_t *krladd_irqhandle(void *device, intflthandle_t handle, uint_t phyili
     return serdscp;
 }
 
+/**
+ * @brief 开启中断请求
+ * 
+ * @param ifdnr 
+ * @return drvstus_t 
+ */
 drvstus_t krlenable_intline(uint_t ifdnr)
 {
    return hal_enable_intline(ifdnr);
