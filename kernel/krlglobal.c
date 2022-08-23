@@ -16,7 +16,8 @@ KRL_DEFGLOB_VARIABLE(kmempool_t,oskmempool);
 KRL_DEFGLOB_VARIABLE(schedclass_t,osschedcls);
 KRL_DEFGLOB_VARIABLE(ktime_t,osktime);
 
-KRL_DEFGLOB_VARIABLE(syscall_t,osscalltab)[INR_MAX] = {
+// 服务接口
+KRL_DEFGLOB_VARIABLE(syscall_t,osservicetab)[INR_MAX] = {
     NULL,krlsvetabl_mallocblk,              // 内存分配服务接口
     krlsvetabl_mfreeblk,                    // 内存释放服务接口
     krlsvetabl_exel_thread,                 // 进程服务接口

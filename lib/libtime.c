@@ -1,11 +1,24 @@
 #include "libc.h"
 #include "libdev.h"
+
+/**
+ * @brief 时间API
+ * 
+ * @param ttime 
+ * @return sysstus_t 
+ */
 sysstus_t time(times_t *ttime)
 {
     sysstus_t rets = api_time(ttime);
     return rets;
 }
 
+/**
+ * @brief 时间设置
+ * 
+ * @param ttime 
+ * @return sysstus_t 
+ */
 sysstus_t settime(times_t *ttime)
 {
 
@@ -29,6 +42,12 @@ sysstus_t settime(times_t *ttime)
     return SYSSTUSOK;
 }
 
+/**
+ * @brief 时间获取
+ * 
+ * @param ttime 
+ * @return sysstus_t 
+ */
 sysstus_t gettime(times_t *ttime)
 {
     if (ttime == NULL) {

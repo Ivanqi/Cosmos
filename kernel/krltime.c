@@ -80,23 +80,31 @@ sysstus_t krlsvetabl_time(uint_t inr, stkparame_t *stkparv)
     return krlsve_time((time_t *)stkparv->parmv1);
 }
 
+/**
+ * @brief 时间接口
+ * 
+ * @param time 
+ * @return sysstus_t 
+ */
 sysstus_t krlsve_time(time_t *time)
 {
+    // 对参数进行判断
     if (time == NULL) {
         return SYSSTUSERR;
     }
 
+    // 操作系统保存时间的结构
     ktime_t *initp = &osktime;
     cpuflg_t cpufg;
-    krlspinlock_cli(&initp->kt_lock, &cpufg);
+    krlspinlock_cli(&initp->kt_lock, &cpufg);       // 加锁
     time->year = initp->kt_year;
     time->mon = initp->kt_mon;
     time->day = initp->kt_day;
     time->date = initp->kt_date;
     time->hour = initp->kt_hour;
     time->min = initp->kt_min;
-    time->sec = initp->kt_sec;
-    krlspinunlock_sti(&initp->kt_lock, &cpufg);
+    time->sec = initp->kt_sec;                   // 把时间数据写入到参数指向的内存
+    krlspinunlock_sti(&initp->kt_lock, &cpufg);  // 解锁
 
-    return SYSSTUSOK;
+    return SYSSTUSOK;                            // 返回正确的状态
 }
