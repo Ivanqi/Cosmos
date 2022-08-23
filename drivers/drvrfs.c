@@ -36,9 +36,11 @@ void filblks_t_init(filblks_t *initp)
 }
 
 /**
- * 初始化超级块
+ * @brief 初始化超级块
  *  1. 文件系统的超级块，保存在储存设备的第一个 4KB 大小的逻辑储存块
  *  2. 但是它本身的大小没有 4KB，多余的空间用于以后扩展
+ * 
+ * @param initp 
  */
 void rfssublk_t_init(rfssublk_t *initp)
 {
@@ -64,7 +66,11 @@ void rfssublk_t_init(rfssublk_t *initp)
     return;
 }
 
-// 文件管理头. 512 字节空间
+/**
+ * @brief 文件管理头. 512 字节空间
+ * 
+ * @param initp 
+ */
 void fimgrhd_t_init(fimgrhd_t *initp)
 {
     initp->fmd_stus = 0;
@@ -119,15 +125,24 @@ drvstus_t new_rfsdevext_mmblk(device_t *devp, size_t blksz)
     return DFCOKSTUS;
 }
 
-// 返回设备扩展数据结构
+/**
+ * @brief 返回设备扩展数据结构
+ * 
+ * @param devp 
+ * @return rfsdevext_t* 
+ */
 rfsdevext_t *ret_rfsdevext(device_t *devp)
 {
     return (rfsdevext_t *)devp->dev_extdata;
 }
 
 /**
- * 根据块号返回储存设备的块地址
+ * @brief 根据块号返回储存设备的块地址
  *  1. 这个函数和 ret_rfsdevblk 函数将会一起根据块号，计算出内存地址
+ * 
+ * @param devp 设备指针
+ * @param blknr 内存块编号
+ * @return void* 编号开始内存
  */
 void *ret_rfsdevblk(device_t *devp, uint_t blknr)
 {
@@ -142,14 +157,26 @@ void *ret_rfsdevblk(device_t *devp, uint_t blknr)
     return blkp;
 }
 
-// 设备扩展数据结构长度
+/**
+ * @brief 设备扩展数据结构长度
+ * 
+ * @param devp 设备指针
+ * @return uint_t 
+ */
 uint_t ret_rfsdevmaxblknr(device_t *devp)
 {
     rfsdevext_t *rfsexp = ret_rfsdevext(devp);
     return (uint_t)(((size_t)rfsexp->rde_msize) / FSYS_ALCBLKSZ);
 }
 
-// 把逻辑储存块中的数据，读取到4KB大小的缓冲区中
+/**
+ * @brief 把逻辑储存块中的数据，读取到4KB大小的缓冲区中
+ * 
+ * @param devp 
+ * @param rdadr 
+ * @param blknr 
+ * @return drvstus_t 
+ */
 drvstus_t read_rfsdevblk(device_t *devp, void *rdadr, uint_t blknr)
 {
     // 获取逻辑储存块地址
@@ -162,7 +189,14 @@ drvstus_t read_rfsdevblk(device_t *devp, void *rdadr, uint_t blknr)
     return DFCOKSTUS;
 }
 
-// 把4KB大小的缓冲区中的内容，写入到储存设备的某个逻辑储存块中
+/**
+ * @brief 把4KB大小的缓冲区中的内容，写入到储存设备的某个逻辑储存块中
+ * 
+ * @param devp 
+ * @param weadr 返回的内存
+ * @param blknr 
+ * @return drvstus_t 
+ */
 drvstus_t write_rfsdevblk(device_t *devp, void *weadr, uint_t blknr)
 {
     // 返回储存设备中第blknr块的逻辑存储块的地址
@@ -389,12 +423,18 @@ drvstus_t rfs_shutdown(device_t *devp, void *iopack)
     return DFCERRSTUS;
 }
 
+
 /**
- * 新建文件的接口函数
+ * @brief 新建文件的接口函数
  *  1. 从文件路径名中提取出纯文件名，检查储存设备上是否已经存在这个文件
  *  2. 分配一个空闲的逻辑储存块，并在根目录文件的末尾写入这个新建文件对应的 rfsdir_t 结构
  *  3. 在一个新的 4KB 大小的缓冲区中，初始化新建文件对应的 fimgrhd_t 结构
  *  4. 把第 3 步对应的缓冲区里的数据，写入到先前分配的空闲逻辑储存块中
+ * 
+ * @param devp 
+ * @param fname 
+ * @param flg 
+ * @return drvstus_t 
  */
 drvstus_t rfs_new_file(device_t *devp, char_t *fname, uint_t flg)
 {
@@ -416,11 +456,16 @@ drvstus_t rfs_new_file(device_t *devp, char_t *fname, uint_t flg)
 }
 
 /**
- * 文件删除的接口函数
+ * @brief 文件删除的接口函数
  *  1. 从文件路径名中提取出纯文件名
  *  2. 获取根目录文件，从根目录文件中查找待删除文件的 rfsdir_t 结构，然后释放该文件占用的逻辑储存块
  *  3. 初始化与待删除文件相对应的 rfsdir_t 结构，并设置 rfsdir_t 结构的类型为 RDR_DEL_TYPE
  *  4. 释放根目录文件
+ * 
+ * @param devp 
+ * @param fname 
+ * @param flg 
+ * @return drvstus_t 
  */
 drvstus_t rfs_del_file(device_t *devp, char_t *fname, uint_t flg)
 {
@@ -433,10 +478,14 @@ drvstus_t rfs_del_file(device_t *devp, char_t *fname, uint_t flg)
 }
 
 /**
- * 读取文件数据的接口函数
+ * @brief 读取文件数据的接口函数
  *  1. 检查 objnode_t 结构中用于存放文件数据的缓冲区及其大小
  *  2. 检查 imgrhd_t 结构中文件相关的信息
  *  3. 把文件的数据读取到 objnode_t 结构中指向的缓冲区中
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
  */
 drvstus_t rfs_read_file(device_t *devp, void *iopack)
 {
@@ -450,10 +499,14 @@ drvstus_t rfs_read_file(device_t *devp, void *iopack)
 }
 
 /**
- * 写入文件数据的接口函数
+ * @brief 写入文件数据的接口函数
  *  1. 检查 objnode_t 结构中用于存放文件数据的缓冲区及其大小
  *  2. 检查 imgrhd_t 结构中文件相关的信息
  *  3. 把文件的数据读取到 objnode_t 结构中指向的缓冲区中
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
  */
 drvstus_t rfs_write_file(device_t *devp, void *iopack)
 {
@@ -467,11 +520,15 @@ drvstus_t rfs_write_file(device_t *devp, void *iopack)
 }
 
 /**
- * 打开文件的接口函数
+ * @brief 打开文件的接口函数
  *  1. 从 objnode_t 结构的文件路径提取文件名
  *  2. 获取根目录文件，在该文件中搜索对应的 rfsdir_t 结构，看看文件是否存在
  *  3. 分配一个 4KB 缓存区，把该文件对应的 rfsdir_t 结构中指向的逻辑储存块读取到缓存区中，然后释放根目录文件
  *  4. 把缓冲区中的 fimgrhd_t 结构的地址，保存到 objnode_t 结构的 on_finode 域中
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
  */
 drvstus_t rfs_open_file(device_t *devp, void *iopack)
 {
@@ -493,10 +550,14 @@ drvstus_t rfs_open_file(device_t *devp, void *iopack)
 }
 
 /**
- * 关闭文件的接口函数
+ * @brief 关闭文件的接口函数
  *  1. 首先检查文件是否已经打开
  *  2. 然后把文件写入到对应的逻辑储存块中，完成数据的同步
  *  3. 最后释放文件数据占用的缓冲区
+ * 
+ * @param devp 
+ * @param iopack 
+ * @return drvstus_t 
  */
 drvstus_t rfs_close_file(device_t *devp, void *iopack)
 {
@@ -588,7 +649,7 @@ void rfs_fmat(device_t *devp)
     }
     //test_rfs(devp);
     //test_dir(devp);
-    //test_file(devp);
+    // test_file(devp);
     return;
 }
 
@@ -818,11 +879,17 @@ err1:
 }
 
 /**
- * 删除文件
+ * @brief 删除文件
  *  1. 从文件路径名中提取出纯文件名
  *  2. 获取根目录文件，从根目录文件中查找待删除文件的 rfsdir_t 结构，然后释放该文件占用的逻辑储存块
  *  3. 初始化与待删除文件相对应的 rfsdir_t 结构，并设置 rfsdir_t 结构的类型为 RDR_DEL_TYPE
  *  4. 释放根目录文件
+ * 
+ * @param devp 
+ * @param fname 
+ * @param flgtype 
+ * @param val 
+ * @return drvstus_t 
  */
 drvstus_t rfs_del_dirfileblk(device_t *devp, char_t *fname, uint_t flgtype, uint_t val)
 {
@@ -846,10 +913,14 @@ drvstus_t rfs_del_dirfileblk(device_t *devp, char_t *fname, uint_t flgtype, uint
 }
 
 /**
- * 删除文件的核心函数
+ * @brief 删除文件的核心函数
  *  1. 获取根目录文件，从根目录文件中查找待删除文件的 rfsdir_t 结构，然后释放该文件占用的逻辑储存块
- *  2. 始化与待删除文件相对应的 rfsdir_t 结构，并设置 rfsdir_t 结构的类型为 RDR_DEL_TYPE
+ *  2. 初始化与待删除文件相对应的 rfsdir_t 结构，并设置 rfsdir_t 结构的类型为 RDR_DEL_TYPE
  *  3. 释放根目录文件
+ * 
+ * @param devp 
+ * @param fname 
+ * @return sint_t 
  */
 sint_t del_dirfileblk_core(device_t *devp, char_t *fname)
 {
@@ -901,8 +972,11 @@ err:
 }
 
 /**
- * 获取根目录文件
+ * @brief 获取根目录文件
  *  1. 返回根目录对应的逻辑块
+ * 
+ * @param devp 
+ * @return void* 
  */
 void *get_rootdirfile_blk(device_t *devp)
 {
@@ -938,8 +1012,11 @@ errl1:
 }
 
 /**
- * 释放根目录文件
+ * @brief 释放根目录文件
  *  1. 释放根目录文件，就是把根目录文件的储存块回写到储存设备中去，最后释放对应的缓冲区
+ * 
+ * @param devp 
+ * @param blkp 
  */
 void del_rootdirfile_blk(device_t *devp, void *blkp)
 {
@@ -955,10 +1032,13 @@ void del_rootdirfile_blk(device_t *devp, void *blkp)
 }
 
 /**
- * 读取根目录
+ * @brief 读取根目录
  *  1. get_rootdir 函数的作用就是读取文件系统超级块中 rfsdir_t 结构到一个缓冲区中
+ * 
+ * @param devp 
+ * @return rfsdir_t* 返回目录指针
  */
-rfsdir_t *get_rootdir(device_t *devp)
+rfsdir_t* get_rootdir(device_t *devp)
 {
     rfsdir_t *retptr = NULL;
     rfssublk_t *sbp = get_superblk(devp);
@@ -980,8 +1060,11 @@ errl:
 }
 
 /**
- * 删除根目录的内存
+ * @brief 删除根目录的内存
  *  1. del_rootdir 函数则是用来释放这个缓冲区
+ * 
+ * @param devp 
+ * @param rdir 
  */
 void del_rootdir(device_t *devp, rfsdir_t *rdir)
 {
@@ -989,8 +1072,13 @@ void del_rootdir(device_t *devp, rfsdir_t *rdir)
     return;
 }
 
-// 获取超级块
-rfssublk_t *get_superblk(device_t *devp)
+/**
+ * @brief 获取超级块
+ * 
+ * @param devp 
+ * @return rfssublk_t* 返回超级块
+ */
+rfssublk_t* get_superblk(device_t *devp)
 {
     // 分配4KB大小的缓冲区
     void *buf = new_buf(FSYS_ALCBLKSZ);
@@ -1009,7 +1097,12 @@ rfssublk_t *get_superblk(device_t *devp)
     return (rfssublk_t *)buf;
 }
 
-// 释放超级块
+/**
+ * @brief 释放超级块
+ * 
+ * @param devp 
+ * @param sbp 超级块
+ */
 void del_superblk(device_t *devp, rfssublk_t *sbp)
 {
     // 回写超级块，因为超级块中的数据可能已经发生了改变，如果出错则死机
@@ -1021,7 +1114,12 @@ void del_superblk(device_t *devp, rfssublk_t *sbp)
     return;
 }
 
-// 获取位图块
+/**
+ * @brief 获取位图块
+ * 
+ * @param devp 
+ * @return u8_t* 
+ */
 u8_t *get_bitmapblk(device_t *devp)
 {
     // 获取超级块
@@ -1073,8 +1171,10 @@ void del_bitmapblk(device_t *devp, u8_t *bitmap)
 }
 
 /**
- * 分配新的空闲逻辑储存块
- *  1. rfs_new_blk 函数会返回新分配的逻辑储存块号，如果没有空闲的逻辑储存块了，就会返回 0
+ * @brief 分配新的空闲逻辑储存块
+ * 
+ * @param devp 
+ * @return uint_t 如果没有空闲的逻辑储存块了，就会返回 0
  */
 uint_t rfs_new_blk(device_t *devp)
 {
@@ -1119,7 +1219,12 @@ void rfs_del_blk(device_t *devp, uint_t blknr)
     return;
 }
 
-// 检查文件路径名
+/**
+ * @brief 检查文件路径名
+ * 
+ * @param fname 
+ * @return sint_t 
+ */
 sint_t rfs_chkfilepath(char_t *fname)
 {
     char_t *chp = fname;
@@ -1148,7 +1253,13 @@ sint_t rfs_chkfilepath(char_t *fname)
     return 0;
 }
 
-// 提取纯文件名
+/**
+ * @brief 提取纯文件名
+ * 
+ * @param buf 
+ * @param fpath 
+ * @return sint_t 
+ */
 sint_t rfs_ret_fname(char_t *buf, char_t *fpath)
 {
     if (buf == NULL || fpath == NULL) {
@@ -1168,11 +1279,15 @@ sint_t rfs_ret_fname(char_t *buf, char_t *fpath)
 }
 
 /**
- * 判断文件是否存在
- *  1.首先是检查文件名的长度
+ * @brief 判断文件是否存在
+ *  1. 首先是检查文件名的长度
  *  2. 接着获取了根目录文件
  *  3. 然后遍历根其中的所有 rfsdir_t 结构并比较文件名是否相同，相同就返回 1
  *  4. 不同就返回其它值，最后释放了根目录文件
+ * 
+ * @param devp 
+ * @param fname 
+ * @return sint_t 
  */
 sint_t rfs_chkfileisindev(device_t *devp, char_t *fname)
 {
@@ -1259,11 +1374,14 @@ bool_t create_superblk(device_t *devp)
 }
 
 /**
- * 建立位图
+ * @brief 建立位图
  *  1. 利用一块储存空间中所有位的状态，达到映射逻辑储存块状态（是否已分配）的目的
  *  2. 第 0 块是超级块，第 1 块是位图块本身，所以代码从缓冲区中的第 3 个字节开始清零，一直到 devmaxblk 个字节
  *      devmaxblk 就是储存介质的逻辑储存块总数
  *  3. 这个缓冲区中的数据写入到储存介质中的第 bitmapblk 个逻辑储存块中，就完成了位图的建立
+ * 
+ * @param devp 
+ * @return bool_t 
  */
 bool_t create_bitmap(device_t *devp)
 {
@@ -1316,11 +1434,14 @@ errlable:
 }
 
 /**
- * 建立根目录
+ * @brief 建立根目录
  *  1. 首先，分配一块新的逻辑储存块
  *  2. 接着，设置超级块中的 rfsdir_t 结构中的名称以及类型和块号
  *  3. 然后设置文件管理头，由于根目录是目录文件，所以文件管理头的类型为 FMD_DIR_TYPE，表示文件数据存放的是目录结构
  *  4. 最后，回写对应的逻辑储存块即可
+ * 
+ * @param devp 
+ * @return bool_t 
  */
 bool_t create_rootdir(device_t *devp)
 {

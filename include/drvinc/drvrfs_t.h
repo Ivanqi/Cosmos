@@ -16,6 +16,7 @@
 #define FSMM_BLK 0x400000
 #define FSYS_ALCBLKSZ 0x1000    // 4096
 
+// 文件设备结构体
 typedef struct s_RFSDEVEXT {
     spinlock_t rde_lock;    // 自旋锁
     list_h_t rde_list;      // 链表
@@ -55,6 +56,7 @@ typedef struct s_RFSSUBLK {
     rfsdir_t rsb_rootdir;       // 根目录，后面会看到这个数据结构的
 } rfssublk_t;
 
+// 文件管理头结构体
 typedef struct s_fimgrhd {
     uint_t fmd_stus;                    // 文件状态
     uint_t fmd_type;                    // 文件类型：可以是目录文件、普通文件、空文件、已删除的文件
