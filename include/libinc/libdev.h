@@ -57,11 +57,11 @@
 #define DIDFIL_IDN 1
 #define DIDFIL_FLN 2
 
-typedef struct s_DEVID
-{
+// 接口设备ID
+typedef struct s_DEVID {
     uint_t  dev_mtype;
     uint_t  dev_stype;
     uint_t  dev_nr;
-}devid_t;
+} devid_t;
 
 #endif // LIBDEV_H

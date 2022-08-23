@@ -41,6 +41,8 @@ KRNLEXCIMG = Cosmos.bin
 LOGOFILE = logo.bmp background.bmp
 # 字体
 FONTFILE = font.fnt
+# app
+APPSFILE = *.app
 
 BUILD_PATH = ./build
 EXKNL_PATH = ./exckrnl
@@ -59,8 +61,8 @@ VBOXVMFLGS = -C $(VM_PATH) -f vbox.mkf
 VMFLAGES = -smp 4 -hda $(VMDKFNAME) -m 256 -enable-kvm
 
 
-SRCFILE = $(BOOTEXCIMG) $(KRNLEXCIMG) $(LDEREXCIMG) $(SHELEXCIMG)
-RSRCFILE = $(BOOTEXCIMG) $(KRNLEXCIMG) $(LDEREXCIMG) $(SHELEXCIMG) #$(VDIFNAME) $(VMDKFNAME)
+SRCFILE = $(BOOTEXCIMG) $(KRNLEXCIMG) $(LDEREXCIMG) $(SHELEXCIMG) $(APPSFILE)
+RSRCFILE = $(BOOTEXCIMG) $(KRNLEXCIMG) $(LDEREXCIMG) $(SHELEXCIMG) $(APPSFILE) #$(VDIFNAME) $(VMDKFNAME)
 
 INITLDRIMH = initldrimh.bin		# GRUB 头文件
 INITLDRKRL = initldrkrl.bin
@@ -68,7 +70,7 @@ INITLDRSVE = initldrsve.bin
 
 CPLILDRSRC = $(INITLDR_BUILD_PATH)$(INITLDRSVE) $(INITLDR_BUILD_PATH)$(INITLDRKRL) $(INITLDR_BUILD_PATH)$(INITLDRIMH)
 
-LKIMG_INFILE = $(INITLDRSVE) $(INITLDRKRL) $(KRNLEXCIMG) $(FONTFILE) $(LOGOFILE)
+LKIMG_INFILE = $(INITLDRSVE) $(INITLDRKRL) $(KRNLEXCIMG) $(FONTFILE) $(LOGOFILE) $(APPSFILE)
 .PHONY: install x32 build print clean all krnlexc cpkrnl wrimg phymod exc vdi vdiexc cprelease release createimg
 
 # 移动文件. 把 ./initldr/build/ 的文件移动到 ./release/

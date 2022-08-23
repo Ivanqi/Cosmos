@@ -4,12 +4,14 @@
 
 %define MBSP_ADR 0x100000
 %define IA32_EFER 0C0000080H
+%define MSR_IA32_MISC_ENABLE 0x000001a0
 %define PML4T_BADR 0x1000000
 %define KRLVIRADR 0xffff800000000000	; 内核虚拟空间
 %define KINITSTACK_OFF 16
 
 global _start
 global x64_GDT
+global kernel_pml4
 extern hal_start
 
 [section .start.text]
@@ -41,11 +43,20 @@ _start:
     mov cr4, eax
     mov eax, PML4T_BADR				; 加载MMU顶级页目录
     mov cr3, eax	
+;开启SSE
+	mov eax, cr4
+    bts eax, 9                      ; CR4.OSFXSR = 1
+    bts eax, 10                     ; CR4.OSXMMEXCPT = 1
+    mov cr4, eax
 ;开启 64bits long-mode
     mov ecx, IA32_EFER
     rdmsr
     bts eax, 8                      ; IA32_EFER.LME =1
     wrmsr
+		mov ecx, MSR_IA32_MISC_ENABLE
+		rdmsr
+		btr eax, 6                      ; L3Cache =1
+	wrmsr
 ;开启 PE 和 paging
     mov eax, cr0
     bts eax, 0                      ; CR0.PE =1
@@ -106,3 +117,11 @@ euser_d64_dsc:  dq 0x0000f20000000000           ; 64-bit 用户数据段
 eGdtLen			equ	$ - enull_x64_dsc			; GDT长度
 eGdtPtr:		dw eGdtLen - 1					; GDT界限
 				dq ex64_GDT
+
+[section .start.data.pml4]
+
+stack:
+	times 1024 dq 0
+
+kernel_pml4:	
+	times 512*10 dq 0

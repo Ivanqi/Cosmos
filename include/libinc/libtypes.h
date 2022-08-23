@@ -1,7 +1,16 @@
 #ifndef _LIBTYPES_H
 #define _LIBTYPES_H
+typedef unsigned char u8_t;
+typedef unsigned short u16_t;
+typedef char s8_t;
+typedef short s16_t;
+typedef int s32_t;
+typedef long s64_t;
 typedef long sint_t;
+typedef char char_t;
 typedef unsigned long uint_t;
+typedef unsigned int u32_t;
+typedef unsigned long u64_t;
 typedef sint_t sysstus_t;
 typedef sint_t hand_t;
 typedef void* buf_t;
@@ -44,4 +53,5 @@ typedef struct s_TIME {
 #define INR_FS_IOCTRL 0xcUL
 #define INR_FS_LSEEK 0xdUL
 #define INR_TIME 0xeUL
+#define INR_TD_TICK 0xfUL
 #endif // LIBTYPES_H

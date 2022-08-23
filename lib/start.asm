@@ -1,12 +1,15 @@
 extern main
-
+extern exit
 global _start
-
-[section .text]
+[section .start.text]
 [BITS 64]
 _start:
-	xor rax,rax
-	mov rax,main
+	xor rax, rax
+	mov rax, main
 	call rax
-	jmp $
+	mov rsi, rax
+exit_loop:
+	mov rax, exit
+	call rax
+	jmp exit_loop
 	

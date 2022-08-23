@@ -24,6 +24,8 @@ DRIVMFLGS = -C $(BUILD_PATH) -f drv.mk
 LIBSMFLGS = -C $(BUILD_PATH) -f lib.mk
 TASKMFLGS = -C $(BUILD_PATH) -f task.mk
 LINKMFLGS = -C $(BUILD_PATH) -f link.mk
+APPSMFLGS = -C $(BUILD_PATH) -f app.mk
+LAPPMFLGS = -C $(BUILD_PATH) -f appslink.mk
 
 
 build: all
