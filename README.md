@@ -28,7 +28,7 @@
 │   ├── drvinc
 │   ├── halinc
 │   ├── knlinc
-│   ├── libinc
+│   ├── libinc              // 服务接口头文件
 │   └── script
 │       └── buildfile.h
 ├── initldr               // 启动目录

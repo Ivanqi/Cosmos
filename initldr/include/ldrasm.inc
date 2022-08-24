@@ -1,3 +1,26 @@
+; 描述符
+; usage: Descriptor Base, Limit, Attr
+;        Base:  dd
+;        Limit: dd (low 20 bits available)
+;        Attr:  dw (lower 4 bits of higher byte are always 0)
+%macro Pmdsc 3
+	dw	%2 & 0FFFFh				; 段界限 1				(2 字节)0-15
+	dw	%1 & 0FFFFh				; 段基址 1				(2 字节)16-31
+	db	(%1 >> 16) & 0FFh			; 段基址 2				(1 字节)32-39
+	dw	((%2 >> 8) & 0F00h) | (%3 & 0F0FFh)	; 属性 1 + 段界限 2 + 属性 2		(2 字节)40-55
+	db	(%1 >> 24) & 0FFh			; 段基址 3				(1 字节)56-63
+%endmacro ; 共 8 字节
+
+
+; usage: Descriptor Base, Limit, Attr
+%macro Gmdsc 3
+	dw	%2 & 0FFFFh				;(0-15)
+	dw	%1 & 0FFFFh				;(16-31)
+	db	((%1 >> 16) & 0FFh)			;(32-39)
+	db	(%3 & 0FFh)				;(40-47)
+	db	((%3 >> 8) & 0F0h)|((%2 >> 16) & 0Fh)	;(48-55)
+	db	((%1 >> 24) & 0FFh)			;(56-63)
+%endmacro
 
 RWUPNA_DATE EQU 0x2                     ; 2
 ECMRNA_CODE EQU 0xe                     ; 14

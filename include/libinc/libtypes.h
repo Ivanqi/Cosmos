@@ -35,10 +35,12 @@ typedef struct s_TIME {
 #define FILE_TY_DEV 1
 #define RWO_FLG_MASK 0xff
 #define RWO_FLG_BITS 0x4
+
 #define RW_FLG (0x3 << RWO_FLG_BITS)
 #define RO_FLG (0x1 << RWO_FLG_BITS)
 #define WO_FLG (0x2 << RWO_FLG_BITS)
 #define NF_FLG (0x4 << RWO_FLG_BITS)
+
 #define INR_MM_ALLOC 0x1UL
 #define INR_MM_FREE 0x2UL
 #define INR_TD_EXEL 0x3UL

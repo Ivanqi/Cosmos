@@ -25,16 +25,13 @@
                         lapitime.o \
                         libmm.o libthread.o libopen.o libclose.o \
                         libread.o libwrite.o libioctrl.o liblseek.o \
-                        libtime.o printf.o\
+                        libtime.o printf.o start.o\
 // app层编译目标
 #define BUILD_APPS_OBJS oneuser.o helloworld.o love.o
-
-#define BUILD_TASK_OBJS
 
 #define BUILD_LINK_OBJS BUILD_HALY_OBJS\
                         BUILD_KRNL_OBJS BUILD_MEMY_OBJS\
                         BUILD_FSYS_OBJS BUILD_DRIV_OBJS\
-                        BUILD_LIBS_OBJS BUILD_TASK_OBJS
                         
 #define LINKR_IPUT_FILE BUILD_LINK_OBJS
 #define LINKR_OPUT_FILE Cosmos.elf

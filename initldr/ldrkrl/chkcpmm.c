@@ -4,6 +4,8 @@
 
 #include "cmctl.h"
 
+
+
 /**
  * acpi地址
  *  1. BIOS在开机过程中会把包在BIOS ROM中的Acpi Table 载入到RAM中，然后留下一些信息给OS来找到他们

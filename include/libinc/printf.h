@@ -9,5 +9,8 @@ int printf(const char* fmt,...);
 char* strcopy(char* buf,char* str_s);
 void vsprintf(char* buf,const char* fmt,va_list args);
 char* number(char* str,uint_t n, sint_t base);
+int memcopy(void* src, void* dest,int count);
+int memset(void* s,char c,int count);
+char getchar();
 
 #endif // PRINTF_H
