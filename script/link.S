@@ -20,13 +20,3 @@ everything:
 # objcopy 将一个目标文件的内容拷贝到另外一个目标文件. 通过 objcopy 把 KERNL_MK_ELFF_FILE(Cosmos.elf) 拷贝成 KERNL_MK_BINF_FILE
 # objcopy -S -O binary Cosmos.elf Cosmos.bin
 [$(OBJCOPY) $(OJCYFLAGS) $(KERNL_MK_ELFF_FILE) $(KERNL_MK_BINF_FILE)
-	
-#$(BOOT_EXC_ELF) $(BOOT_EXC_BIN)
-
-$(BOOT_EXC_ELF): $(LMOSEM_LINK_OBJS)
-[$(LD) $(LDFLAGS) -o $(BOOT_EXC_ELF)  $(LMOSEM_LINK_OBJS)
-[@echo 'LD -[M] 正在构建...' $@
-$(BOOT_EXC_BIN):
-	
-//$(BUILD_MK_LMKR_EBIN): $(BUILD_MK_LMKR_LINK)
-//	$(LD) $(KERNELLDFLAGS) -o $(BUILD_MK_LMKR_EBIN) $(BUILD_MK_LMKR_LINK)

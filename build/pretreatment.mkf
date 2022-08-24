@@ -23,8 +23,8 @@ CC		= gcc
 CPPFLGSLDS	= $(HEADFILE_PATH) -E -P 
 
 # 要生成的文件
-PREMENTMKI_OBJS = krnlobjs.mki cosmoslink.lds krnlbuidcmd.mki krnlbuidrule.mki hal.mki krl.mki drv.mki lib.mki task.mki link.mki
-PREMENTMK_OBJS = krnlobjs.mk krnlbuidcmd.mk krnlbuidrule.mk hal.mk krl.mk drv.mk lib.mk task.mk link.mk
+PREMENTMKI_OBJS = krnlobjs.mki applds.lds cosmoslink.lds krnlbuidcmd.mki krnlbuidrule.mki hal.mki krl.mki drv.mki lib.mki app.mki link.mki appslink.mki
+PREMENTMK_OBJS = krnlobjs.mk krnlbuidcmd.mk krnlbuidrule.mk hal.mk krl.mk drv.mk lib.mk app.mk link.mk appslink.mk
 
 .PHONY: all everything everymk build_kernel
 

@@ -25,7 +25,7 @@
                         lapitime.o \
                         libmm.o libthread.o libopen.o libclose.o \
                         libread.o libwrite.o libioctrl.o liblseek.o \
-                        libtime.o printf.o start.o \
+                        libtime.o printf.o\
 // app层编译目标
 #define BUILD_APPS_OBJS oneuser.o helloworld.o love.o
 

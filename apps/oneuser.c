@@ -93,7 +93,7 @@ sint_t shc_cmd_run(char_t* cmdstr)
 void skb_buff_enter(shellkbbuff_t* skb)
 {
 	printf("\n");
-	if(shc_cmd_run(&skb->skb_buff[skb->skb_start]) == 0) {
+	if (shc_cmd_run(&skb->skb_buff[skb->skb_start]) == 0) {
 		return;
 	}
 	printf("Cosmos@LMOS:>");
@@ -148,6 +148,7 @@ void shell()
 			continue;
 		}
 	}
+	
 	close_keyboard(hand);
 	return;
 }

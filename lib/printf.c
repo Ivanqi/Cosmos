@@ -9,6 +9,38 @@ uint_t strlen(char* str_s)
 	return chaidx;
 }
 
+char getchar()
+{
+	char rets = 0;
+	devid_t dev;
+	dev.dev_mtype = UART_DEVICE;
+	dev.dev_stype = 0;
+	dev.dev_nr = 0;
+
+	char *buf = (char *)mallocblk(0x1000);
+	if (buf == NULL) {
+		return -1;
+	}
+
+	hand_t fd = open(&dev, RW_FLG | FILE_TY_DEV, 0);
+	if (fd == -1) {
+		rets = -1;
+		goto res_step;
+	}
+
+	if (read(fd, buf, 2, 0) == SYSSTUSERR) {
+		rets = 0;
+		goto res_step;
+	}
+	close(fd);
+	rets = buf[0];
+res_step:
+	if (mfreeblk(buf, 0x1000) == SYSSTUSERR) {
+		rets = 0;
+	}
+	return rets;
+}
+
 int printf(const char* fmt,...)
 {
     int rets = -1;
@@ -55,12 +87,43 @@ char* strcopy(char* buf, char* str_s)
 	return buf;
 }
 
+int memcopy(void* src, void* dest,int count)
+{
+	char* ss = src,*sd = dest;	
+	int i;
+	if (NULL == src || NULL == dest) {
+		return -1;
+	}
+
+	for(i = 0; i < count; i++) {
+		sd[i] = ss[i];
+	}
+
+	return (int)(i - 1);
+}
+
+
+int memset(void* s,char c,int count)
+{
+	char* st=s;
+	int i;
+	if (NULL == s) {
+		return -1;
+	}
+
+	for (i = 0; i < count; i++) {
+		st[i] = c;
+	}
+	
+	return (int)(i - 1);
+}
+
 void vsprintf(char* buf, const char* fmt, va_list args)
 {
 	char* p =buf;
 	
 	while(*fmt) {
-		if(*fmt != '%') {
+		if (*fmt != '%') {
 			*p++ = *fmt++;
 			continue;
 		}

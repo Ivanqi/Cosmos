@@ -38,4 +38,6 @@ all:
 	$(MAKE) $(DRIVMFLGS)
 	$(MAKE) $(LIBSMFLGS)
 	$(MAKE) $(LINKMFLGS)
+	$(MAKE) $(APPSMFLGS)
+
 	@echo '恭喜我，系统编译构建完成！ ^_^'

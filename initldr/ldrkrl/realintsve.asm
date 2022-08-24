@@ -211,6 +211,9 @@ func_table:						; 函数表
 	dw _getvbeonemodeinfo		; 获取显卡VBE模式的数据
 	dw _setvbemode				; 设置显卡VBE模式
 
+BootM:  db     "pengdong, OS is loading"
+	db 0
+
 int131errmsg: db "int 13 read hdsk  error"
 	db 0
 

@@ -51,7 +51,7 @@ void init_krlcpuidle()
 {
     new_cpuidle();      // 建立空转进程
     // init_ab_thread();   // 初始化建立A、B进程
-    // init_user_thread();
+    init_user_thread();
     krlcpuidle_start(); // 启动空转进程运行
     return;
 }
@@ -152,8 +152,8 @@ void krlcpuidle_main()
 {
     uint_t i = 0;
     for (;; i++) {
-        kprint("cpuidle is run:%x\n", i);
-        die(0x400);
+        // kprint("cpuidle is run:%x\n", i);
+        // die(0x400);
         krlschedul();   // 调度进程
     }
     return;
