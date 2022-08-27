@@ -331,9 +331,9 @@ drvstus_t rfs_entry(driver_t *drvp, uint_t val, void *p)
     // 初始化rfs
     init_rfs(devp);
     // 测试文件系统超级块
-    test_rfs_rootdir(devp);
-    test_rfs_bitmap(devp);
-    test_rfs_superblk(devp);
+    // test_rfs_rootdir(devp);
+    // test_rfs_bitmap(devp);
+    // test_rfs_superblk(devp);
     return DFCOKSTUS;
 }
 

@@ -202,6 +202,10 @@ thread_t* krlsched_retn_idlethread()
     return schdap->sda_cpuidle;
 }
 
+/**
+ * @brief 设置调度结构体的属性
+ * 
+ */
 void krlsched_set_schedflgs()
 {
     cpuflg_t cpuflg;
@@ -337,6 +341,11 @@ void krlschedul()
     return;
 }
 
+/**
+ * @brief 进程退出
+ * 
+ * @param thdp 进程指针
+ */
 void krlschdclass_del_thread_addexit(thread_t *thdp)
 {
     uint_t cpuid = hal_retn_cpuid();
@@ -430,7 +439,7 @@ void krlschdclass_add_thread(thread_t *thdp)
  * @param next 上一个进程
  * @param prev 下一个进程
  */
-void __to_new_context(thread_t *next, thread_t *prev)
+TNCCALL void __to_new_context(thread_t *next, thread_t *prev)
 {
     uint_t cpuid = hal_retn_cpuid();
     schdata_t *schdap = &osschedcls.scls_schda[cpuid];
@@ -533,35 +542,36 @@ void retnfrom_first_sched(thread_t *thrdp)
     __asm__ __volatile__(
         "movq %[NEXT_RSP],%%rsp\n\t"    // 设置CPU的RSP寄存器为该进程机器上下文结构中的RSP
         // 恢复进程保存在内核栈中的段寄存器
-        "popq %%r14\n\t"
-        "movw %%r14w, %%gs\n\t"
-        "popq %%r14\n\t"
-        "movw %%r14w, %%fs\n\t"
-        "popq %%r14\n\t"
-        "movw %%r14w, %%es\n\t"
-        "popq %%r14\n\t"
-        "movw %%r14w, %%ds\n\t"
+        // "popq %%r14\n\t"
+        // "movw %%r14w, %%gs\n\t"
+        // "popq %%r14\n\t"
+        // "movw %%r14w, %%fs\n\t"
+        // "popq %%r14\n\t"
+        // "movw %%r14w, %%es\n\t"
+        // "popq %%r14\n\t"
+        // "movw %%r14w, %%ds\n\t"
         // 恢复进程保存在内核栈中的通用寄存器
-        "popq %%r15\n\t"
-        "popq %%r14\n\t"
-        "popq %%r13\n\t"
-        "popq %%r12\n\t"
-        "popq %%r11\n\t"
-        "popq %%r10\n\t"
-        "popq %%r9\n\t"
-        "popq %%r8\n\t"
-        "popq %%rdi\n\t"
-        "popq %%rsi\n\t"
-        "popq %%rbp\n\t"
-        "popq %%rdx\n\t"
-        "popq %%rcx\n\t"
-        "popq %%rbx\n\t"
-        "popq %%rax\n\t"
+        // "popq %%r15\n\t"
+        // "popq %%r14\n\t"
+        // "popq %%r13\n\t"
+        // "popq %%r12\n\t"
+        // "popq %%r11\n\t"
+        // "popq %%r10\n\t"
+        // "popq %%r9\n\t"
+        // "popq %%r8\n\t"
+        // "popq %%rdi\n\t"
+        // "popq %%rsi\n\t"
+        // "popq %%rbp\n\t"
+        // "popq %%rdx\n\t"
+        // "popq %%rcx\n\t"
+        // "popq %%rbx\n\t"
+        // "popq %%rax\n\t"
         // 恢复进程保存在内核栈中的RIP、CS、RFLAGS，（有可能需要恢复进程应用程序的RSP、SS）寄存器
         "iretq\n\t"
 
         :
         : [ NEXT_RSP ] "m"(thrdp->td_context.ctx_nextrsp)
         : "memory");
+        kprint("retnfrom_first_sched 2\n");
 #endif
 }

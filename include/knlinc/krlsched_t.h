@@ -36,7 +36,7 @@ typedef struct s_SCHDATA {
     thread_t*   sda_cpuidle;                // 当前CPU的空转进程
     thread_t*   sda_currtd;                 // 当前正在运行的进程
     thrdlst_t   sda_thdlst[PRITY_MAX];      // 进程链表数组
-    list_h_t    sda_exitlist;
+    list_h_t    sda_exitlist;               // 被杀死的进程
 } schdata_t;
 
 typedef struct s_SCHEDCALSS {               

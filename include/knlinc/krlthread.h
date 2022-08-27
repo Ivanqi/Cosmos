@@ -25,4 +25,8 @@ thread_t* krlnew_user_thread_core(char_t *name, void* filerun,uint_t flg,uint_t 
 thread_t* krlnew_kern_thread_core(char_t *name, void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
 thread_t* krlnew_thread(char_t *name, void* filerun,uint_t flg,uint_t prilg,uint_t prity,size_t usrstksz,size_t krlstksz);
 char_t* thread_name(thread_t *thread, char_t *name);
+uint_t krlthread_sumtick(thread_t* thdp);
+uint_t krlthd_curr_sumtick();
+thread_t* krlthread_execvl(thread_t* thread, char_t* filename);
+
 #endif // KRLTHREAD_H

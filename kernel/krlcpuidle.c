@@ -8,11 +8,11 @@
 void thread_a_main()
 {
     uint_t i = 0;
-    for (;; i++) {
+    // for (; i > 10; i++) {
         kprint("进程A运行:%x\n", i);
-        die(200); //延迟一会
-        krlschedul();
-    }
+        // die(200); //延迟一会
+        // krlschedul();
+    // }
     return;
 }
 
@@ -20,7 +20,7 @@ void thread_a_main()
 void thread_b_main()
 {
     uint_t i = 0;
-    for (;; i++) {
+    for (; i > 10; i++) {
         kprint("进程B运行:%x\n", i);
         die(150); //延迟一会
         krlschedul();
@@ -31,7 +31,7 @@ void thread_b_main()
 void init_ab_thread()
 {
     krlnew_thread("kernelthread-a", (void*)thread_a_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
-    krlnew_thread("kernelthread-b", (void*)thread_b_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    // krlnew_thread("kernelthread-b", (void*)thread_b_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
     return;
 }
 
@@ -39,7 +39,9 @@ void init_user_thread()
 {
     thread_t *t = NULL;
     t = krlnew_thread("oneuser.app", (void *)APPRUN_START_VITRUALADDR, USERTHREAD_FLG, PRILG_USR, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    kprint("init_user_thread t1: %x\n", t);
     t = krlthread_execvl(t, "oneuser.app");
+    kprint("init_user_thread t2: %x\n", t);
     if (NULL != t) {
         kprint("oneuser.app进程建立成功:%x\n", (uint_t)t);
     }
@@ -50,8 +52,8 @@ void init_user_thread()
 void init_krlcpuidle()
 {
     new_cpuidle();      // 建立空转进程
-    // init_ab_thread();   // 初始化建立A、B进程
-    init_user_thread();
+    init_ab_thread();   // 初始化建立A、B进程
+    // init_user_thread();
     krlcpuidle_start(); // 启动空转进程运行
     return;
 }
@@ -143,8 +145,6 @@ void new_cpuidle()
     if (thp == NULL) {
         hal_sysdie("newcpuilde err");
     }
-
-    kprint("CPUIDLETASK: %x\n", (uint_t)thp);
     return;
 }
 
@@ -157,34 +157,4 @@ void krlcpuidle_main()
         krlschedul();   // 调度进程
     }
     return;
-}
-
-thread_t* krlthread_execvl(thread_t* thread, char_t* filename)
-{
-    u64_t retadr = 0, filelen = 0;
-    adr_t vadr = 0;
-
-    if (NULL == thread || NULL == filename) {
-        return NULL;
-    }
-
-    get_file_rvadrandsz(filename, &kmachbsp, &retadr, &filelen);
-    if (NULL == retadr || 0 == filelen) {
-        return NULL;
-    }
-
-    if (thread->td_mmdsc == &initmmadrsdsc) {
-        return NULL;
-    }
-
-    if ((0x100000 + filelen) >= THREAD_HEAPADR_START) {
-        return NULL;
-    }
-
-    vadr = kvma_initdefault_virmemadrs(thread->td_mmdsc, APPRUN_START_VITRUALADDR, filelen, KMV_BIN_TYPE);
-    if (NULL == vadr) {
-        return NULL;
-    }
-
-    return thread;
 }

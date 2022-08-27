@@ -48,6 +48,7 @@ void thread_t_init(thread_t *initp)
     initp->td_cpuid = hal_retn_cpuid();         // 进程所在的CPU的id
     initp->td_id = krlretn_thread_id(initp);    // 进程id
     initp->td_tick = 0;                         // 进程运行了多个tick
+    initp->td_sumtick = 0;
     initp->td_privilege = PRILG_USR;            // 普通进程权限
     initp->td_priority = PRITY_MIN;             // 最高优先级，数值越小优先级越高
     initp->td_runmode = 0;                      // 进程的运行模式
@@ -100,6 +101,7 @@ void krlthd_inc_tick(thread_t *thdp)
     cpuflg_t cpuflg;
     krlspinlock_cli(&thdp->td_lock, &cpuflg);
     thdp->td_tick++;
+    thdp->td_sumtick++;
 
     if (thdp->td_tick > TDRUN_TICK) {
         thdp->td_tick = 0;
@@ -109,6 +111,21 @@ void krlthd_inc_tick(thread_t *thdp)
     krlspinunlock_sti(&thdp->td_lock, &cpuflg);
     return;
 }
+
+uint_t krlthread_sumtick(thread_t* thdp)
+{
+    if (NULL == thdp) {
+        return 0;
+    }
+
+    return thdp->td_sumtick;
+}
+
+uint_t krlthd_curr_sumtick()
+{
+    return krlthread_sumtick(krlsched_retn_currthread());
+}
+
 
 hand_t krlthd_retn_nullhand(thread_t *thdp)
 {
@@ -360,13 +377,6 @@ thread_t *krlnew_user_thread_core(char_t *name, void *filerun, uint_t flg, uint_
         return NULL;
     }
 
-    // 分配应用程序栈空间
-    usrstkadr = krlnew(usrstksz);
-    if (usrstkadr == NULL) {
-        del_mmadrsdsc(mm);
-        return NULL;
-    }
-
     // 分配内核栈空间
     krlstkadr = krlnew(krlstksz);
     if (krlstkadr == NULL) {
@@ -378,7 +388,7 @@ thread_t *krlnew_user_thread_core(char_t *name, void *filerun, uint_t flg, uint_
     ret_td = krlnew_thread_dsc();
     // 创建失败必须要释放之前的栈空间
     if (ret_td == NULL) {
-        acs = krldelete(usrstkadr, usrstksz);
+        acs = krldelete(krlstkadr, krlstksz);
         acs = del_mmadrsdsc(mm);
         if (acs == FALSE) {
             return NULL;
@@ -477,9 +487,9 @@ thread_t *krlnew_kern_thread_core(char_t* name, void *filerun, uint_t flg, uint_
  * @param usrstksz 进程的应用程序栈
  * @param krlstksz 内核栈大小
  */
-thread_t *krlnew_thread(char_t *name, void *filerun, uint_t flg, uint_t prilg, uint_t prity, size_t usrstksz, size_t krlstksz)
+thread_t* krlnew_thread(char_t *name, void *filerun, uint_t flg, uint_t prilg, uint_t prity, size_t usrstksz, size_t krlstksz)
 {
-    size_t tustksz = 0, tkstksz = 0;
+    size_t tustksz = usrstksz, tkstksz = krlstksz;
     // 对参数进行检查，不合乎要求就返回NULL表示创建失败
     if (filerun == NULL || usrstksz > DAFT_TDUSRSTKSZ || krlstksz > DAFT_TDKRLSTKSZ) {
         return NULL;
@@ -507,4 +517,34 @@ thread_t *krlnew_thread(char_t *name, void *filerun, uint_t flg, uint_t prilg, u
     }
 
     return NULL;
+}
+
+thread_t* krlthread_execvl(thread_t* thread, char_t* filename)
+{
+    u64_t retadr = 0, filelen = 0;
+    adr_t vadr = 0;
+
+    if (NULL == thread || NULL == filename) {
+        return NULL;
+    }
+
+    get_file_rvadrandsz(filename, &kmachbsp, &retadr, &filelen);
+    if (NULL == retadr || 0 == filelen) {
+        return NULL;
+    }
+
+    if (thread->td_mmdsc == &initmmadrsdsc) {
+        return NULL;
+    }
+
+    if ((0x100000 + filelen) >= THREAD_HEAPADR_START) {
+        return NULL;
+    }
+
+    vadr = kvma_initdefault_virmemadrs(thread->td_mmdsc, APPRUN_START_VITRUALADDR, filelen, KMV_BIN_TYPE);
+    if (NULL == vadr) {
+        return NULL;
+    }
+
+    return thread;
 }

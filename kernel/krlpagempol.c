@@ -91,7 +91,7 @@ msadsc_t *msadsc_del_kmempool(kmempool_t *kmplp, uint_t relpnr, adr_t fradr)
     msadsc_t *tmpmsa = NULL, *retmsa = NULL;
     list_h_t *tmplst;
     cpuflg_t cpuflg;
-    hal_spinlock_saveflg_cli(&kmplp->mp_lock, &cpuflg);
+    krlspinlock_cli(&kmplp->mp_lock, &cpuflg);
 
     if ((PHYMSA_MAX - 1) <= relpnr) {
         list_for_each(tmplst, &kmplp->mp_msalsthead[(PHYMSA_MAX - 1)].mlh_msalst) {
@@ -117,7 +117,7 @@ msadsc_t *msadsc_del_kmempool(kmempool_t *kmplp, uint_t relpnr, adr_t fradr)
 
     retmsa = NULL;
 ret_step:
-    hal_spinunlock_restflg_sti(&kmplp->mp_lock, &cpuflg);
+    krlspinunlock_sti(&kmplp->mp_lock, &cpuflg);
     return retmsa;
 }
 
