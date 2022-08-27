@@ -1,3 +1,3 @@
 .vscode
-hd.img
-vboxbuild.sh
+/hd.img
+/vboxbuild.sh
