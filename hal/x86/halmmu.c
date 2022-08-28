@@ -970,7 +970,9 @@ void hal_mmu_refresh()
 bool_t hal_mmu_init(mmudsc_t* mmu)
 {
 	bool_t rets = FALSE;
+	// adr_t pcr3 = NULL;
 	adr_t vcr3 = NULL;
+	// cr3s_t cr3;
 
 	if (NULL == mmu) {
 		return FALSE;
@@ -984,8 +986,13 @@ bool_t hal_mmu_init(mmudsc_t* mmu)
 	}
 
 	// cr3.c3s_entry = (u64_t)read_cr3();
-
 	// pcr3 = (adr_t)(cr3.c3s_c3sflgs.c3s_plm4a << 12);
+	// vcr3 = phyadr_to_viradr(pcr3);
+	/*
+		为什么内核建立进程没有问题,
+		而进程新建进程就随机崩,进程A建立进程B,而由于上面代码
+		进程B直接复制进程A的页表.所以出事了
+	*/
 	vcr3 = phyadr_to_viradr(kmachbsp.mb_pml4padr);
 
 	// 把 cr3拷贝到mmu->mud_tdirearr
