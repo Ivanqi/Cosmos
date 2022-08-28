@@ -4,6 +4,20 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+sysstus_t krlsvetabl_tick(uint_t inr, stkparame_t *stkparv)
+{
+    if (inr != INR_TD_TICK) {
+        return SYSSTUSERR;
+    }
+
+    return (sysstus_t)krlsve_thread_tick((uint_t)stkparv->parmv1);
+}
+
+uint_t krlsve_thread_tick(uint_t id)
+{
+    return krlthd_curr_sumtick();
+}
+
 sysstus_t krlsvetabl_exel_thread(uint_t inr, stkparame_t *stkparv)
 {
     if (inr != INR_TD_EXEL) {
@@ -51,13 +65,13 @@ sysstus_t krlsvetabl_set_threadstats(uint_t inr, stkparame_t *stkparv)
 
 hand_t krlsve_exel_thread(void *file, uint_t flgs)
 {
-    return SYSSTUSERR;
+    return krlsve_core_exel_thread(file, flgs);
 }
 
 sysstus_t krlsve_exit_thread()
 {
     krlsve_core_exit_thread();
-    return SYSSTUSERR;
+    return SYSSTUSOK;
 }
 
 hand_t krlsve_retn_threadhand(void *tname)
@@ -82,7 +96,22 @@ sysstus_t krlsve_set_threadstats(hand_t thand, uint_t scode, uint_t data, buf_t 
 
 hand_t krlsve_core_exel_thread(void *file, uint_t flgs)
 {
-    return SYSSTUSERR;
+    char_t *tdname = (char_t *)file;
+    thread_t *t = NULL;
+    u64_t retadr = 0, filelen = 0;
+
+    get_file_rvadrandsz(tdname, &kmachbsp, &retadr, &filelen);
+    if(NULL == retadr || 0 == filelen) {
+        return SYSSTUSERR;
+    }
+
+    t = krlnew_thread(tdname, (void *)APPRUN_START_VITRUALADDR, USERTHREAD_FLG, PRILG_USR, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    t = krlthread_execvl(t, tdname);
+    if (t == NULL) {
+        return SYSSTUSERR;
+    }
+
+    return (hand_t)(t->td_id);
 }
 
 void krlsve_core_exit_thread()

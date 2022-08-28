@@ -91,3 +91,8 @@ sysstus_t synsecalarm(uint_t sec)
     close(fd);
     return SYSSTUSOK;
 }
+
+long tick(uint_t id)
+{
+    return (long)api_tick(id);
+}

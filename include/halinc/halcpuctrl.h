@@ -11,6 +11,12 @@ void hal_enable_irq();
 void hal_disable_irqfiq();
 void hal_enable_irqfiq();
 
+void hal_wbinvd();
+void hal_invd();
+
+void hal_sti_cpuflag(cpuflg_t* cpuflg);
+void hal_cli_cpuflag(cpuflg_t* cpuflg);
+
 void hal_cpuflag_sti(cpuflg_t* cpuflg);
 void hal_cpuflag_cli(cpuflg_t* cpuflg);
 

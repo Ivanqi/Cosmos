@@ -19,6 +19,23 @@ int chk_cpuid();
 
 int chk_cpu_longmode();
 
+int chk_cpu_sse();
+int chk_cpu_sse2();
+int chk_cpu_sse3();
+int chk_cpu_sse4();
+int chk_cpu_cr4osxsave();
+int chk_cpu_osxsave();
+int chk_cpu_avxbit();
+int chk_cpu_avx2bit();
+int chk_cpu_avx512fbit();
+int chk_cpu_avx2();
+void enable_cpu_osxsave();
+int chk_cpu_avx512();
+int chk_cpu_avx512reg();
+u32_t get_xcr0low32();
+void set_xcr0(u64_t xcr0);
+
+
 e820map_t* chk_memsize(e820map_t* e8p,u32_t enr,u64_t sadr,u64_t size);
 
 u64_t get_memsize(e820map_t* e8p,u32_t enr);

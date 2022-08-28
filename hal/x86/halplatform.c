@@ -291,9 +291,9 @@ int initchkadr_is_ok(machbstart_t *mbsp, u64_t chkadr, u64_t cksz)
     return 0;
 }
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
-void die(u32_t dt)
+// #pragma GCC push_options
+// #pragma GCC optimize("O0")
+void __attribute__((optimize("O0"))) die(u32_t dt)
 {
 
     u32_t dttt = dt, dtt = dt;
@@ -313,4 +313,4 @@ void die(u32_t dt)
     return;
 }
 
-#pragma GCC pop_options
+// #pragma GCC pop_options

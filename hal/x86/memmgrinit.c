@@ -119,7 +119,6 @@ bool_t copy_pages_data(machbstart_t *mbsp)
 
 	// 顶级页目录
 	uint_t *p = (uint_t *)phyadr_to_viradr((adr_t)topgadr);
-	kprint("topgadr:%x, p:%x\n", topgadr, p);
 	// 页目录指针
 	uint_t *pdpte = (uint_t *)(((uint_t)p) + 0x1000);
 	// 页目录

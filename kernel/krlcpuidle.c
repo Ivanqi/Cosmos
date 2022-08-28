@@ -8,11 +8,11 @@
 void thread_a_main()
 {
     uint_t i = 0;
-    // for (; i > 10; i++) {
-        kprint("进程A运行:%x\n", i);
-        // die(200); //延迟一会
-        // krlschedul();
-    // }
+    for (;; i++) {
+        kprint("进程A运行:%x\n", 0);
+        die(0x500); //延迟一会
+        krlschedul();
+    }
     return;
 }
 
@@ -20,9 +20,9 @@ void thread_a_main()
 void thread_b_main()
 {
     uint_t i = 0;
-    for (; i > 10; i++) {
+    for (;; i++) {
         kprint("进程B运行:%x\n", i);
-        die(150); //延迟一会
+        die(0x500); //延迟一会
         krlschedul();
     }
     return;
@@ -31,7 +31,7 @@ void thread_b_main()
 void init_ab_thread()
 {
     krlnew_thread("kernelthread-a", (void*)thread_a_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
-    // krlnew_thread("kernelthread-b", (void*)thread_b_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
+    krlnew_thread("kernelthread-b", (void*)thread_b_main, KERNTHREAD_FLG, PRILG_SYS, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
     return;
 }
 
@@ -39,12 +39,11 @@ void init_user_thread()
 {
     thread_t *t = NULL;
     t = krlnew_thread("oneuser.app", (void *)APPRUN_START_VITRUALADDR, USERTHREAD_FLG, PRILG_USR, PRITY_MIN, DAFT_TDUSRSTKSZ, DAFT_TDKRLSTKSZ);
-    kprint("init_user_thread t1: %x\n", t);
     t = krlthread_execvl(t, "oneuser.app");
-    kprint("init_user_thread t2: %x\n", t);
     if (NULL != t) {
         kprint("oneuser.app进程建立成功:%x\n", (uint_t)t);
     }
+
     return;
 }
 
@@ -52,8 +51,8 @@ void init_user_thread()
 void init_krlcpuidle()
 {
     new_cpuidle();      // 建立空转进程
-    init_ab_thread();   // 初始化建立A、B进程
-    // init_user_thread();
+    // init_ab_thread();   // 初始化建立A、B进程
+    init_user_thread();
     krlcpuidle_start(); // 启动空转进程运行
     return;
 }
@@ -136,7 +135,11 @@ thread_t *new_cpuidle_thread()
     return ret_td;
 }
 
-// 新建空转进程
+/**
+ * @brief 新建空转进程
+ *  1. 空转进程是操作系统在没任何进程可以调度运行的时候，就选择调度空转进程来运行
+ *  2. 空转进程是进程调度器最后的选择
+ */
 void new_cpuidle()
 {
     // 建立空转进程
@@ -152,7 +155,7 @@ void krlcpuidle_main()
 {
     uint_t i = 0;
     for (;; i++) {
-        // kprint("cpuidle is run:%x\n", i);
+        // kprint("空转进程启动:%x\n", i);
         // die(0x400);
         krlschedul();   // 调度进程
     }

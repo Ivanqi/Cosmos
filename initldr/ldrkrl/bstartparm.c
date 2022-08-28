@@ -76,7 +76,7 @@ void init_bstartparm()
     init_bstartpages(mbsp);
     // 设置图形模式
     init_graph(mbsp);
-
+    die(0x400);
     return ;
 }
 

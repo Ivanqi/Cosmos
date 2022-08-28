@@ -151,6 +151,7 @@ typedef struct s_PHYMEM {
     spinlock_t pmm_lock;
     uint_t freeblks;
     uint_t allcblks;
+    alcfrelst_t pmm_sz_lsth[BLKSZ_HEAD_MAX];
 } phymem_t;
 
 #endif

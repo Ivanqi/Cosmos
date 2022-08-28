@@ -24,10 +24,10 @@ void kerror(char_t *kestr)
     return ;
 }
 
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
+// #pragma GCC push_options
+// #pragma GCC optimize ("O0")
 
-void die(u32_t dt)
+void __attribute__((optimize("O0"))) die(u32_t dt)
 {
     u32_t dttt = dt, dtt = dt;
 
@@ -46,4 +46,4 @@ void die(u32_t dt)
     return ;
 }
 
-#pragma GCC pop_options
+// #pragma GCC pop_options

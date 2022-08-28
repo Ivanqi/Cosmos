@@ -437,10 +437,10 @@ drvstus_t krldev_add_request(device_t *devp, objnode_t *request)
 {
     cpuflg_t cpufg;
     objnode_t *np = (objnode_t *)request;
-    hal_spinlock_saveflg_cli(&devp->dev_lock, &cpufg);
+    krlspinlock_cli(&devp->dev_lock, &cpufg);
     list_add_tail(&np->on_list, &devp->dev_rqlist);
     devp->dev_rqlnr++;
-    hal_spinunlock_restflg_sti(&devp->dev_lock, &cpufg);
+    krlspinunlock_sti(&devp->dev_lock, &cpufg);
     return DFCOKSTUS;
 }
 
@@ -570,7 +570,7 @@ device_t *krlonidfl_retn_device(void *dfname, uint_t flgs)
     list_for_each(lstp, &dtbp->devt_devclsl[devmty].dtl_list) {
         findevp = list_entry(lstp, device_t, dev_intbllst);
         if (krlcmp_devid(didp, &findevp->dev_id) == TRUE) {
-            findevp = findevp;
+            // findevp = findevp;
             goto return_step;
         }
     }

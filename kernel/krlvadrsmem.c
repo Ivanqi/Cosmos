@@ -303,7 +303,7 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 	stackkmvdc->kva_mcstruct = vma;	// stackkmvdc 的 上层结构为vma
 	stackkmvdc->kva_maptype = KMV_STACK_TYPE;
 
-	krlspinlock_init(&vma->vs_lock);
+	krlspinlock_lock(&vma->vs_lock);
 
 	// 0 ～ 0x00007fffffffffff
 	vma->vs_isalcstart = USER_VIRTUAL_ADDRESS_START;
@@ -348,6 +348,7 @@ void mmadrsdsc_t_init(mmadrsdsc_t* initp)
 	initp->msd_flag = 0;
 	initp->msd_stus = 0;
 	initp->msd_scount = 0;
+	initp->msd_thread = NULL;
 
 	// 信号设置
 	krlsem_t_init(&initp->msd_sem);
@@ -1723,7 +1724,7 @@ kvmemcbox_t* knl_get_kvmemcbox()
 	kmb->kmb_mgr = kmbmgr;
 
 out:
-	knl_spinunlock(&kmbmgr->kbm_lock);	
+	krlspinlock_unlock(&kmbmgr->kbm_lock);	
 	return kmb;
 }
 

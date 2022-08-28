@@ -9,7 +9,7 @@
 __attribute__((section(".data"))) cursor_t curs;
 
 // 初始化光标
-void init_curs()
+PUBLIC void init_curs()
 {
     // 内存范围
     curs.vmem_s = VGASTR_RAM_BASE;
@@ -24,7 +24,7 @@ void init_curs()
 /**
  * 往屏幕写入字符
  */
-void GxH_strwrite(char_t *str, cursor_t *cursptr)
+PUBLIC void GxH_strwrite(char_t *str, cursor_t *cursptr)
 {
     uint_t straddr = cursptr->x + cursptr->y * 80 * 2;
     char_t *p_strdst = (char_t *)(cursptr->vmem_s + straddr);   // 写入的显卡内存首地址
@@ -58,7 +58,7 @@ void GxH_strwrite(char_t *str, cursor_t *cursptr)
 /**
  * 按base(进制)字符串转数字
  */
-char_t *numberk(char_t *str, uint_t n, sint_t base) 
+PUBLIC char_t *numberk(char_t *str, uint_t n, sint_t base) 
 {
     register char_t *p;
     char_t strbuf[36];
@@ -81,7 +81,7 @@ char_t *numberk(char_t *str, uint_t n, sint_t base)
 }
 
 // 设置光标
-void set_curs(u32_t x, u32_t y)
+PUBLIC void set_curs(u32_t x, u32_t y)
 {
     curs.x = x;
     curs.y = y;
@@ -95,7 +95,7 @@ void set_curs(u32_t x, u32_t y)
  *  3. 然后写入 u16_t srrv。 srrv一般为0x0720的高字节，前景色和背景属性
  *  4. 关闭光标
  */
-void clear_screen(u16_t srrv)
+PUBLIC void clear_screen(u16_t srrv)
 {
     curs.x = 0;
     curs.y = 0;
@@ -110,7 +110,7 @@ void clear_screen(u16_t srrv)
     return ;
 }
 
-void put_one_char(char_t cr, uint_t x, uint_t y)
+PUBLIC void put_one_char(char_t cr, uint_t x, uint_t y)
 {
     char_t *p_strdst = (char_t *)(VGASTR_RAM_BASE + (x + (y * 80 * 2)));
     *p_strdst = cr;
@@ -147,7 +147,7 @@ char_t *strcopy(char_t *buf, char_t *str_s)
  *  d: 替换成16进制数字
  *  s: 替换成字符串
  */
-void vsprintfk(char_t *buf, const char_t *fmt, va_list_t args)
+PUBLIC void vsprintfk(char_t *buf, const char_t *fmt, va_list_t args)
 {
     char_t *p = buf;
     va_list_t next_arg = args;
@@ -191,7 +191,7 @@ void vsprintfk(char_t *buf, const char_t *fmt, va_list_t args)
 /**
  * 打印函数
  */
-void kprint(const char_t *fmt, ...)
+PUBLIC void kprint(const char_t *fmt, ...)
 {
     char_t buf[512];
 

@@ -317,17 +317,18 @@ KLINE u32_t read_kesp() {
     return esp;
 }
 
-KLINE u32_t read_kcr2() {
-    u32_t cr2;
+KLINE u64_t read_rsp() {
+    u64_t rsp;
 
     __asm__ __volatile__(
-        "movl %%cr2, %0"
-        : "=g"(cr2)
+        "movq %%rsp,%0"
+        : "=g"(rsp)
         :
         : "memory");
 
-    return cr2;
+    return rsp;
 }
+
 
 // 设置cr3寄存器
 KLINE void set_cr3(u64_t pl4adr) {

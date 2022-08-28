@@ -20,12 +20,17 @@ void printfk(const char_t *fmt, ...)
 
 void kprint(const char_t *fmt, ...)
 {
+	cpuflg_t cpuflg;
 	char_t buf[512];
 	va_list ap;
+	hal_cli_cpuflag(&cpuflg);
+
 	va_start(ap, fmt);
 	vsprintfk(buf, fmt, ap);
 	gstr_write(&kdftgh, buf);
 	va_end(ap);
+
+	hal_sti_cpuflag(&cpuflg);
 	return;
 }
 

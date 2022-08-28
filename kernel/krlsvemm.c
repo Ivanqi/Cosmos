@@ -27,16 +27,13 @@ sysstus_t krlsvetabl_mfreeblk(uint_t inr, stkparame_t *stkparv)
 
 void *krlsve_mallocblk(size_t blksz)
 {
-    if (blksz >= 0x400000) {
-        return NULL;
-    }
 
     return krlsve_core_mallocblk(blksz);
 }
 
 sysstus_t krlsve_mfreeblk(void *fradr, size_t blksz)
 {
-    if (fradr == NULL || blksz >= 0x400000) {
+    if (fradr == NULL) {
         return SYSSTUSERR;
     }
 
@@ -45,13 +42,14 @@ sysstus_t krlsve_mfreeblk(void *fradr, size_t blksz)
 
 void *krlsve_core_mallocblk(size_t blksz)
 {
-    return (void *)krlnew(blksz);
+    adr_t retvadr = vma_new_vadrs(krl_curr_mmadrsdsc(), NULL, blksz, 0, KMV_HEAP_TYPE);
+    return (void *)retvadr;
 }
 
 sysstus_t krlsve_core_mfreeblk(void *fradr, size_t blksz)
 {
-    if (krldelete((adr_t)fradr, blksz) == FALSE) {
-        hal_sysdie("krlsve_core_mfreeblk err");
+    if (vma_del_vadrs(krl_curr_mmadrsdsc(), (adr_t)fradr, blksz) == FALSE) {
+        return SYSSTUSERR;
     }
     return SYSSTUSOK;
 }

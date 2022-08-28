@@ -63,7 +63,7 @@ PUBLIC void init_halintupt()
     init_intfltdsc();
 
     init_i8259();
-    i8259_enabled_line(0);
+    // i8259_enabled_line(0);
     kprint("中断初始化成功\n");
     return;
 }
@@ -144,7 +144,7 @@ drvstus_t hal_enable_intline(uint_t ifdnr)
         return DFCERRSTUS;
     }
 
-    i8259_enabled_line((u32_t)ifdnr);
+    i8259_enabled_line((u32_t)(ifdnr - 20));
     return DFCOKSTUS;
 }
 
@@ -155,7 +155,7 @@ drvstus_t hal_disable_intline(uint_t ifdnr)
         return DFCERRSTUS;
     }
 
-    i8259_disable_line((u32_t)ifdnr);
+    i8259_disable_line((u32_t)(ifdnr - 20));
     return DFCOKSTUS;
 }
 
@@ -305,9 +305,14 @@ sysstus_t hal_syscl_allocator(uint_t inr, void* krnlsframp)
  */
 void hal_hwint_allocator(uint_t intnumb, void *krnlsframp)
 {
-    i8259_send_eoi();
+    cpuflg_t cpuflg;
+    hal_cpuflag_sti(&cpuflg);
+
+    hal_hwint_eoi();
     hal_do_hwint(intnumb, krnlsframp);
     krlsched_chkneed_pmptsched();
+
+    hal_cpuflag_cli(&cpuflg);
     //kprint("暂时无法向任何服务进程发送中断消息,直接丢弃......\n");
     return;
 }

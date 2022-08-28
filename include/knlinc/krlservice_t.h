@@ -18,8 +18,8 @@
 #define INR_FS_IOCTRL 0xcUL
 #define INR_FS_LSEEK 0xdUL
 #define INR_TIME 0xeUL
-
-#define INR_MAX 0xfUL
+#define INR_TD_TICK 0xfUL
+#define INR_MAX 0x10UL
 
 #define SYSSTUSERR (-1)
 #define SYSSTUSOK (0)

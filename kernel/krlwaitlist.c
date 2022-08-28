@@ -77,7 +77,7 @@ thread_t* krlwlst_del_thread(kwlst_t *wlst)
 
         list_del(&tdp->td_list);
         wlst->wl_tdnr--;
-        tdp = tdp;
+        // tdp = tdp;
         goto return_step;
         
     }

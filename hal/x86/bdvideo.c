@@ -17,6 +17,7 @@ PUBLIC LKINIT void init_dftgraph()
     machbstart_t *kmbsp = &kmachbsp;
     memset(kghp, 0, sizeof(dftgraph_t));
 
+    krlspinlock_init(&kghp->gh_lock);
     kghp->gh_mode = kmbsp->mb_ghparm.gh_mode;                                       // 图形模式
     kghp->gh_x = kmbsp->mb_ghparm.gh_x;                                             // 水平像素点
     kghp->gh_y = kmbsp->mb_ghparm.gh_y;                                             // 垂直像素点

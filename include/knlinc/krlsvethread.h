@@ -19,5 +19,7 @@ void krlsve_core_exit_thread();
 hand_t krlsve_core_retn_threadhand(void* tname);
 sysstus_t krlsve_core_retn_threadstats(hand_t thand,uint_t scode,uint_t data,buf_t buf);
 sysstus_t krlsve_core_set_threadstats(hand_t thand,uint_t scode,uint_t data,buf_t buf);
+sysstus_t krlsvetabl_tick(uint_t inr, stkparame_t *stkparv);
+uint_t krlsve_thread_tick(uint_t id);
 
 #endif // KRLSVETHREAD_H

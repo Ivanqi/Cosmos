@@ -969,8 +969,8 @@ void hal_mmu_refresh()
 bool_t hal_mmu_init(mmudsc_t* mmu)
 {
 	bool_t rets = FALSE;
-	adr_t pcr3 = NULL, vcr3 = NULL;
-	cr3s_t cr3;
+	adr_t vcr3 = NULL;
+
 	if (NULL == mmu) {
 		return FALSE;
 	}
@@ -982,10 +982,10 @@ bool_t hal_mmu_init(mmudsc_t* mmu)
 		goto out;
 	}
 
-	cr3.c3s_entry = (u64_t)read_cr3();
+	// cr3.c3s_entry = (u64_t)read_cr3();
 
-	pcr3 = (adr_t)(cr3.c3s_c3sflgs.c3s_plm4a << 12);
-	vcr3 = phyadr_to_viradr(pcr3);
+	// pcr3 = (adr_t)(cr3.c3s_c3sflgs.c3s_plm4a << 12);
+	vcr3 = phyadr_to_viradr(kmachbsp.mb_pml4padr);
 
 	// 把 cr3拷贝到mmu->mud_tdirearr
 	hal_memcpy((void*)vcr3, (void*)mmu->mud_tdirearr, sizeof(tdirearr_t));

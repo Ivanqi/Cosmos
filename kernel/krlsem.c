@@ -32,7 +32,7 @@ start_step:
     
         krlwlst_wait(&sem->sem_waitlst);
         krlspinunlock_sti(&sem->sem_lock, &cpufg);
-        //krlschedul();
+        krlschedul();
         goto start_step; 
     }
 
@@ -55,7 +55,7 @@ void krlsem_up(sem_t* sem)
     krlwlst_allup(&sem->sem_waitlst);
     krlspinunlock_sti(&sem->sem_lock, &cpufg);
     
-    //krlsched_set_schedflgs();
+    krlsched_set_schedflgs();
     return;
 }
 

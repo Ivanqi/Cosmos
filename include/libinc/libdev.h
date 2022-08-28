@@ -62,6 +62,6 @@ typedef struct s_DEVID {
     uint_t  dev_mtype;
     uint_t  dev_stype;
     uint_t  dev_nr;
-} devid_t;
+} __attribute__((aligned(64))) devid_t;
 
 #endif // LIBDEV_H

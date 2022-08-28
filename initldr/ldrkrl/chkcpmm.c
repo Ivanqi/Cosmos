@@ -3,9 +3,6 @@
 ***********************************************************/
 
 #include "cmctl.h"
-
-
-
 /**
  * acpi地址
  *  1. BIOS在开机过程中会把包在BIOS ROM中的Acpi Table 载入到RAM中，然后留下一些信息给OS来找到他们
@@ -159,6 +156,48 @@ void init_chkcpu(machbstart_t *mbsp)
 
     // 如果成功则设置机器信息结构CPU模式为64位
     mbsp->mb_cpumode = 0x40;
+    if (!chk_cpu_sse()) {
+        kprint("Your CPU is not support sse sys is die!");
+        CLI_HALT();
+    }
+
+    if (!chk_cpu_sse2()) {
+        kprint("Your CPU is not support sse2 sys is die!");
+        CLI_HALT();
+    }
+
+    if (!chk_cpu_sse3()) {
+        kprint("Your CPU is not support sse3 sys is die!");
+        CLI_HALT();
+    }
+
+    if (!chk_cpu_sse4()) {
+        kprint("Your CPU is not support sse4 sys is die!");
+        CLI_HALT();
+    }
+
+    enable_cpu_osxsave();
+    set_xcr0(7);
+    if (!chk_cpu_cr4osxsave()) {
+        kprint("Your CPU is not support cr4osxsave sys is die!");
+        CLI_HALT();
+    }
+    
+    if (!chk_cpu_osxsave()) {
+        kprint("Your CPU is not support osxsave sys is die!");
+        CLI_HALT();
+    }
+    
+    if (!chk_cpu_avxbit()) {
+        kprint("Your CPU is not support avx sys is die!");
+        CLI_HALT();
+    }
+    
+    if (!chk_cpu_avx2bit()) {
+        kprint("Your CPU is not support avx2 sys is die!");
+        CLI_HALT();
+    }
+    
     return;
 }
 
@@ -371,6 +410,246 @@ int chk_cpu_longmode()
         :
     );
     return rets;
+}
+
+int chk_cpu_sse()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x1,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $25,%%edx  \n\t" // sse mode  support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        :
+        :);
+    return rets;
+}
+
+
+int chk_cpu_sse2()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x1,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $26,%%edx  \n\t" // sse mode  support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        :
+        :);
+    return rets;
+}
+
+int chk_cpu_sse3()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x1,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $0,%%ecx  \n\t" // sse mode  support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        :
+        :);
+    return rets;
+}
+
+int chk_cpu_sse4()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x1,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $19,%%ecx  \n\t" // sse mode  support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        :
+        :);
+    return rets;
+}
+int chk_cpu_cr4osxsave()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl %%cr4,%%eax \n\t"
+        "bt $18,%%eax  \n\t" // osxsave support 位
+        "setcb %%al \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        :
+        :);
+    return rets;
+}
+int chk_cpu_osxsave()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x1,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $27,%%ecx  \n\t" // osxsave support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        : "c" (0)
+        :);
+    return rets;
+}
+
+int chk_cpu_avxbit()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x1,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $28,%%ecx  \n\t" // avx support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        : "c" (0)
+        :);
+    return rets;
+}
+
+int chk_cpu_avx2bit()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x7,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $5,%%ebx  \n\t" // avx2 support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        : "c" (0)
+        :);
+    return rets;
+}
+
+int chk_cpu_avx512fbit()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x7,%%eax \n\t"
+        "cpuid \n\t"
+        "bt $16,%%ebx  \n\t" // avx512f support 位
+        "setcb %%al \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        : "c" (0)
+        :);
+    return rets;
+}
+
+int chk_cpu_avx2()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x1,%%eax \n\t"
+        "cpuid \n\t"
+        "andl $0x018000000,%%ecx \n\t"
+        "cmpl $0x018000000,%%ecx \n\t"
+        "jne 1f \n\t"
+        "movl $0,%%ecx \n\t"
+        "xgetbv \n\t"
+        "andl $0x06,%%eax \n\t"
+        "cmpl $0x06,%%eax \n\t"
+        "jne 1f \n\t"
+        "movl $1,%%eax \n\t"
+        "jmp 2f \n\t"
+        "1: \n\t"
+        "movl $0,%%eax \n\t"
+        "2: \n\t"
+
+        : "=a"(rets)
+        :
+        :);
+    return rets;
+}
+
+
+void enable_cpu_osxsave()
+{
+    __asm__ __volatile__(
+        "movl %%cr4,%%eax \n\t"
+        // "btsl $9,%%eax\n\t"
+        // "btsl $10,%%eax\n\t"
+        "btsl $18,%%eax\n\t"//enable osxsave 位
+        "movl %%eax,%%cr4  \n\t" 
+        :
+        :
+        : "eax");
+    return;   
+}
+
+
+int chk_cpu_avx512()
+{
+    int rets = 0;
+    __asm__ __volatile__(
+        "movl $0x7,%%eax \n\t"
+        "movl $0x0,%%ecx \n\t"
+        "cpuid \n\t"
+        "bt $16,%%ebx  \n\t" // avx512  support 位
+        "setcb %%al \n\t"
+        "jnc 1f \n\t"
+        "bt $26,%%ebx  \n\t" // avx512  support 位
+        "setcb %%al \n\t"
+        "jnc 1f \n\t"
+        "bt $27,%%ebx  \n\t" // avx512  support 位
+        "setcb %%al \n\t"
+        "jnc 1f \n\t"
+        "bt $17,%%ebx  \n\t" // avx512  support 位
+        "setcb %%al \n\t"
+        "jnc 1f \n\t"
+        "bt $30,%%ebx  \n\t" // avx512  support 位
+        "setcb %%al \n\t"
+        "jnc 1f \n\t"
+        "1: \n\t"
+        "movzx %%al,%%eax \n\t"
+        : "=a"(rets)
+        :
+        :);
+    return rets;
+}
+
+int chk_cpu_avx512reg()
+{
+    int rets = 0;
+
+    __asm__ __volatile__("xgetbv" : "=a" (rets) : "c" (0) : "%edx");
+
+    if (((rets & 6) == 6) && ((rets & 0xe0) == 0xe0)) {
+        return 1;
+    }
+    return 0;
+}
+
+u32_t get_xcr0low32()
+{
+    u32_t rets = 0;
+
+    __asm__ __volatile__("xgetbv\n\t" : "=a" (rets) : "c" (0) : "%edx");
+    
+    return rets;
+}
+
+void set_xcr0(u64_t xcr0)
+{
+    __asm__ __volatile__("xsetbv\n\t" : :"a"((u32_t)(xcr0 & 0xffffffff)), "d"((u32_t)(xcr0 >> 32)), "c" (0) :);
+
 }
 
 void init_chkmm()

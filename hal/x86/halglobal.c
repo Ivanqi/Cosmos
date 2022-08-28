@@ -16,6 +16,7 @@ HAL_DEFGLOB_VARIABLE(iidtr_t,x64_iidt_reg);
 HAL_DEFGLOB_VARIABLE(machbstart_t, kmachbsp);
 HAL_DEFGLOB_VARIABLE(dftgraph_t, kdftgh);
 
+HAL_DEFGLOB_VARIABLE(memmgrob_t, memmgrob);
 HAL_DEFGLOB_VARIABLE(intfltdsc_t, machintflt)[IDTMAX];
 #endif
 
