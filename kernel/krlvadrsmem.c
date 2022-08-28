@@ -317,6 +317,7 @@ bool_t kvma_inituserspace_virmemadrs(virmemadrs_t *vma)
 
 	// 加入链表
 	list_add_tail(&kmvdc->kva_list, &vma->vs_list);
+	list_add_tail(&heapkmvdc->kva_list, &vma->vs_list);
 	list_add_tail(&stackkmvdc->kva_list, &vma->vs_list);
 	// 计数加3
 	vma->vs_kmvdscnr += 3;
@@ -441,7 +442,7 @@ void init_kvirmemadrs()
 	hal_mmu_init(&initmmadrsdsc.msd_mmu);
 	hal_mmu_load(&initmmadrsdsc.msd_mmu);
 
-	test_vadr();
+	// test_vadr();
 	kprint("虚拟内存初始化成功\n");
     // die(0x400);
 	return;
@@ -1487,7 +1488,7 @@ mmadrsdsc_t* krl_curr_mmadrsdsc()
 sint_t krluserspace_accessfailed(adr_t fairvadrs)
 {
 	// 这里应该获取当前进程的mm，但是现在我们没有进程，才initmmadrsdsc代替
-	mmadrsdsc_t* mm = &initmmadrsdsc;
+	mmadrsdsc_t* mm = krl_curr_mmadrsdsc();
 	// 应用程序的虚拟地址不可能大于USER_VIRTUAL_ADDRESS_END
 	if (USER_VIRTUAL_ADDRESS_END < fairvadrs) {
 		return -EACCES;
@@ -1708,13 +1709,14 @@ kvmemcbox_t* knl_get_kvmemcbox()
 			kmbmgr->kbm_kmbnr++;
 			refcount_inc(&kmb->kmb_cont);
 			kmb->kmb_mgr = kmbmgr;
-			kmb = kmb;
+			// kmb = kmb;
 			goto out; 
 		}
 	}
 
 	kmb = new_kvmemcbox();
 	if (NULL == kmb) {
+		system_error("mem: knl_get_kvmemcbox() null\n");
 		goto out;
 	}
 

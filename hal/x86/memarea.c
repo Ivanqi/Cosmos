@@ -1119,8 +1119,8 @@ void mem_check_mareadata(machbstart_t *mbsp)
 }
 
 // 初始化页面合并
-void init_merlove_mem() {
-
+void init_merlove_mem() 
+{
 	if (merlove_mem_core(&kmachbsp) == FALSE) {
 		system_error("merlove_mem_core fail\n");
 	}

@@ -36,8 +36,9 @@ u16_t read_keyboard_code(sint_t hand)
 {
     u16_t code_buf[8];
     sysstus_t rets = read(hand, (char_t*)code_buf, 8, 0);
-    if (rets > 0) {
-        printf(" read err:%x\n", rets);
+    if (0 > rets) {
+        printf("read err:%x\n", -rets);
+		return 0;
     }
 
     if (code_buf[0] == 0) {
@@ -130,6 +131,8 @@ void shell()
 	printf("Cosmos@LMOS:>");
 	for(;;) {
 		kbcode = read_keyboard_code(hand);
+		if (kbcode == 0) return;
+		
 		if (32 <= kbcode && 127 >= kbcode) {
 			charbuff[0] = (char_t)kbcode;
 			skb_buff_write(&shellkbuff, charbuff[0]);

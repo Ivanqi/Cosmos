@@ -570,6 +570,5 @@ void retnfrom_first_sched(thread_t *thrdp)
         :
         : [ NEXT_RSP ] "m"(thrdp->td_context.ctx_nextrsp)
         : "memory");
-        kprint("retnfrom_first_sched 2\n");
 #endif
 }

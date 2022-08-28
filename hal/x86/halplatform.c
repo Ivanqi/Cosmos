@@ -76,7 +76,7 @@ int strcmpl(const char *a, const char *b)
     return *b - *a;
 }
 
-fhdsc_t *get_fileinfo(char_t *fname, machbstart_t *mbsp)
+fhdsc_t* get_fileinfo(char_t *fname, machbstart_t *mbsp)
 {
     mlosrddsc_t *mrddadrs = (mlosrddsc_t *)phyadr_to_viradr((adr_t)(mbsp->mb_imgpadr + MLOSDSC_OFF));
     if (mrddadrs->mdc_endgic != MDC_ENDGIC || mrddadrs->mdc_rv != MDC_RVGIC || mrddadrs->mdc_fhdnr < 2 || mrddadrs->mdc_filnr < 2) {
@@ -96,7 +96,7 @@ fhdsc_t *get_fileinfo(char_t *fname, machbstart_t *mbsp)
 
 ok_l:
     if (rethn < 0) {
-        system_error("not find file");
+        return NULL;
     }
 
     return &fhdscstart[rethn];
@@ -124,7 +124,7 @@ void get_file_rvadrandsz(char_t *fname, machbstart_t *mbsp, u64_t *retadr, u64_t
     return;
 }
 
-e820map_t *get_maxmappadr_e820map(machbstart_t *mbsp, u64_t mappadr)
+e820map_t* get_maxmappadr_e820map(machbstart_t *mbsp, u64_t mappadr)
 {
     if (NULL == mbsp) {
         return NULL;
@@ -155,7 +155,7 @@ e820map_t *get_maxmappadr_e820map(machbstart_t *mbsp, u64_t mappadr)
  * @param cpsz 
  * @return e820map_t* 
  */
-e820map_t *ret_kmaxmpadrcmpsz_e820map(machbstart_t *mbsp, u64_t mappadr, u64_t cpsz)
+e820map_t* ret_kmaxmpadrcmpsz_e820map(machbstart_t *mbsp, u64_t mappadr, u64_t cpsz)
 {
     if (NULL == mbsp) {
         return NULL;

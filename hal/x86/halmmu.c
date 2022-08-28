@@ -904,7 +904,8 @@ untf_sdirearr:
 	// 删除顶级页目录项
 	mmu_untransform_sdire(mmu, mmu->mud_tdirearr, NULL, vadrs);
 
-out:	
+out:
+	hal_mmu_refresh();
 	knl_spinunlock(&mmu->mud_lock);
 	return retadr;
 }
