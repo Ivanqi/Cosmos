@@ -388,6 +388,10 @@ int chk_cpuid()
  *  然后调用CPUID功能，判断是否支持长模式
  *  先通过通过0x80000000参数，调用cpuid命令，判断CPU是否支持扩展处理器信息【返回值比0x80000000大】
  *  如果支持，通过0x80000001参数，调用cpuid命令，获取扩展处理器信息，然后检测第29位，判断是否支持长模式
+ * 
+ * bt 表示 Bit Test，测试并用原值设置进位值.
+ * setcb/setnb %al  把eflags寄存器的中cf 位   写入al寄存器中
+ * 80000001H/EDX Bit 29: Intel® 64 Architecture available if 1
  * @return int 
  */
 int chk_cpu_longmode()
@@ -401,10 +405,10 @@ int chk_cpu_longmode()
         "jb 1f \n\t"                        // JB表示无符号小于则跳转，CF=1 且ZF=0 即A<B转移
         "movl $0x80000001,%%eax \n\t"
         "cpuid \n\t"                        // 把eax中放入0x80000001调用CPUID指令，检查edx中的返回数据
-        "bt $29,%%edx  \n\t"                // bt 表示 Bit Test，测试并用原值设置进位值.长模式 支持位 是否为1
+        "bt $29,%%edx  \n\t"                // 长模式支持位 是否为1
         "setcb %%al \n\t"                   // CF=1
         "1: \n\t"
-        "movzx %%al,%%eax \n\t"
+        "movzx %%al,%%eax \n\t"             // 返回结果
         : "=a"(rets)
         :
         :
