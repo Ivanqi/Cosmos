@@ -28,11 +28,15 @@ void krlwlst_up(kwlst_t* wlst)
     return;
 }
 
+/**
+ * @brief 唤醒所有等待的线程
+ * 
+ * @param wlst 
+ */
 void krlwlst_allup(kwlst_t* wlst)
 {
     while (list_is_empty_careful(&wlst->wl_list) == FALSE) {
         krlsched_up(wlst);
-
     }
 
     return;

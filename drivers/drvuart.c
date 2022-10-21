@@ -265,10 +265,10 @@ drvstus_t uart_handle(uint_t ift_nr, void *devp, void *sframe)
     device_t* idev = (device_t*)devp;
     kboard_t* ikbd = (kboard_t*)idev->dev_extdata;
     u8_t scan;
-    if(NULL == idev || NULL == ikbd)
-    {
+    if (NULL == idev || NULL == ikbd) {
         return DFCERRSTUS;
     }
+    
     scan = (u8_t)read_keybd();
     kbd_write_scan(ikbd, scan);
   
