@@ -1,4 +1,5 @@
 # for macOS
+sudo rm -rf /Users/lvan/VirtualBox\ VMs/hd.img
 sudo cp hd.img /Users/lvan/VirtualBox\ VMs
 cd /Users/lvan/VirtualBox\ VMs
 sudo rm -rf hd.vdi
