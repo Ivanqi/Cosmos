@@ -133,8 +133,8 @@ typedef struct s_GDTPTR {
 
 // 中断描述符寄存器
 typedef struct s_IDTPTR {
-    u16_t idtLen;
-	u64_t idtbass;
+    u16_t idtLen;	// 表界限，即IDT大小减1
+	u64_t idtbass;	// IDT的基地址
 } __attribute__((packed)) iidtr_t;
 
 /**

@@ -6,7 +6,7 @@
 #include "cosmosmctrl.h"
 
 /**
- * @brief 中断描述分设置
+ * @brief 中断描述符设置
  * 
  * @param vector 向量也是中断号
  * @param desc_type 中断门类型，中断门，陷阱门
@@ -37,6 +37,11 @@ void set_igdtr(descriptor_t *gdtptr)
     return;
 }
 
+/**
+ * @brief 中断描述符寄存器IDTR
+ * 
+ * @param idtptr IDT的基地址
+ */
 void set_iidtr(gate_t *idtptr)
 {
 

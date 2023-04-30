@@ -63,7 +63,7 @@ PUBLIC void init_halintupt()
     init_intfltdsc();
 
     init_i8259();
-    // i8259_enabled_line(0);
+    i8259_enabled_line(0);
     kprint("中断初始化成功\n");
     return;
 }
