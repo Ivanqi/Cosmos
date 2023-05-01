@@ -110,7 +110,7 @@ void intserdsc_t_init(intserdsc_t *initp, u32_t flg, intfltdsc_t *intfltp, void 
 }
 
 /**
- * @brief 把intserdsc_t结构体实例变量挂载到中断异常描述符结构中
+ * @brief 把intserdsc_t结构体实例变量挂载到中断异常描述符结构(intflthandle_t)中
  * 
  * @param intdscp 
  * @param serdscp 

@@ -584,9 +584,9 @@ return_step:
 /**
  * @brief 安装中断回调函数接口
  * 
- * @param devp 
- * @param handle 
- * @param phyiline 
+ * @param devp 设备实例
+ * @param handle 设备中断回调函数
+ * @param phyiline 中断向量号
  * @return drvstus_t 
  */
 drvstus_t krlnew_devhandle(device_t *devp, intflthandle_t handle, uint_t phyiline)
