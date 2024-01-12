@@ -22,6 +22,17 @@ sysstus_t krlsve_write(hand_t fhand, buf_t buf, size_t len, uint_t flgs)
     return krlsve_core_write(fhand, buf, len, flgs);
 }
 
+/**
+ * @brief 写文件核心实现
+ *  1. 获取当前运行的进程
+ *  2. 获取进程描述符组对应下标的设备资源
+ * 
+ * @param fhand 进程描述符组下表
+ * @param buf 待写入的信息
+ * @param len 信息长度
+ * @param flgs 
+ * @return sysstus_t 
+ */
 sysstus_t krlsve_core_write(hand_t fhand, buf_t buf, size_t len, uint_t flgs)
 {
 

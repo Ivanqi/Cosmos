@@ -79,7 +79,8 @@ typedef struct s_DEVID {
 } __attribute__((aligned(64))) devid_t;
 
 /**
- * devtlst_t 是每个设备类型一个，表示一类设备，但每一类可能有多个设备
+ * @brief 设备分类对应的设备信息
+ * 个设备类型一个，表示一类设备，但每一类可能有多个设备
  */
 typedef struct s_DEVTLST {
     uint_t dtl_type;    // 设备类型

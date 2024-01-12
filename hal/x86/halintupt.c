@@ -298,10 +298,11 @@ sysstus_t hal_syscl_allocator(uint_t inr, void* krnlsframp)
 
 
 /**
- * 有硬件中断时，会先到达中断处理入口，然后调用到硬件中断分发器函数hal_hwint_allocator
- *  第一个参数为中断编号，在rdi
- *  第二个参数为中断发生时的栈指针，在rsi
- *  然后调用异常处理函数hal_do_hwint
+ * @brief 硬件中断分发器函数
+ *  1. 调用异常处理函数hal_do_hwint
+ * 
+ * @param intnumb 第一个参数为中断编号，在rdi
+ * @param krnlsframp 第二个参数为中断发生时的栈指针，在rsi
  */
 void hal_hwint_allocator(uint_t intnumb, void *krnlsframp)
 {

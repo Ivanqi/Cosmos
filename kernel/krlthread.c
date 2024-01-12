@@ -145,6 +145,14 @@ retn_step:
     return rethd;
 }
 
+/**
+ * @brief 往进程描述符组中写入对应的资源信息
+ *  1. 看进程描述符组中那个位置为空，写入资源信息
+ * 
+ * @param thdp 
+ * @param ondp 
+ * @return hand_t 
+ */
 hand_t krlthd_add_objnode(thread_t *thdp, objnode_t *ondp)
 {
     cpuflg_t cpuflg;

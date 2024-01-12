@@ -95,7 +95,7 @@ typedef struct s_MSADSC {
 	spinlock_t md_lock;             // 4，保护自身的自旋锁
 	msadflgs_t md_indxflgs;         // 4，内存空间地址描述符标志
 	phyadrflgs_t md_phyadrs;        // 8，物理地址和标志
-	void* md_odlink;                // 8，相邻且相同大小msdsc的指针
+	void* md_odlink;                // 8，相邻且相同大小msdsc的指针，所以msadsc_t本身也是一个连续内存页链表
 } __attribute__((packed)) msadsc_t; // 32+24;
 
 #endif

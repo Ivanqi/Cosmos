@@ -22,13 +22,26 @@ hand_t krlsve_open(void *file, uint_t flgs, uint_t stus)
     return krlsve_core_open(file, flgs, stus);
 }
 
+/**
+ * @brief 打开文件核心函数
+ *  1. 获取当前运行的进程
+ *  2. 通过对应的句柄寻找对应设备
+ *  3. 往进程描述符组中写入对应的资源信息
+ *  4. 调用设备驱动
+ * 
+ * @param file 句柄
+ * @param flgs 句柄flag
+ * @param stus 句柄status
+ * @return hand_t 进程描述符组的位置
+ */
 hand_t krlsve_core_open(void *file, uint_t flgs, uint_t stus)
 {
     devid_t devid = {0, 0, 0};
     device_t *devp = NULL;
     objnode_t *ondp = NULL;
     hand_t rethd = NO_HAND;
-
+   
+    // 获取当前运行的进程
     thread_t *tdp = krlsched_retn_currthread();
     if (((flgs & FILE_TY_MASK) == FILE_TY_DEV)) {
         goto op_dev_step;
@@ -45,6 +58,7 @@ op_dev_step:
     devid.dev_stype = ((devid_t *)file)->dev_stype;
     devid.dev_nr = ((devid_t *)file)->dev_nr;
 
+    // 通过对应的句柄寻找对应设备
     devp = krlonidfl_retn_device((void *)(&devid), DIDFIL_IDN);
     if (devp == NULL) {
         return NO_HAND;
@@ -59,6 +73,7 @@ op_dev_step:
     ondp->on_objtype = OBJN_TY_DEV;
     ondp->on_objadr = devp;
 
+    // 往进程描述符组中写入对应的资源信息
     rethd = krlthd_add_objnode(tdp, ondp);
     if (rethd == NO_HAND) {
         goto res_step;

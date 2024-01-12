@@ -182,17 +182,22 @@ void init_kboard(device_t* dev)
     void* ext;
     ext = (void*)krlnew(sizeof(kboard_t));
 
-    if(NULL == ext)
-    {
+    if (NULL == ext) {
         kprint("init kboard fail\n");
         return;
     }
+
     dev->dev_extdata = ext;
 	kboard_t_init((kboard_t*)dev->dev_extdata);
 	init_i8042();
     return;
 }
 
+/**
+ * @brief 设置驱动默认函数
+ * 
+ * @param drvp 驱动指针
+ */
 void uart_set_driver(driver_t *drvp)
 {
     drvp->drv_dipfun[IOIF_CODE_OPEN] = uart_open;
@@ -211,6 +216,12 @@ void uart_set_driver(driver_t *drvp)
     return;
 }
 
+/**
+ * @brief 设置设备属性
+ * 
+ * @param devp 设备指针
+ * @param drvp 驱动指针
+ */
 void uart0_set_device(device_t *devp, driver_t *drvp)
 {
     devp->dev_flgs = DEVFLG_SHARE;
@@ -230,7 +241,7 @@ uint_t read_keybd()
 
     save_flags_cli(&flags);
 
-    scan=in_u8(KB_DATA_REG);
+    scan = in_u8(KB_DATA_REG);
  
     restore_flags_sti(&flags);
     return (uint_t) scan;
@@ -260,6 +271,14 @@ void kbd_write_scan(kboard_t* ikbd, u8_t scan)
     return;
 }
 
+/**
+ * @brief 键盘驱动回调函数
+ * 
+ * @param ift_nr 
+ * @param devp 
+ * @param sframe 
+ * @return drvstus_t 
+ */
 drvstus_t uart_handle(uint_t ift_nr, void *devp, void *sframe)
 {
     device_t* idev = (device_t*)devp;
@@ -276,6 +295,18 @@ drvstus_t uart_handle(uint_t ift_nr, void *devp, void *sframe)
 	return DFCOKSTUS;
 }
 
+/**
+ * @brief 键盘驱动程序入口
+ *  1. 新建设备
+ *  2. 设置驱动默认函数
+ *  3. 把设备加入到驱动的设备链表中
+ *  4. 安装中断回调函数接口.用于后续的中断处理
+ * 
+ * @param drvp 驱动结构体
+ * @param val 
+ * @param p 
+ * @return drvstus_t 
+ */
 drvstus_t uart_entry(driver_t *drvp, uint_t val, void *p)
 {
     if (drvp == NULL) {
@@ -289,6 +320,8 @@ drvstus_t uart_entry(driver_t *drvp, uint_t val, void *p)
 
     uart_set_driver(drvp);
     uart0_set_device(devp, drvp);
+
+    // 把设备加入到驱动的设备链表中
     if (krldev_add_driver(devp, drvp) == DFCERRSTUS) {
         if (del_device_dsc(devp) == DFCERRSTUS) { //注意释放资源。
             return DFCERRSTUS;
@@ -296,6 +329,7 @@ drvstus_t uart_entry(driver_t *drvp, uint_t val, void *p)
         return DFCERRSTUS;
     }
 
+    // 向内核(设备表)注册设备
     if (krlnew_device(devp) == DFCERRSTUS) {
         if (del_device_dsc(devp) == DFCERRSTUS) { //注意释放资源
             return DFCERRSTUS;
@@ -303,9 +337,9 @@ drvstus_t uart_entry(driver_t *drvp, uint_t val, void *p)
         return DFCERRSTUS;
     }
     
+    // 安装中断回调函数接口
     if (krlnew_devhandle(devp, uart_handle, 0x21) == DFCERRSTUS) {
-
-        return DFCERRSTUS; //注意释放资源。
+        return DFCERRSTUS; // 注意释放资源。
     }
 
     init_kboard(devp);

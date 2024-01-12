@@ -94,12 +94,7 @@ typedef struct s_MEMDIVMER {
 #define MA_PROC_LSZ (0xffffffffffffffff - 0x400000000)	// 应用区结束地址
 #define MA_PROC_LEND (MA_PROC_LSTART + MA_PROC_LSZ)		// 应用去内存长度
 
-/**
- * 0x400000000  16GB
- * 这个结构至少占用一个页面，当然也可以是多个连续的的页面，但是该结构从第一个页面的首地址开始存放，
- * 后面的空间用于存放实现分配算法的数据结构，这样每个区可方便的实现不同的分配策略，或者有天你觉得我的分配算法是渣渣，
- * 完全可以替换mafuncobjs_t结构中的指针，指向你的函数
- */
+
 typedef struct s_MEMAREA {
     list_h_t ma_list;			// 内存区自身的链表
 	spinlock_t ma_lock;			// 保护内存区的自旋锁
@@ -123,8 +118,13 @@ typedef struct s_MEMAREA {
 	uint_t ma_allmsadscnr;
 	arclst_t ma_arcpglst;
 	mafuncobjs_t ma_funcobj;
-	memdivmer_t ma_mdmdata;
+	memdivmer_t ma_mdmdata;		// memdivmer，用于挂载内存
 	void* ma_privp;
+	/**
+	 * 这个结构至少占用一个页面，当然也可以是多个连续的的页面，但是该结构从第一个页面的首地址开始存放，
+	 * 后面的空间用于存放实现分配算法的数据结构，这样每个区可方便的实现不同的分配策略，或者有天你觉得我的分配算法是渣渣，
+	 * 完全可以替换mafuncobjs_t结构中的指针，指向你的函数
+	 */
 } memarea_t;
 
 #endif

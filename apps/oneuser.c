@@ -97,7 +97,7 @@ void skb_buff_enter(shellkbbuff_t* skb)
 	if (shc_cmd_run(&skb->skb_buff[skb->skb_start]) == 0) {
 		return;
 	}
-	printf("Cosmos@LMOS:>");
+	printf("Cosmos@IVANQI:>");
 	return;
 }
 
@@ -113,11 +113,17 @@ void skb_buff_backspace(shellkbbuff_t* skb)
 
 	skb->skb_tail--;
 	skb->skb_buff[skb->skb_tail] = 0;
-	printf("Cosmos@LMOS:>");
+	printf("Cosmos@IVANQI:>");
 	printf("%s", &skb->skb_buff[skb->skb_start]);
 	return;	
 }
 
+/**
+ * @brief 自定义命令终端
+ * 	1. 创建句柄
+ * 	2. 通过句柄读取信息
+ * 	3. 通过句柄写入信息
+ */
 void shell()
 {
 	hand_t hand = -1;
@@ -128,7 +134,7 @@ void shell()
 	
 	printf("Cosmos shell is init!\n");
 
-	printf("Cosmos@LMOS:>");
+	printf("Cosmos@IVANQI:>");
 	for(;;) {
 		kbcode = read_keyboard_code(hand);
 		if (kbcode == 0) return;

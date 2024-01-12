@@ -83,8 +83,8 @@ void memdivmer_t_init(memdivmer_t *initp)
 	/**
 	 * 循环初始化memdivmer_t结构体中dm_mdmlielst数组中的每个bafhlst_t结构的基本数据
 	 * bafhlst_t数组中的每个bafhlst_t，会根据其在数组中的序号n，存放全部2的n次方的连续页面，也就是说：
-	 * 	1. 第0个bafhlst_t，存放全部长度为1的内存段
-	 * 	2. 第1个bafhlst_t，存放全部长度为2的内存段
+	 * 	1. 第0个bafhlst_t，存放全部长度为1的内存段。保存的都是 不连续的内存页msadsc_t链表
+	 * 	2. 第1个bafhlst_t，存放全部长度为2的内存段。保存2个连续的内存页的msadsc_t链表
 	 * 	3. 第2个bafhlst_t，存放全部长度为4的内存段
 	 */
 	for (uint_t li = 0; li < MDIVMER_ARR_LMAX; li++) {
@@ -133,7 +133,7 @@ void memarea_t_init(memarea_t *initp)
 }
 
 /**
- * @brief 初始化内存区(memarea)
+ * @brief 初始化多个内存区(memarea)
  * 
  * @param mbsp 
  * @return bool_t 

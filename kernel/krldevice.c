@@ -4,6 +4,12 @@
 #include "cosmostypes.h"
 #include "cosmosmctrl.h"
 
+/**
+ * @brief 初始化设备分类并设置分类ID
+ * 
+ * @param initp 
+ * @param dtype 
+ */
 void devtlst_t_init(devtlst_t *initp, uint_t dtype)
 {
     initp->dtl_type = dtype;        // 设置设备类型 initp->dtl_nr = 0;
@@ -13,6 +19,12 @@ void devtlst_t_init(devtlst_t *initp, uint_t dtype)
     return;
 }
 
+/**
+ * @brief 初始化设备
+ *  1. 初始化对应的设备分类
+ * 
+ * @param initp 
+ */
 void devtable_t_init(devtable_t *initp)
 {
     list_init(&initp->devt_list);
@@ -122,7 +134,15 @@ void init_krldevice()
     return;
 }
 
-// 驱动程序入口函数
+/**
+ * @brief 驱动程序入口函数
+ *  1. 建立driver_t实例变量
+ *  2. 运行驱动程序入口函数
+ *  3. 把驱动程序加入系统
+ * 
+ * @param drventry 
+ * @return drvstus_t 
+ */
 drvstus_t krlrun_driverentry(drventyexit_t drventry)
 {
     driver_t *drvp = new_driver_dsc();              // 建立driver_t实例变量
@@ -141,7 +161,10 @@ drvstus_t krlrun_driverentry(drventyexit_t drventry)
     return DFCOKSTUS;
 }
 
-// 驱动程序的初始化
+/**
+ * @brief 驱动程序的初始化
+ *  1. 根据驱动程序表初始化程序入口
+ */
 void init_krldriver()
 {
     // 遍历驱动程序表中的每个驱动程序入口函数
@@ -544,11 +567,19 @@ drvstus_t krldev_retn_rqueparm(void *request, buf_t *retbuf, uint_t *retcops, ui
     return DFCOKSTUS;
 }
 
+/**
+ * @brief 通过对应的句柄寻找对应设备
+ * 
+ * @param dfname 句柄
+ * @param flgs 句柄状态
+ * @return device_t* 
+ */
 device_t *krlonidfl_retn_device(void *dfname, uint_t flgs)
 {
     device_t *findevp;
     cpuflg_t cpufg;
     list_h_t *lstp;
+    // 设备表
     devtable_t *dtbp = &osdevtable;
 
     if (dfname == NULL || flgs != DIDFIL_IDN) {
@@ -556,6 +587,7 @@ device_t *krlonidfl_retn_device(void *dfname, uint_t flgs)
     }
 
     devid_t *didp = (devid_t *)dfname;
+    // 设备类型
     uint_t devmty = didp->dev_mtype;
     if (devmty >= DEVICE_MAX) {
         return NULL;
@@ -567,8 +599,10 @@ device_t *krlonidfl_retn_device(void *dfname, uint_t flgs)
         goto return_step;
     }
 
+    // 在设备表中查找同一类型的设备
     list_for_each(lstp, &dtbp->devt_devclsl[devmty].dtl_list) {
         findevp = list_entry(lstp, device_t, dev_intbllst);
+        // 设备比较
         if (krlcmp_devid(didp, &findevp->dev_id) == TRUE) {
             // findevp = findevp;
             goto return_step;

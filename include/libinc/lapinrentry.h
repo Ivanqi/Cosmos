@@ -70,7 +70,7 @@ __asm__ __volatile__(\
  *  3. 第二个参数: movq %[prv2], %%rcx
  *  4. 第三个参数: movq %[prv3], %%rdx
  *  5. 第四个参数: movq %[prv4], %%rsi
- *  6. 触发中: int $255
+ *  6. 触发中断: int $255
  *  7. 处理返回结果: movq %%rax, %[retval]
  */
 #define API_ENTRY_PARE4(intnr, rets, pval1, pval2, pval3, pval4)\
